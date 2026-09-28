@@ -127,8 +127,8 @@
           <select id="bookSelect" class="col-span-5 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none">
           </select>
           
-          <!-- Chapter / Verse Range Input -->
-          <input id="passageRangeInput" type="text" value="1" class="col-span-4 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="e.g. 12:9-12" />
+          <!-- Chapter / Verse Range Text Input -->
+          <input id="passageRangeInput" type="text" value="1" class="col-span-4 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="12:9-12" />
         </div>
 
         <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all">
@@ -302,7 +302,7 @@
         const opt = document.createElement('option');
         opt.value = book;
         opt.textContent = book;
-        if (book === 'John') opt.selected = true;
+        if (book === 'Romans') opt.selected = true;
         bookSelect.appendChild(opt);
       });
     }
@@ -326,17 +326,16 @@
     navAiBtn.addEventListener('click', () => {
       switchView(aiView, navAiBtn);
       
-      // Auto-sync current active reader passage into AI Insights target box
-      const currentBook = bookSelect.value || 'John';
-      const currentRange = passageRangeInput.value.trim() || '1';
+      const currentBook = bookSelect.value || 'Romans';
+      const currentRange = passageRangeInput.value.trim() || '12:9-12';
       aiPassageInput.value = `${currentBook} ${currentRange}`;
     });
     navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
 
     // Flexible Chapter and Verse Range Reader
     async function fetchPassage() {
-      const book = bookSelect.value || 'John';
-      const range = passageRangeInput.value.trim() || '1';
+      const book = bookSelect.value || 'Romans';
+      const range = passageRangeInput.value.trim() || '12:9-12';
       const passageRef = `${book} ${range}`;
       
       passageTitle.textContent = `${passageRef} (ESV)`;
@@ -439,7 +438,6 @@
       }
     });
 
-    // Gemini API Request Engine
     generateAiBtn.addEventListener('click', async () => {
       const key = (localStorage.getItem('gemini_key') || '').trim();
       if (!key) {
