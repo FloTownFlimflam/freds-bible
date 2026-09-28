@@ -375,7 +375,6 @@
       }
     }
 
-    // Load Passage via Click or Enter Key
     loadBtn.addEventListener('click', fetchPassage);
     passageRangeInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -477,7 +476,18 @@ Return ONLY a valid JSON object matching this exact schema:
   "conceptualAnalogy": "A clear, modern analogy explaining the central doctrine or practical point.",
   "famousQuote": "A notable quote from a theologian, C.S. Lewis, Church Father, or historical Christian author relevant to this verse (include author name).",
   "crossReferences": ["Book Ch:Vs - Brief note on connection", "Book Ch:Vs - Brief note on connection"],
-  "studyQuestions": ["Question 1", "Question 2", "Question 3"]
+  "studyQuestions": [
+    "Observation Question 1",
+    "Interpretation Question 2",
+    "Application Question 3",
+    "Application Question 4",
+    "Application Question 5",
+    "Context/Background Question 6",
+    "Group Discussion Question 7",
+    "Group Discussion Question 8",
+    "Deep & Introspective Personal Question 9 (probing heart motivations, personal surrender, or convictions)",
+    "Deep & Introspective Personal Question 10 (probing heart motivations, personal surrender, or convictions)"
+  ]
 }`;
 
       const requestPayload = {
@@ -567,9 +577,16 @@ Return ONLY a valid JSON object matching this exact schema:
             </div>
 
             <div>
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 mb-2">❓ Reflection & Discussion Questions</h3>
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 mb-2">❓ Reflection & Discussion Questions (10)</h3>
               <ol class="space-y-2">
-                ${data.studyQuestions.map((q, idx) => `<li class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-slate-100/80 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200/50 dark:border-slate-800"><strong class="text-sky-500">${idx + 1}.</strong>${q}</li>`).join('')}
+                ${data.studyQuestions.map((q, idx) => {
+                  const isDeep = idx >= 8;
+                  return `
+                    <li class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 p-3 rounded-xl border ${isDeep ? 'bg-indigo-500/10 dark:bg-indigo-950/40 border-indigo-500/30' : 'bg-slate-100/80 dark:bg-slate-900/60 border-slate-200/50 dark:border-slate-800'}">
+                      <strong class="text-sky-500">${idx + 1}.</strong> ${q}${isDeep ? '<span class="block mt-1 text-[10px] font-bold text-indigo-500 uppercase tracking-wider">🔍 Deep Reflection</span>' : ''}
+                    </li>
+                  `;
+                }).join('')}
               </ol>
             </div>
           </div>
