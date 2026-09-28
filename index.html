@@ -28,7 +28,6 @@
   </script>
   
   <style>
-    /* Premium Modern Glossy UI Styling */
     .glass-card {
       background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(20px) saturate(190%);
@@ -59,7 +58,6 @@
       border-bottom: 1px solid rgba(51, 65, 85, 0.4);
     }
 
-    /* Ambient Background Glow Spheres */
     .glow-bg-1 {
       position: fixed;
       top: -10%;
@@ -94,11 +92,10 @@
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 h-full flex flex-col font-sans transition-colors duration-300 relative overflow-hidden">
 
-  <!-- Ambient Decorative Color Gradients -->
   <div class="glow-bg-1"></div>
   <div class="glow-bg-2"></div>
 
-  <!-- iOS Header Bar -->
+  <!-- Header Bar -->
   <header class="glass-nav sticky top-0 z-40 px-4 pt-12 pb-3 flex items-center justify-between">
     <div class="flex items-center gap-2">
       <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-md shadow-sky-500/20">
@@ -113,26 +110,21 @@
     </button>
   </header>
 
-  <!-- Main Content Viewport -->
+  <!-- Viewport -->
   <main id="appContainer" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-28 z-10">
     
-    <!-- VIEW 1: BIBLE READER VIEW -->
+    <!-- READ VIEW -->
     <div id="readView" class="space-y-4">
-      <!-- Passage & Search Controls -->
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <div class="grid grid-cols-12 gap-2">
-          
-          <!-- Testament Selector -->
           <select id="testamentSelect" class="col-span-4 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none">
             <option value="NT" selected>NT</option>
             <option value="OT">OT</option>
           </select>
 
-          <!-- Book Selector -->
           <select id="bookSelect" class="col-span-5 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none">
           </select>
           
-          <!-- Chapter Input -->
           <input id="chapterInput" type="number" min="1" value="1" class="col-span-3 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-1 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Ch" />
         </div>
 
@@ -140,26 +132,23 @@
           Load Passage
         </button>
 
-        <!-- Search Field -->
         <div class="relative">
           <input id="searchInput" type="text" placeholder="Search loaded text..." class="w-full bg-slate-200/50 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 rounded-xl pl-9 pr-3 py-2 text-xs font-medium border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none" />
           <span class="absolute left-3 top-2.5 text-xs text-slate-400">🔍</span>
         </div>
       </div>
 
-      <!-- Passage Header Banner -->
       <div id="passageHeader" class="px-1 flex justify-between items-center text-xs font-bold text-slate-600 dark:text-slate-300">
         <span id="passageTitle" class="text-sm bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">John 1 (ESV)</span>
         <span id="offlineStatus" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold">ESV Active</span>
       </div>
 
-      <!-- Verses Container -->
       <div id="verseDisplay" class="glass-card rounded-2xl p-5 space-y-3 min-h-[320px]">
         <p class="text-xs text-slate-400 text-center py-10">Tap "Load Passage" to view text...</p>
       </div>
     </div>
 
-    <!-- VIEW 2: AI INSIGHTS VIEW -->
+    <!-- AI INSIGHTS VIEW -->
     <div id="aiView" class="space-y-4 hidden">
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 flex items-center gap-2">
@@ -171,7 +160,7 @@
             Save Key
           </button>
         </div>
-        <p id="keyStatusText" class="text-[11px] text-slate-400">Stored locally in device memory.</p>
+        <p id="keyStatusText" class="text-[11px] text-slate-400">Stored locally on device.</p>
       </div>
 
       <div class="glass-card rounded-2xl p-4 space-y-3">
@@ -206,11 +195,11 @@
       </div>
 
       <div id="aiResultsDisplay" class="glass-card rounded-2xl p-5 space-y-4">
-        <p class="text-xs text-slate-400 text-center py-8">Select a passage and tap "Generate Study & Teaching Pack" to view sermon illustrations, quotes, cross-references, and study questions.</p>
+        <p class="text-xs text-slate-400 text-center py-8">Select a passage and tap "Generate Study & Teaching Pack".</p>
       </div>
     </div>
 
-    <!-- VIEW 3: LEXICON VIEW -->
+    <!-- LEXICON VIEW -->
     <div id="lexiconView" class="space-y-4 hidden">
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 flex items-center gap-2">
@@ -239,7 +228,7 @@
 
   </main>
 
-  <!-- Bottom Navigation Bar -->
+  <!-- Navigation -->
   <nav class="glass-nav fixed bottom-0 left-0 right-0 z-40 px-6 py-3 flex justify-around items-center border-t border-slate-200/50 dark:border-slate-800/50">
     <button id="navReadBtn" class="flex flex-col items-center gap-1 text-sky-500 font-bold transition-all">
       <span class="text-xl">📖</span>
@@ -255,26 +244,12 @@
     </button>
   </nav>
 
-  <!-- Self-Contained Direct JavaScript Logic -->
   <script>
-    // 66-Book Bible Mapping
     const BIBLE_BOOKS = {
-      OT: [
-        "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth",
-        "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra",
-        "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon",
-        "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos",
-        "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"
-      ],
-      NT: [
-        "Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians",
-        "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians",
-        "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter",
-        "1 John", "2 John", "3 John", "Jude", "Revelation"
-      ]
+      OT: ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"],
+      NT: ["Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"]
     };
 
-    // Dictionary for offline Strong's
     const LEXICON_DICT = {
       'G3056': { strongs: 'G3056', word: 'λόγος (logos)', transliteration: 'logos', language: 'Greek', partOfSpeech: 'Noun', definition: 'A word, divine expression, or reasoning.', usage: 'Used of the divine Word, Jesus Christ (John 1:1).' },
       'G26': { strongs: 'G26', word: 'ἀγάπη (agape)', transliteration: 'agape', language: 'Greek', partOfSpeech: 'Noun', definition: 'Unconditional, benevolent, self-sacrificing love.', usage: 'God’s divine love towards humanity.' },
@@ -283,7 +258,6 @@
       'H430': { strongs: 'H430', word: 'אֱלֹהִים (Elohim)', transliteration: 'elohim', language: 'Hebrew', partOfSpeech: 'Noun', definition: 'God, Supreme Deity.', usage: 'Creator God of Israel.' }
     };
 
-    // DOM Elements
     const readView = document.getElementById('readView');
     const aiView = document.getElementById('aiView');
     const lexiconView = document.getElementById('lexiconView');
@@ -312,12 +286,10 @@
     const lexiconSearchBtn = document.getElementById('lexiconSearchBtn');
     const lexiconResultCard = document.getElementById('lexiconResultCard');
 
-    // Theme Toggle
     document.getElementById('themeToggle').addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');
     });
 
-    // Cascading Book Dropdown Logic
     function populateBooks() {
       const selectedTestament = testamentSelect.value || 'NT';
       const books = BIBLE_BOOKS[selectedTestament];
@@ -334,7 +306,6 @@
 
     testamentSelect.addEventListener('change', populateBooks);
 
-    // Navigation View Switcher
     function switchView(activeView, activeBtn) {
       readView.classList.add('hidden');
       aiView.classList.add('hidden');
@@ -355,7 +326,6 @@
     });
     navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
 
-    // Passage Fetcher
     async function fetchPassage() {
       const book = bookSelect.value || 'John';
       const chapter = parseInt(chapterInput.value, 10) || 1;
@@ -365,9 +335,7 @@
 
       try {
         const res = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${chapter}?translation=esv`);
-        
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
         const data = await res.json();
         
         if (data && data.verses && data.verses.length > 0) {
@@ -395,13 +363,12 @@
           }
         } catch (e) {}
 
-        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${book} ${chapter}. Please check connection.</p>`;
+        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${book} ${chapter}.</p>`;
       }
     }
 
     loadBtn.addEventListener('click', fetchPassage);
 
-    // Lexicon Lookup
     function lookupStrongs(id) {
       if (!id) return;
       const cleanId = id.trim().toUpperCase();
@@ -448,7 +415,6 @@
       });
     });
 
-    // Gemini API Setup
     if (localStorage.getItem('gemini_key')) {
       apiKeyInput.value = localStorage.getItem('gemini_key');
       keyStatusText.textContent = 'Key active & stored in browser.';
@@ -464,9 +430,9 @@
       }
     });
 
-    // Gemini API Integration (Using active gemini-2.5-flash model endpoint)
+    // Flexible Robust Gemini API Call
     generateAiBtn.addEventListener('click', async () => {
-      const key = localStorage.getItem('gemini_key');
+      const key = (localStorage.getItem('gemini_key') || '').trim();
       if (!key) {
         aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Please save a Gemini API Key above first.</p>`;
         return;
@@ -495,31 +461,66 @@ Return ONLY a valid JSON object matching this exact schema:
   "studyQuestions": ["Question 1", "Question 2", "Question 3"]
 }`;
 
+      const requestPayload = {
+        contents: [{ parts: [{ text: promptText }] }],
+        generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
+      };
+
+      // Primary & Fallback Model Endpoints
+      const modelEndpoints = [
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent'
+      ];
+
+      let lastError = null;
+      let successData = null;
+
+      for (const endpoint of modelEndpoints) {
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': key
+            },
+            body: JSON.stringify(requestPayload)
+          });
+
+          if (res.ok) {
+            successData = await res.json();
+            break;
+          } else {
+            const errJson = await res.json().catch(() => ({}));
+            lastError = errJson.error?.message || `HTTP ${res.status}`;
+          }
+        } catch (e) {
+          lastError = e.message;
+        }
+      }
+
+      if (!successData) {
+        aiResultsDisplay.innerHTML = `
+          <div class="text-center py-6 space-y-2">
+            <p class="text-xs text-rose-500 font-bold">API Connection Error</p>
+            <p class="text-[11px] text-slate-400 font-mono">${lastError}</p>
+            <p class="text-[10px] text-slate-400 pt-2">Please re-check that your API Key was copied completely from Google AI Studio without extra spaces.</p>
+          </div>
+        `;
+        return;
+      }
+
       try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }],
-            generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
-          })
-        });
-
-        if (!res.ok) throw new Error(`API returned HTTP status ${res.status}`);
-
-        const resData = await res.json();
-        const jsonText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+        const jsonText = successData.candidates?.[0]?.content?.parts?.[0]?.text;
         const data = JSON.parse(jsonText);
 
         aiResultsDisplay.innerHTML = `
           <div class="space-y-4">
-            <!-- Overview -->
             <div>
               <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 mb-1">Overview (${tradition})</h3>
               <p class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-sky-500/10 border border-sky-500/20 p-3 rounded-xl font-medium">${data.theologicalSummary}</p>
             </div>
 
-            <!-- Sermon Illustration & Object Lesson -->
             <div>
               <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 mb-2">🎪 Sermon Illustration / Object Lesson</h3>
               <div class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-slate-100/80 dark:bg-slate-900/60 p-3.5 rounded-xl border border-slate-200/50 dark:border-slate-800">
@@ -527,7 +528,6 @@ Return ONLY a valid JSON object matching this exact schema:
               </div>
             </div>
 
-            <!-- Modern Analogy -->
             <div>
               <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 mb-2">💡 Conceptual Analogy</h3>
               <div class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-slate-100/80 dark:bg-slate-900/60 p-3.5 rounded-xl border border-slate-200/50 dark:border-slate-800">
@@ -535,7 +535,6 @@ Return ONLY a valid JSON object matching this exact schema:
               </div>
             </div>
 
-            <!-- Notable Quote -->
             <div>
               <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 mb-2">💬 Notable Quote</h3>
               <blockquote class="text-xs italic leading-relaxed text-slate-700 dark:text-slate-200 bg-indigo-500/10 border-l-4 border-indigo-500 p-3 rounded-r-xl">
@@ -543,7 +542,6 @@ Return ONLY a valid JSON object matching this exact schema:
               </blockquote>
             </div>
 
-            <!-- Cross-References -->
             <div>
               <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 mb-2">🔗 Key Cross-References</h3>
               <ul class="space-y-1.5">
@@ -551,7 +549,6 @@ Return ONLY a valid JSON object matching this exact schema:
               </ul>
             </div>
 
-            <!-- Discussion Questions -->
             <div>
               <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 mb-2">❓ Reflection & Discussion Questions</h3>
               <ol class="space-y-2">
@@ -560,14 +557,11 @@ Return ONLY a valid JSON object matching this exact schema:
             </div>
           </div>
         `;
-
       } catch (err) {
-        console.error(err);
-        aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8">Error generating insights: ${err.message}</p>`;
+        aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8">Parsing Error: ${err.message}</p>`;
       }
     });
 
-    // Initial Initialization
     populateBooks();
     fetchPassage();
   </script>
