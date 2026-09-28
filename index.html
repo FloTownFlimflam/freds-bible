@@ -1,4 +1,528 @@
-generateAiBtn.addEventListener('click', async () => {
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Fred's Bible">
+  <title>Fred's Bible Reference</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              500: '#38bdf8',
+              600: '#0284c7',
+              700: '#0369a1',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Premium Modern Glassmorphism Styling */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(20px) saturate(190%);
+      -webkit-backdrop-filter: blur(20px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 12px 32px 0 rgba(31, 38, 135, 0.08);
+    }
+    
+    .dark .glass-card {
+      background: rgba(10, 15, 30, 0.88);
+      backdrop-filter: blur(20px) saturate(190%);
+      -webkit-backdrop-filter: blur(20px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.65);
+    }
+
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+    }
+
+    .dark .glass-nav {
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(30, 41, 59, 0.6);
+    }
+
+    /* iOS Notch Safe Area Support */
+    .ios-header-padding {
+      padding-top: calc(0.75rem + env(safe-area-inset-top, 20px));
+    }
+
+    /* Deep Ambient Background Glow Spheres */
+    .glow-bg-1 {
+      position: fixed;
+      top: -10%;
+      left: -10%;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, rgba(99, 102, 241, 0.1) 50%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(50px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glow-bg-2 {
+      position: fixed;
+      bottom: 10%;
+      right: -10%;
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.2) 0%, rgba(168, 85, 247, 0.1) 50%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(60px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Enable Native Copy/Paste and Highlighting */
+    body, p, span, li, blockquote, div {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+    }
+
+    /* Instant Touch Feedback in iOS Standalone Mode */
+    button, input, select {
+      touch-action: manipulation;
+    }
+
+    body {
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 h-full flex flex-col font-sans transition-colors duration-300 relative">
+
+  <div class="glow-bg-1"></div>
+  <div class="glow-bg-2"></div>
+
+  <!-- iOS Safe-Area Responsive Header Bar -->
+  <header class="glass-nav sticky top-0 z-40 px-4 pb-3 ios-header-padding flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-md shadow-sky-500/20 select-none">
+        FB
+      </div>
+      <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent">
+        Fred's Bible Reference
+      </h1>
+    </div>
+    <button id="themeToggle" class="px-3 py-1.5 rounded-full glass-card text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm active:scale-95 transition-all select-none cursor-pointer">
+      🌙 Theme
+    </button>
+  </header>
+
+  <!-- Viewport Container -->
+  <main id="appContainer" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-32 z-10">
+    
+    <!-- READ VIEW -->
+    <div id="readView" class="space-y-4">
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <div class="grid grid-cols-12 gap-2">
+          <!-- Testament Selector -->
+          <select id="testamentSelect" class="col-span-3 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+            <option value="NT" selected>NT</option>
+            <option value="OT">OT</option>
+          </select>
+
+          <!-- Book Selector -->
+          <select id="bookSelect" class="col-span-4 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+          </select>
+
+          <!-- Chapter Dropdown -->
+          <select id="chapterSelect" class="col-span-2 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-1 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+          </select>
+          
+          <!-- Optional Verse(s) Text Input -->
+          <input id="verseRangeInput" type="text" class="col-span-3 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs (opt)" />
+        </div>
+
+        <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all select-none cursor-pointer">
+          Load Passage
+        </button>
+
+        <div class="relative">
+          <input id="searchInput" type="text" placeholder="Search loaded text..." class="w-full bg-slate-200/50 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100 rounded-xl pl-9 pr-3 py-2 text-xs font-medium border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <span class="absolute left-3 top-2.5 text-xs text-slate-400 select-none">🔍</span>
+        </div>
+      </div>
+
+      <div id="passageHeader" class="px-1 flex justify-between items-center text-xs font-bold text-slate-600 dark:text-slate-300">
+        <span id="passageTitle" class="text-sm bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">John 1 (ESV)</span>
+        <span id="offlineStatus" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none">ESV Active</span>
+      </div>
+
+      <div id="verseDisplay" class="glass-card rounded-2xl p-5 space-y-3 min-h-[320px]">
+        <p class="text-xs text-slate-400 text-center py-10">Tap "Load Passage" or press Enter to view text...</p>
+      </div>
+    </div>
+
+    <!-- AI INSIGHTS VIEW -->
+    <div id="aiView" class="space-y-4 hidden">
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
+          <span>⚙️</span> Gemini API Settings
+        </h2>
+        <div class="flex gap-2">
+          <input id="apiKeyInput" type="password" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <button id="saveKeyBtn" class="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold px-3 py-2 rounded-xl active:scale-95 transition-all select-none cursor-pointer">
+            Save Key
+          </button>
+        </div>
+        <p id="keyStatusText" class="text-[11px] text-slate-400 select-none">Stored locally on device.</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-600 dark:text-slate-300 select-none">Target Passage</label>
+          <input id="aiPassageInput" type="text" value="John 1:1-14" class="w-full bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[11px] font-semibold text-slate-400 select-none">Translation</label>
+            <select id="aiTranslationSelect" class="w-full bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2 text-xs font-semibold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+              <option value="ESV" selected>ESV</option>
+              <option value="NASB">NASB</option>
+              <option value="KJV">KJV</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[11px] font-semibold text-slate-400 select-none">Tradition / Focus</label>
+            <select id="aiTraditionSelect" class="w-full bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2 text-xs font-semibold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+              <option value="Expository">Expository / Cross-Ref</option>
+              <option value="General Protestant">General Protestant</option>
+              <option value="Reformed">Reformed</option>
+              <option value="Wesleyan">Wesleyan</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="generateAiBtn" class="w-full bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600 text-white font-bold text-xs py-3 rounded-xl shadow-lg shadow-sky-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 select-none cursor-pointer">
+          <span>✨</span> Generate Study & Teaching Pack
+        </button>
+      </div>
+
+      <div id="aiResultsDisplay" class="glass-card rounded-2xl p-5 space-y-4">
+        <p class="text-xs text-slate-400 text-center py-8">Select a passage and tap "Generate Study & Teaching Pack".</p>
+      </div>
+    </div>
+
+    <!-- LEXICON VIEW -->
+    <div id="lexiconView" class="space-y-4 hidden">
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
+          <span>🏛️</span> Greek & Hebrew Lexicon
+        </h2>
+        <div class="flex gap-2">
+          <input id="strongsInput" type="text" placeholder="e.g. G3056 or H7225..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <button id="lexiconSearchBtn" class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-xl active:scale-95 transition-all select-none cursor-pointer">
+            Lookup
+          </button>
+        </div>
+
+        <div class="flex flex-wrap gap-1.5 pt-1 select-none">
+          <button class="preset-tag text-[10px] font-bold bg-slate-200/80 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg text-sky-600 dark:text-sky-400 border border-slate-300/40 dark:border-slate-800/80 active:scale-95 cursor-pointer" data-strongs="G3056">Logos (G3056)</button>
+          <button class="preset-tag text-[10px] font-bold bg-slate-200/80 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg text-sky-600 dark:text-sky-400 border border-slate-300/40 dark:border-slate-800/80 active:scale-95 cursor-pointer" data-strongs="G26">Agape (G26)</button>
+          <button class="preset-tag text-[10px] font-bold bg-slate-200/80 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg text-sky-600 dark:text-sky-400 border border-slate-300/40 dark:border-slate-800/80 active:scale-95 cursor-pointer" data-strongs="G4151">Pneuma (G4151)</button>
+          <button class="preset-tag text-[10px] font-bold bg-slate-200/80 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg text-sky-600 dark:text-sky-400 border border-slate-300/40 dark:border-slate-800/80 active:scale-95 cursor-pointer" data-strongs="H7225">Reshith (H7225)</button>
+          <button class="preset-tag text-[10px] font-bold bg-slate-200/80 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg text-sky-600 dark:text-sky-400 border border-slate-300/40 dark:border-slate-800/80 active:scale-95 cursor-pointer" data-strongs="H430">Elohim (H430)</button>
+        </div>
+      </div>
+
+      <div id="lexiconResultCard" class="glass-card rounded-2xl p-5 space-y-4">
+        <p class="text-xs text-slate-400 text-center py-8">Select a tag or search Strong's ID to load definition.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Navigation -->
+  <nav class="glass-nav fixed bottom-0 left-0 right-0 z-40 px-6 py-3 pb-6 flex justify-around items-center border-t border-slate-200/50 dark:border-slate-800/50 select-none">
+    <button id="navReadBtn" class="flex flex-col items-center gap-1 text-sky-400 font-bold transition-all cursor-pointer">
+      <span class="text-xl">📖</span>
+      <span class="text-[10px] tracking-wide">Read</span>
+    </button>
+    <button id="navAiBtn" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold transition-all cursor-pointer">
+      <span class="text-xl">🤖</span>
+      <span class="text-[10px] tracking-wide">AI Insights</span>
+    </button>
+    <button id="navLexiconBtn" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold transition-all cursor-pointer">
+      <span class="text-xl">🏛️</span>
+      <span class="text-[10px] tracking-wide">Lexicon</span>
+    </button>
+  </nav>
+
+  <script>
+    // HARDCODED GEMINI API KEY (Replace string below with your actual API key)
+    const HARDCODED_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
+
+    const BIBLE_BOOKS = {
+      OT: ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"],
+      NT: ["Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"]
+    };
+
+    const CHAPTER_COUNTS = {
+      "Genesis": 50, "Exodus": 40, "Leviticus": 27, "Numbers": 36, "Deuteronomy": 34, "Joshua": 24, "Judges": 21, "Ruth": 4, "1 Samuel": 31, "2 Samuel": 24, "1 Kings": 22, "2 Kings": 25, "1 Chronicles": 29, "2 Chronicles": 36, "Ezra": 10, "Nehemiah": 13, "Esther": 10, "Job": 42, "Psalms": 150, "Proverbs": 31, "Ecclesiastes": 12, "Song of Solomon": 8, "Isaiah": 66, "Jeremiah": 52, "Lamentations": 5, "Ezekiel": 48, "Daniel": 12, "Hosea": 14, "Joel": 3, "Amos": 9, "Obadiah": 1, "Jonah": 4, "Micah": 7, "Nahum": 3, "Habakkuk": 3, "Zephaniah": 3, "Haggai": 2, "Zechariah": 14, "Malachi": 4,
+      "Matthew": 28, "Mark": 16, "Luke": 24, "John": 21, "Acts": 28, "Romans": 16, "1 Corinthians": 16, "2 Corinthians": 13, "Galatians": 6, "Ephesians": 6, "Philippians": 4, "Colossians": 4, "1 Thessalonians": 5, "2 Thessalonians": 3, "1 Timothy": 6, "2 Timothy": 4, "Titus": 3, "Philemon": 1, "Hebrews": 13, "James": 5, "1 Peter": 5, "2 Peter": 3, "1 John": 5, "2 John": 1, "3 John": 1, "Jude": 1, "Revelation": 22
+    };
+
+    const LEXICON_DICT = {
+      'G3056': { strongs: 'G3056', word: 'λόγος (logos)', transliteration: 'logos', language: 'Greek', partOfSpeech: 'Noun', definition: 'A word, divine expression, or reasoning.', usage: 'Used of the divine Word, Jesus Christ (John 1:1).' },
+      'G26': { strongs: 'G26', word: 'ἀγάπη (agape)', transliteration: 'agape', language: 'Greek', partOfSpeech: 'Noun', definition: 'Unconditional, benevolent, self-sacrificing love.', usage: 'God’s divine love towards humanity.' },
+      'G4151': { strongs: 'G4151', word: 'πνεῦμα (pneuma)', transliteration: 'pneuma', language: 'Greek', partOfSpeech: 'Noun', definition: 'Wind, breath, spirit.', usage: 'Refers to the Holy Spirit or human spirit.' },
+      'H7225': { strongs: 'H7225', word: 'רֵאשִׁית (reshith)', transliteration: 'reshith', language: 'Hebrew', partOfSpeech: 'Noun', definition: 'Beginning, chief, first fruits.', usage: 'Genesis 1:1 "In the beginning".' },
+      'H430': { strongs: 'H430', word: 'אֱלֹהִים (Elohim)', transliteration: 'elohim', language: 'Hebrew', partOfSpeech: 'Noun', definition: 'God, Supreme Deity.', usage: 'Creator God of Israel.' }
+    };
+
+    const readView = document.getElementById('readView');
+    const aiView = document.getElementById('aiView');
+    const lexiconView = document.getElementById('lexiconView');
+    const navReadBtn = document.getElementById('navReadBtn');
+    const navAiBtn = document.getElementById('navAiBtn');
+    const navLexiconBtn = document.getElementById('navLexiconBtn');
+
+    const testamentSelect = document.getElementById('testamentSelect');
+    const bookSelect = document.getElementById('bookSelect');
+    const chapterSelect = document.getElementById('chapterSelect');
+    const verseRangeInput = document.getElementById('verseRangeInput');
+    const loadBtn = document.getElementById('loadBtn');
+    const searchInput = document.getElementById('searchInput');
+    const passageTitle = document.getElementById('passageTitle');
+    const verseDisplay = document.getElementById('verseDisplay');
+
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const saveKeyBtn = document.getElementById('saveKeyBtn');
+    const keyStatusText = document.getElementById('keyStatusText');
+    const aiPassageInput = document.getElementById('aiPassageInput');
+    const aiTranslationSelect = document.getElementById('aiTranslationSelect');
+    const aiTraditionSelect = document.getElementById('aiTraditionSelect');
+    const generateAiBtn = document.getElementById('generateAiBtn');
+    const aiResultsDisplay = document.getElementById('aiResultsDisplay');
+
+    const strongsInput = document.getElementById('strongsInput');
+    const lexiconSearchBtn = document.getElementById('lexiconSearchBtn');
+    const lexiconResultCard = document.getElementById('lexiconResultCard');
+
+    // Default Dark Theme
+    const storedTheme = localStorage.getItem('app_theme');
+    if (storedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
+    });
+
+    function populateBooks() {
+      const selectedTestament = testamentSelect.value || 'NT';
+      const books = BIBLE_BOOKS[selectedTestament];
+      
+      bookSelect.innerHTML = '';
+      books.forEach(book => {
+        const opt = document.createElement('option');
+        opt.value = book;
+        opt.textContent = book;
+        if (book === 'Romans') opt.selected = true;
+        bookSelect.appendChild(opt);
+      });
+
+      populateChapters();
+    }
+
+    function populateChapters() {
+      const selectedBook = bookSelect.value || 'Romans';
+      const totalChapters = CHAPTER_COUNTS[selectedBook] || 1;
+
+      chapterSelect.innerHTML = '';
+      for (let c = 1; c <= totalChapters; c++) {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = `Ch ${c}`;
+        chapterSelect.appendChild(opt);
+      }
+    }
+
+    testamentSelect.addEventListener('change', populateBooks);
+    bookSelect.addEventListener('change', populateChapters);
+
+    function switchView(activeView, activeBtn) {
+      readView.classList.add('hidden');
+      aiView.classList.add('hidden');
+      lexiconView.classList.add('hidden');
+
+      navReadBtn.className = "flex flex-col items-center gap-1 text-slate-400 font-bold transition-all cursor-pointer";
+      navAiBtn.className = "flex flex-col items-center gap-1 text-slate-400 font-bold transition-all cursor-pointer";
+      navLexiconBtn.className = "flex flex-col items-center gap-1 text-slate-400 font-bold transition-all cursor-pointer";
+
+      activeView.classList.remove('hidden');
+      activeBtn.className = "flex flex-col items-center gap-1 text-sky-400 font-bold transition-all cursor-pointer";
+    }
+
+    navReadBtn.addEventListener('click', () => switchView(readView, navReadBtn));
+    navAiBtn.addEventListener('click', () => {
+      switchView(aiView, navAiBtn);
+      
+      const currentBook = bookSelect.value || 'Romans';
+      const currentChapter = chapterSelect.value || '1';
+      const verses = verseRangeInput.value.trim();
+      
+      aiPassageInput.value = verses ? `${currentBook} ${currentChapter}:${verses}` : `${currentBook} ${currentChapter}`;
+    });
+    navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
+
+    async function fetchPassage() {
+      const book = bookSelect.value || 'Romans';
+      const chapter = chapterSelect.value || '1';
+      const verses = verseRangeInput.value.trim();
+
+      const passageQuery = verses ? `${book}+${chapter}:${verses}` : `${book}+${chapter}`;
+      const passageRef = verses ? `${book} ${chapter}:${verses}` : `${book} ${chapter}`;
+      
+      passageTitle.textContent = `${passageRef} (ESV)`;
+      verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${passageRef} (ESV)...</p>`;
+
+      try {
+        const res = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}?translation=esv`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        
+        if (data && data.verses && data.verses.length > 0) {
+          verseDisplay.innerHTML = data.verses.map(v => `
+            <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-100">
+              <sup class="text-[10px] font-extrabold text-sky-400 mr-1 select-none">${v.verse}</sup>
+              <span class="select-text">${v.text.trim()}</span>
+            </p>
+          `).join('');
+        } else {
+          throw new Error('No verses returned.');
+        }
+      } catch (err) {
+        try {
+          const fallbackRes = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}`);
+          const fallbackData = await fallbackRes.json();
+          if (fallbackData && fallbackData.verses) {
+            verseDisplay.innerHTML = fallbackData.verses.map(v => `
+              <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-100">
+                <sup class="text-[10px] font-extrabold text-sky-400 mr-1 select-none">${v.verse}</sup>
+                <span class="select-text">${v.text.trim()}</span>
+              </p>
+            `).join('');
+            return;
+          }
+        } catch (e) {}
+
+        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${passageRef}. Check verse formatting (e.g., 9-12).</p>`;
+      }
+    }
+
+    loadBtn.addEventListener('click', fetchPassage);
+    verseRangeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        fetchPassage();
+      }
+    });
+
+    function lookupStrongs(id) {
+      if (!id) return;
+      const cleanId = id.trim().toUpperCase();
+      const entry = LEXICON_DICT[cleanId] || {
+        strongs: cleanId,
+        word: 'Lexical Entry',
+        transliteration: cleanId,
+        language: cleanId.startsWith('G') ? 'Greek' : 'Hebrew',
+        partOfSpeech: 'Word Root',
+        definition: `Strong's definition entry for ${cleanId}.`,
+        usage: 'Grammatical and biblical context entry.'
+      };
+
+      lexiconResultCard.innerHTML = `
+        <div class="space-y-3">
+          <div class="flex justify-between items-start border-b border-slate-200/50 dark:border-slate-800 pb-2">
+            <div>
+              <span class="text-[10px] font-extrabold text-sky-400 uppercase tracking-wider">${entry.language} (${entry.strongs})</span>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 select-text">${entry.word}</h3>
+              <p class="text-xs italic text-slate-500 dark:text-slate-400 select-text">Transliteration: ${entry.transliteration}</p>
+            </div>
+            <span class="text-[10px] font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2 py-1 rounded-lg select-none">${entry.partOfSpeech}</span>
+          </div>
+
+          <div>
+            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 select-none">Definition</h4>
+            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-200 bg-slate-100/60 dark:bg-slate-900/90 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/80 select-text">${entry.definition}</p>
+          </div>
+
+          <div>
+            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 select-none">Usage</h4>
+            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-200 bg-slate-100/60 dark:bg-slate-900/90 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/80 select-text">${entry.usage}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    lexiconSearchBtn.addEventListener('click', () => lookupStrongs(strongsInput.value));
+    strongsInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        lookupStrongs(strongsInput.value);
+      }
+    });
+
+    document.querySelectorAll('.preset-tag').forEach(tag => {
+      tag.addEventListener('click', (e) => {
+        const id = e.target.getAttribute('data-strongs');
+        strongsInput.value = id;
+        lookupStrongs(id);
+      });
+    });
+
+    // API Key Resolver
+    function getActiveApiKey() {
+      if (HARDCODED_API_KEY && HARDCODED_API_KEY !== "YOUR_GEMINI_API_KEY_HERE") {
+        return HARDCODED_API_KEY.trim();
+      }
+      return (localStorage.getItem('gemini_key') || '').trim();
+    }
+
+    if (HARDCODED_API_KEY && HARDCODED_API_KEY !== "YOUR_GEMINI_API_KEY_HERE") {
+      apiKeyInput.value = "••••••••••••••••••••••••••••••••";
+      keyStatusText.textContent = "Hardcoded API Key active.";
+      keyStatusText.classList.add("text-emerald-500");
+    } else if (localStorage.getItem('gemini_key')) {
+      apiKeyInput.value = localStorage.getItem('gemini_key');
+      keyStatusText.textContent = 'Key active & stored in browser.';
+      keyStatusText.classList.add('text-emerald-500');
+    }
+
+    saveKeyBtn.addEventListener('click', () => {
+      const k = apiKeyInput.value.trim();
+      if (k && k !== "••••••••••••••••••••••••••••••••") {
+        localStorage.setItem('gemini_key', k);
+        keyStatusText.textContent = 'Key saved locally!';
+        keyStatusText.classList.add('text-emerald-500');
+      }
+    });
+
+    let currentInsightsText = '';
+
+    generateAiBtn.addEventListener('click', async () => {
       const key = getActiveApiKey();
       if (!key) {
         aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Please add your hardcoded API Key or save a Gemini API Key above first.</p>`;
@@ -39,7 +563,6 @@ Return ONLY a valid JSON object matching this exact schema:
         generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
       };
 
-      // Model Endpoints using query string parameter authentication
       const modelEndpoints = [
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(key)}`,
@@ -53,9 +576,7 @@ Return ONLY a valid JSON object matching this exact schema:
         try {
           const res = await fetch(endpoint, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestPayload)
           });
 
@@ -176,3 +697,9 @@ ${data.studyQuestions.map((q, i) => `${i + 1}.${q}`).join('\n')}`;
         aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8">Parsing Error: ${err.message}</p>`;
       }
     });
+
+    populateBooks();
+    fetchPassage();
+  </script>
+</body>
+</html>
