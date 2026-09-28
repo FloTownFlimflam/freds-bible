@@ -269,8 +269,8 @@
   </nav>
 
   <script>
-    // HARDCODED GEMINI API KEY (Replace string below with your actual API key)
-    const HARDCODED_API_KEY = "AQ.Ab8RN6IOIwDxrrp3rhy_-ZCVH0-SkQkISSKK724RWondI9LiMw";
+    // HARDCODED GEMINI API KEY (Replace string below with your actual API key starting with AQ. or AIzaSy)
+    const HARDCODED_API_KEY = "AQ.Ab8RN6IP5a1bbslIXAQteikNXRIk1DUxRowuxnjcblDoiD2ZkQ";
 
     const BIBLE_BOOKS = {
       OT: ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"],
@@ -319,7 +319,7 @@
     const lexiconSearchBtn = document.getElementById('lexiconSearchBtn');
     const lexiconResultCard = document.getElementById('lexiconResultCard');
 
-    // Default Dark Theme
+    // Theme Selector
     const storedTheme = localStorage.getItem('app_theme');
     if (storedTheme === 'light') {
       document.documentElement.classList.remove('dark');
@@ -493,21 +493,27 @@
       });
     });
 
-    // API Key Resolver
+    // Flexible API Key Resolver (Supports both AIzaSy and AQ. keys)
     function getActiveApiKey() {
-      if (HARDCODED_API_KEY && HARDCODED_API_KEY !== "YOUR_GEMINI_API_KEY_HERE") {
+      if (HARDCODED_API_KEY && HARDCODED_API_KEY !== "YOUR_GEMINI_API_KEY_HERE" && HARDCODED_API_KEY.trim().length > 15) {
         return HARDCODED_API_KEY.trim();
       }
-      return (localStorage.getItem('gemini_key') || '').trim();
+      const savedKey = (localStorage.getItem('gemini_key') || '').trim();
+      if (savedKey.length > 15) {
+        return savedKey;
+      }
+      return null;
     }
 
-    if (HARDCODED_API_KEY && HARDCODED_API_KEY !== "YOUR_GEMINI_API_KEY_HERE") {
+    if (HARDCODED_API_KEY && HARDCODED_API_KEY !== "YOUR_GEMINI_API_KEY_HERE" && HARDCODED_API_KEY.trim().length > 15) {
       apiKeyInput.value = "••••••••••••••••••••••••••••••••";
       keyStatusText.textContent = "Hardcoded API Key active.";
+      keyStatusText.classList.remove("text-slate-400");
       keyStatusText.classList.add("text-emerald-500");
     } else if (localStorage.getItem('gemini_key')) {
       apiKeyInput.value = localStorage.getItem('gemini_key');
       keyStatusText.textContent = 'Key active & stored in browser.';
+      keyStatusText.classList.remove("text-slate-400");
       keyStatusText.classList.add('text-emerald-500');
     }
 
@@ -516,6 +522,7 @@
       if (k && k !== "••••••••••••••••••••••••••••••••") {
         localStorage.setItem('gemini_key', k);
         keyStatusText.textContent = 'Key saved locally!';
+        keyStatusText.classList.remove("text-slate-400");
         keyStatusText.classList.add('text-emerald-500');
       }
     });
