@@ -128,7 +128,7 @@
           </select>
           
           <!-- Chapter / Verse Range Text Input -->
-          <input id="passageRangeInput" type="text" value="1" class="col-span-4 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="12:9-12" />
+          <input id="passageRangeInput" type="text" value="12:9-12" class="col-span-4 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="12:9-12" />
         </div>
 
         <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all">
@@ -147,7 +147,7 @@
       </div>
 
       <div id="verseDisplay" class="glass-card rounded-2xl p-5 space-y-3 min-h-[320px]">
-        <p class="text-xs text-slate-400 text-center py-10">Tap "Load Passage" to view text...</p>
+        <p class="text-xs text-slate-400 text-center py-10">Tap "Load Passage" or press Enter to view text...</p>
       </div>
     </div>
 
@@ -375,7 +375,13 @@
       }
     }
 
+    // Load Passage via Click or Enter Key
     loadBtn.addEventListener('click', fetchPassage);
+    passageRangeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        fetchPassage();
+      }
+    });
 
     function lookupStrongs(id) {
       if (!id) return;
@@ -415,6 +421,12 @@
     }
 
     lexiconSearchBtn.addEventListener('click', () => lookupStrongs(strongsInput.value));
+    strongsInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        lookupStrongs(strongsInput.value);
+      }
+    });
+
     document.querySelectorAll('.preset-tag').forEach(tag => {
       tag.addEventListener('click', (e) => {
         const id = e.target.getAttribute('data-strongs');
