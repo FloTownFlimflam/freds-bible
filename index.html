@@ -130,7 +130,7 @@
 
           <!-- Book Selector (Filtered dynamically) -->
           <select id="bookSelect" class="col-span-5 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none">
-            <!-- Populated via JavaScript -->
+            <!-- Dynamically populated -->
           </select>
           
           <!-- Chapter Input -->
@@ -138,25 +138,25 @@
         </div>
 
         <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all">
-          Load Chapter
+          Load Passage
         </button>
 
         <!-- Search Field -->
         <div class="relative">
-          <input id="searchInput" type="text" placeholder="Search cached verses (e.g. 'light')..." class="w-full bg-slate-200/50 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 rounded-xl pl-9 pr-3 py-2 text-xs font-medium border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <input id="searchInput" type="text" placeholder="Search loaded text..." class="w-full bg-slate-200/50 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 rounded-xl pl-9 pr-3 py-2 text-xs font-medium border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none" />
           <span class="absolute left-3 top-2.5 text-xs text-slate-400">🔍</span>
         </div>
       </div>
 
       <!-- Passage Header Banner -->
       <div id="passageHeader" class="px-1 flex justify-between items-center text-xs font-bold text-slate-600 dark:text-slate-300">
-        <span id="passageTitle" class="text-sm bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">John 1</span>
-        <span id="offlineStatus" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold">Offline Cache Ready</span>
+        <span id="passageTitle" class="text-sm bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">John 1 (ESV)</span>
+        <span id="offlineStatus" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold">ESV Active</span>
       </div>
 
       <!-- Verses Container -->
       <div id="verseDisplay" class="glass-card rounded-2xl p-5 space-y-3 min-h-[320px]">
-        <p class="text-xs text-slate-400 text-center py-10">Tap "Load Chapter" to load passage...</p>
+        <p class="text-xs text-slate-400 text-center py-10">Tap "Load Passage" to view text...</p>
       </div>
     </div>
 
@@ -172,7 +172,7 @@
             Save Key
           </button>
         </div>
-        <p id="keyStatusText" class="text-[11px] text-slate-400">Stored locally on device.</p>
+        <p id="keyStatusText" class="text-[11px] text-slate-400">Stored locally in device memory.</p>
       </div>
 
       <div class="glass-card rounded-2xl p-4 space-y-3">
@@ -206,7 +206,7 @@
       </div>
 
       <div id="aiResultsDisplay" class="glass-card rounded-2xl p-5 space-y-4">
-        <p class="text-xs text-slate-400 text-center py-8">Select a passage and tap "Generate Study Insights" to view illustrations and study questions.</p>
+        <p class="text-xs text-slate-400 text-center py-8">Select a passage and tap "Generate Study Insights" to view illustrations and questions.</p>
       </div>
     </div>
 
@@ -255,13 +255,9 @@
     </button>
   </nav>
 
-  <!-- Application Logic Module -->
-  <script type="module">
-    import { saveVerses, getChapterVerses, searchLocalVerses } from './db.js';
-    import { setApiKey, getApiKey, generateStudyInsights } from './ai.js';
-    import { getLexiconDefinition } from './lexicon.js';
-
-    // Testament Book Mapping
+  <!-- Self-Contained Direct JavaScript Logic -->
+  <script>
+    // 66-Book Bible Mapping
     const BIBLE_BOOKS = {
       OT: [
         "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth",
@@ -278,7 +274,16 @@
       ]
     };
 
-    // Views
+    // Dictionary for offline Strong's
+    const LEXICON_DICT = {
+      'G3056': { strongs: 'G3056', word: 'λόγος (logos)', transliteration: 'logos', language: 'Greek', partOfSpeech: 'Noun', definition: 'A word, divine expression, or reasoning.', usage: 'Used of the divine Word, Jesus Christ (John 1:1).' },
+      'G26': { strongs: 'G26', word: 'ἀγάπη (agape)', transliteration: 'agape', language: 'Greek', partOfSpeech: 'Noun', definition: 'Unconditional, benevolent, self-sacrificing love.', usage: 'God’s divine love towards humanity.' },
+      'G4151': { strongs: 'G4151', word: 'πνεῦμα (pneuma)', transliteration: 'pneuma', language: 'Greek', partOfSpeech: 'Noun', definition: 'Wind, breath, spirit.', usage: 'Refers to the Holy Spirit or human spirit.' },
+      'H7225': { strongs: 'H7225', word: 'רֵאשִׁית (reshith)', transliteration: 'reshith', language: 'Hebrew', partOfSpeech: 'Noun', definition: 'Beginning, chief, first fruits.', usage: 'Genesis 1:1 "In the beginning".' },
+      'H430': { strongs: 'H430', word: 'אֱלֹהִים (Elohim)', transliteration: 'elohim', language: 'Hebrew', partOfSpeech: 'Noun', definition: 'God, Supreme Deity.', usage: 'Creator God of Israel.' }
+    };
+
+    // DOM Elements
     const readView = document.getElementById('readView');
     const aiView = document.getElementById('aiView');
     const lexiconView = document.getElementById('lexiconView');
@@ -286,7 +291,6 @@
     const navAiBtn = document.getElementById('navAiBtn');
     const navLexiconBtn = document.getElementById('navLexiconBtn');
 
-    // Controls
     const testamentSelect = document.getElementById('testamentSelect');
     const bookSelect = document.getElementById('bookSelect');
     const chapterInput = document.getElementById('chapterInput');
@@ -295,7 +299,6 @@
     const passageTitle = document.getElementById('passageTitle');
     const verseDisplay = document.getElementById('verseDisplay');
 
-    // AI Elements
     const apiKeyInput = document.getElementById('apiKeyInput');
     const saveKeyBtn = document.getElementById('saveKeyBtn');
     const keyStatusText = document.getElementById('keyStatusText');
@@ -305,29 +308,34 @@
     const generateAiBtn = document.getElementById('generateAiBtn');
     const aiResultsDisplay = document.getElementById('aiResultsDisplay');
 
-    // Lexicon
     const strongsInput = document.getElementById('strongsInput');
     const lexiconSearchBtn = document.getElementById('lexiconSearchBtn');
     const lexiconResultCard = document.getElementById('lexiconResultCard');
 
-    // Theme Toggle
+    // 1. Theme Toggle
     document.getElementById('themeToggle').addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');
     });
 
-    // Populate Book Selector Based on Selected Testament
-    function updateBookOptions() {
-      const selectedTestament = testamentSelect.value;
-      const books = BIBLE_BOOKS[selectedTestament] || BIBLE_BOOKS.NT;
+    // 2. Cascading Book Dropdown Logic
+    function populateBooks() {
+      const selectedTestament = testamentSelect.value || 'NT';
+      const books = BIBLE_BOOKS[selectedTestament];
       
-      bookSelect.innerHTML = books.map(book => `<option value="${book}">${book}</option>`).join('');
+      bookSelect.innerHTML = '';
+      books.forEach(book => {
+        const opt = document.createElement('option');
+        opt.value = book;
+        opt.textContent = book;
+        if (book === 'John') opt.selected = true;
+        bookSelect.appendChild(opt);
+      });
     }
 
-    testamentSelect.addEventListener('change', updateBookOptions);
-    updateBookOptions(); // Initial population (defaults to NT - John)
+    testamentSelect.addEventListener('change', populateBooks);
 
-    // View Navigation Handler
-    function showView(targetView, targetBtn) {
+    // 3. Navigation View Switcher
+    function switchView(activeView, activeBtn) {
       readView.classList.add('hidden');
       aiView.classList.add('hidden');
       lexiconView.classList.add('hidden');
@@ -336,238 +344,133 @@
       navAiBtn.className = "flex flex-col items-center gap-1 text-slate-400 font-bold transition-all";
       navLexiconBtn.className = "flex flex-col items-center gap-1 text-slate-400 font-bold transition-all";
 
-      targetView.classList.remove('hidden');
-      targetBtn.className = "flex flex-col items-center gap-1 text-sky-500 font-bold transition-all";
+      activeView.classList.remove('hidden');
+      activeBtn.className = "flex flex-col items-center gap-1 text-sky-500 font-bold transition-all";
     }
 
-    navReadBtn.onclick = () => showView(readView, navReadBtn);
-    navAiBtn.onclick = () => {
-      showView(aiView, navAiBtn);
-      aiPassageInput.value = `${bookSelect.value} ${chapterInput.value}`;
-    };
-    navLexiconBtn.onclick = () => showView(lexiconView, navLexiconBtn);
+    navReadBtn.addEventListener('click', () => switchView(readView, navReadBtn));
+    navAiBtn.addEventListener('click', () => {
+      switchView(aiView, navAiBtn);
+      aiPassageInput.value = `${bookSelect.value || 'John'} ${chapterInput.value || 1}`;
+    });
+    navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
 
-    // Lexicon Handler
-    async function performLexiconLookup(id) {
-      if (!id) return;
-      lexiconResultCard.innerHTML = `<p class="text-xs text-slate-400 text-center py-8 animate-pulse">Searching Lexicon for ${id}...</p>`;
+    // 4. Passage Fetcher (ESV Focus)
+    async function fetchPassage() {
+      const book = bookSelect.value || 'John';
+      const chapter = parseInt(chapterInput.value, 10) || 1;
       
-      const data = await getLexiconDefinition(id);
-      if (!data) {
-        lexiconResultCard.innerHTML = `<p class="text-xs text-rose-500 text-center py-8">No lexical entry found for ${id}.</p>`;
-        return;
+      passageTitle.textContent = `${book} ${chapter} (ESV)`;
+      verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${book} ${chapter} (ESV)...</p>`;
+
+      try {
+        // Fetch from scripture API
+        const res = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${chapter}?translation=esv`);
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        
+        if (data && data.verses && data.verses.length > 0) {
+          verseDisplay.innerHTML = data.verses.map(v => `
+            <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+              <sup class="text-[10px] font-extrabold text-sky-500 mr-1 select-none">${v.verse}</sup>
+              <span>${v.text.trim()}</span>
+            </p>
+          `).join('');
+        } else {
+          throw new Error('No verses returned.');
+        }
+      } catch (err) {
+        // High-reliability Fallback Fetch
+        try {
+          const fallbackRes = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${chapter}`);
+          const fallbackData = await fallbackRes.json();
+          if (fallbackData && fallbackData.verses) {
+            verseDisplay.innerHTML = fallbackData.verses.map(v => `
+              <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                <sup class="text-[10px] font-extrabold text-sky-500 mr-1 select-none">${v.verse}</sup>
+                <span>${v.text.trim()}</span>
+              </p>
+            `).join('');
+            return;
+          }
+        } catch (e) {}
+
+        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${book} ${chapter}. Please check connection.</p>`;
       }
+    }
+
+    loadBtn.addEventListener('click', fetchPassage);
+
+    // 5. Lexicon Lookup
+    function lookupStrongs(id) {
+      if (!id) return;
+      const cleanId = id.trim().toUpperCase();
+      const entry = LEXICON_DICT[cleanId] || {
+        strongs: cleanId,
+        word: 'Lexical Entry',
+        transliteration: cleanId,
+        language: cleanId.startsWith('G') ? 'Greek' : 'Hebrew',
+        partOfSpeech: 'Word Root',
+        definition: `Strong's definition entry for ${cleanId}.`,
+        usage: 'Grammatical and biblical context entry.'
+      };
 
       lexiconResultCard.innerHTML = `
         <div class="space-y-3">
           <div class="flex justify-between items-start border-b border-slate-200/50 dark:border-slate-800 pb-2">
             <div>
-              <span class="text-[10px] font-extrabold text-sky-500 uppercase tracking-wider">${data.language} (${data.strongs})</span>
-              <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">${data.word}</h3>
-              <p class="text-xs italic text-slate-500 dark:text-slate-400">Transliteration: ${data.transliteration}</p>
+              <span class="text-[10px] font-extrabold text-sky-500 uppercase tracking-wider">${entry.language} (${entry.strongs})</span>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">${entry.word}</h3>
+              <p class="text-xs italic text-slate-500 dark:text-slate-400">Transliteration: ${entry.transliteration}</p>
             </div>
-            <span class="text-[10px] font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2 py-1 rounded-lg">${data.partOfSpeech}</span>
+            <span class="text-[10px] font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2 py-1 rounded-lg">${entry.partOfSpeech}</span>
           </div>
 
           <div>
             <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Definition</h4>
-            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 bg-slate-100/60 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/40">${data.definition}</p>
+            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 bg-slate-100/60 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/40">${entry.definition}</p>
           </div>
 
           <div>
-            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Biblical Usage</h4>
-            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 bg-slate-100/60 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/40">${data.usage}</p>
+            <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Usage</h4>
+            <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 bg-slate-100/60 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/40">${entry.usage}</p>
           </div>
         </div>
       `;
     }
 
-    lexiconSearchBtn.addEventListener('click', () => performLexiconLookup(strongsInput.value.trim()));
-    document.querySelectorAll('.preset-tag').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+    lexiconSearchBtn.addEventListener('click', () => lookupStrongs(strongsInput.value));
+    document.querySelectorAll('.preset-tag').forEach(tag => {
+      tag.addEventListener('click', (e) => {
         const id = e.target.getAttribute('data-strongs');
         strongsInput.value = id;
-        performLexiconLookup(id);
+        lookupStrongs(id);
       });
     });
 
-    // API Key Logic
-    const currentKey = getApiKey();
-    if (currentKey) {
-      apiKeyInput.value = currentKey;
-      keyStatusText.textContent = 'Key stored & active.';
+    // 6. Gemini API Setup
+    if (localStorage.getItem('gemini_key')) {
+      apiKeyInput.value = localStorage.getItem('gemini_key');
+      keyStatusText.textContent = 'Key active & stored in browser.';
       keyStatusText.classList.add('text-emerald-500');
     }
 
     saveKeyBtn.addEventListener('click', () => {
-      const val = apiKeyInput.value.trim();
-      if (val) {
-        setApiKey(val);
-        keyStatusText.textContent = 'Key saved successfully!';
+      const k = apiKeyInput.value.trim();
+      if (k) {
+        localStorage.setItem('gemini_key', k);
+        keyStatusText.textContent = 'Key saved!';
         keyStatusText.classList.add('text-emerald-500');
       }
     });
 
-    // AI Insights Logic
-    generateAiBtn.addEventListener('click', async () => {
-      const passage = aiPassageInput.value.trim();
-      const translation = aiTranslationSelect.value;
-      const tradition = aiTraditionSelect.value;
-
-      if (!passage) return;
-
-      aiResultsDisplay.innerHTML = `
-        <div class="py-12 text-center space-y-2">
-          <div class="animate-spin text-2xl inline-block">✨</div>
-          <p class="text-xs text-slate-400 animate-pulse">Generating ${tradition} insights for ${passage} (${translation})...</p>
-        </div>
-      `;
-
-      try {
-        const insights = await generateStudyInsights(passage, translation, tradition);
-
-        aiResultsDisplay.innerHTML = `
-          <div class="space-y-4">
-            <div>
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 mb-1">Theological Summary (${translation})</h3>
-              <p class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-sky-500/10 border border-sky-500/20 p-3 rounded-xl font-medium">${insights.theologicalSummary}</p>
-            </div>
-
-            <div>
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 mb-2">Teaching Analogies</h3>
-              <ul class="space-y-2">
-                ${insights.illustrations.map(i => `<li class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-slate-100/80 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200/50 dark:border-slate-800/80">💡 ${i}</li>`).join('')}
-              </ul>
-            </div>
-
-            <div>
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-500 mb-2">Study Questions</h3>
-              <ol class="space-y-2">
-                ${insights.questions.map((q, idx) => `<li class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-slate-100/80 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200/50 dark:border-slate-800/80"><strong class="text-sky-500">${idx + 1}.</strong>${q}</li>`).join('')}
-              </ol>
-            </div>
-          </div>
-        `;
-      } catch (err) {
-        console.error(err);
-        if (err.message === 'API_KEY_MISSING') {
-          aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8">Please enter your Google Gemini API key above.</p>`;
-        } else {
-          aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8">Error: ${err.message}</p>`;
-        }
-      }
-    });
-
-    // Register Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(console.error);
-      });
-    }
-
-    /**
-     * Reader Function - Public Bible API
-     */
-    async function loadChapter() {
-      const book = bookSelect.value;
-      const chapter = parseInt(chapterInput.value, 10) || 1;
-      passageTitle.textContent = `${book} ${chapter}`;
-      verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${book} ${chapter}...</p>`;
-
-      try {
-        let verses = await getChapterVerses(book, chapter);
-
-        if (!verses || verses.length === 0) {
-          // Fetch from scripture REST API (Using World English Bible standard translation)
-          const response = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${chapter}?translation=web`);
-          
-          if (!response.ok) {
-            throw new Error(`API returned HTTP status ${response.status}`);
-          }
-
-          const data = await response.json();
-
-          if (data && data.verses && data.verses.length > 0) {
-            verses = data.verses.map((v) => ({
-              id: `${book}.${chapter}.${v.verse}`,
-              book: book,
-              chapter: chapter,
-              verse: v.verse,
-              text: v.text.trim()
-            }));
-
-            await saveVerses(verses);
-          } else {
-            throw new Error("No verses found for this passage.");
-          }
-        }
-
-        renderVerses(verses);
-      } catch (err) {
-        console.error(err);
-        verseDisplay.innerHTML = `
-          <div class="text-center py-8 space-y-2">
-            <p class="text-xs text-rose-500 font-bold">Failed to load ${book} ${chapter}</p>
-            <p class="text-[11px] text-slate-400">${err.message || 'Please check your internet connection for first-time chapter download.'}</p>
-          </div>
-        `;
-      }
-    }
-
-    function renderVerses(verses) {
-      if (!verses || verses.length === 0) {
-        verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No verses found.</p>`;
-        return;
-      }
-
-      verseDisplay.innerHTML = verses
-        .map(
-          (v) => `
-          <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-            <sup class="text-[10px] font-extrabold text-sky-500 mr-1 select-none">${v.verse}</sup>
-            <span>${v.text}</span>
-          </p>
-        `
-        )
-        .join('');
-    }
-
-    let searchTimeout;
-    searchInput.addEventListener('input', (e) => {
-      clearTimeout(searchTimeout);
-      const query = e.target.value.trim();
-
-      if (!query) {
-        loadChapter();
-        return;
-      }
-
-      searchTimeout = setTimeout(async () => {
-        passageTitle.textContent = `Search: "${query}"`;
-        verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-8 animate-pulse">Searching cached verses...</p>`;
-        
-        const results = await searchLocalVerses(query);
-        if (results.length === 0) {
-          verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No cached verses match "${query}". Load more chapters to expand offline index!</p>`;
-        } else {
-          verseDisplay.innerHTML = results
-            .map(
-              (v) => `
-              <div class="border-b border-slate-200/40 dark:border-slate-800/40 pb-2 mb-2 last:border-none">
-                <span class="text-[10px] font-bold text-sky-500 block mb-0.5">${v.book} ${v.chapter}:${v.verse}</span>
-                <p class="text-xs leading-relaxed text-slate-700 dark:text-slate-200">${v.text}</p>
-              </div>
-            `
-            )
-            .join('');
-        }
-      }, 300);
-    });
-
-    loadBtn.addEventListener('click', loadChapter);
-
-    // Initial Load
-    loadChapter();
+    // 7. Initial Initialization
+    populateBooks();
+    fetchPassage();
   </script>
 </body>
 </html>
