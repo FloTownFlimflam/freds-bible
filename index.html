@@ -117,15 +117,18 @@
     <div id="readView" class="space-y-4">
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <div class="grid grid-cols-12 gap-2">
-          <select id="testamentSelect" class="col-span-4 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none">
+          <!-- Testament Selector -->
+          <select id="testamentSelect" class="col-span-3 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none">
             <option value="NT" selected>NT</option>
             <option value="OT">OT</option>
           </select>
 
+          <!-- Book Selector -->
           <select id="bookSelect" class="col-span-5 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none">
           </select>
           
-          <input id="chapterInput" type="number" min="1" value="1" class="col-span-3 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-1 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Ch" />
+          <!-- Chapter / Verse Range Input -->
+          <input id="passageRangeInput" type="text" value="1" class="col-span-4 bg-slate-200/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-700/40 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="e.g. 12:9-12" />
         </div>
 
         <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all">
@@ -267,7 +270,7 @@
 
     const testamentSelect = document.getElementById('testamentSelect');
     const bookSelect = document.getElementById('bookSelect');
-    const chapterInput = document.getElementById('chapterInput');
+    const passageRangeInput = document.getElementById('passageRangeInput');
     const loadBtn = document.getElementById('loadBtn');
     const searchInput = document.getElementById('searchInput');
     const passageTitle = document.getElementById('passageTitle');
@@ -322,19 +325,25 @@
     navReadBtn.addEventListener('click', () => switchView(readView, navReadBtn));
     navAiBtn.addEventListener('click', () => {
       switchView(aiView, navAiBtn);
-      aiPassageInput.value = `${bookSelect.value || 'John'} ${chapterInput.value || 1}`;
+      
+      // Auto-sync current active reader passage into AI Insights target box
+      const currentBook = bookSelect.value || 'John';
+      const currentRange = passageRangeInput.value.trim() || '1';
+      aiPassageInput.value = `${currentBook} ${currentRange}`;
     });
     navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
 
+    // Flexible Chapter and Verse Range Reader
     async function fetchPassage() {
       const book = bookSelect.value || 'John';
-      const chapter = parseInt(chapterInput.value, 10) || 1;
+      const range = passageRangeInput.value.trim() || '1';
+      const passageRef = `${book} ${range}`;
       
-      passageTitle.textContent = `${book} ${chapter} (ESV)`;
-      verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${book} ${chapter} (ESV)...</p>`;
+      passageTitle.textContent = `${passageRef} (ESV)`;
+      verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${passageRef} (ESV)...</p>`;
 
       try {
-        const res = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${chapter}?translation=esv`);
+        const res = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${encodeURIComponent(range)}?translation=esv`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         
@@ -350,7 +359,7 @@
         }
       } catch (err) {
         try {
-          const fallbackRes = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${chapter}`);
+          const fallbackRes = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${encodeURIComponent(range)}`);
           const fallbackData = await fallbackRes.json();
           if (fallbackData && fallbackData.verses) {
             verseDisplay.innerHTML = fallbackData.verses.map(v => `
@@ -363,7 +372,7 @@
           }
         } catch (e) {}
 
-        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${book} ${chapter}.</p>`;
+        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${passageRef}. Check range formatting (e.g., 12:9-12).</p>`;
       }
     }
 
@@ -430,7 +439,7 @@
       }
     });
 
-    // Smart Multi-Endpoint Auto Fallback Logic
+    // Gemini API Request Engine
     generateAiBtn.addEventListener('click', async () => {
       const key = (localStorage.getItem('gemini_key') || '').trim();
       if (!key) {
@@ -466,7 +475,6 @@ Return ONLY a valid JSON object matching this exact schema:
         generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
       };
 
-      // Model order: 2.5-flash -> 3.5-flash-lite -> 1.5-flash
       const modelEndpoints = [
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent',
@@ -504,7 +512,6 @@ Return ONLY a valid JSON object matching this exact schema:
           <div class="text-center py-6 space-y-2">
             <p class="text-xs text-rose-500 font-bold">API Connection Error</p>
             <p class="text-[11px] text-slate-400 font-mono">${lastError}</p>
-            <p class="text-[10px] text-slate-400 pt-2">If servers are busy, try tapping "Generate" again in a few seconds.</p>
           </div>
         `;
         return;
