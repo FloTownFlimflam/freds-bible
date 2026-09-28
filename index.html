@@ -464,7 +464,7 @@
       }
     });
 
-    // Gemini AI Prompt Integration (Includes Sermon Illustrations & Famous Quotes)
+    // Gemini API Integration (Using active gemini-2.5-flash model endpoint)
     generateAiBtn.addEventListener('click', async () => {
       const key = localStorage.getItem('gemini_key');
       if (!key) {
@@ -496,7 +496,7 @@ Return ONLY a valid JSON object matching this exact schema:
 }`;
 
       try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${key}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
