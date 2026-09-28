@@ -59,6 +59,11 @@
       border-bottom: 1px solid rgba(30, 41, 59, 0.6);
     }
 
+    /* iOS Notch Safe Area Support */
+    .ios-header-padding {
+      padding-top: calc(0.75rem + env(safe-area-inset-top, 20px));
+    }
+
     /* Deep Ambient Background Glow Spheres */
     .glow-bg-1 {
       position: fixed;
@@ -97,13 +102,13 @@
     }
   </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 h-full flex flex-col font-sans transition-colors duration-300 relative overflow-hidden">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 h-full flex flex-col font-sans transition-colors duration-300 relative">
 
   <div class="glow-bg-1"></div>
   <div class="glow-bg-2"></div>
 
-  <!-- Header Bar -->
-  <header class="glass-nav sticky top-0 z-40 px-4 pt-12 pb-3 flex items-center justify-between">
+  <!-- iOS Safe-Area Responsive Header Bar -->
+  <header class="glass-nav sticky top-0 z-40 px-4 pb-3 ios-header-padding flex items-center justify-between">
     <div class="flex items-center gap-2">
       <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-md shadow-sky-500/20 select-none">
         FB
@@ -117,8 +122,8 @@
     </button>
   </header>
 
-  <!-- Viewport -->
-  <main id="appContainer" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-28 z-10">
+  <!-- Viewport Container -->
+  <main id="appContainer" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-32 z-10">
     
     <!-- READ VIEW -->
     <div id="readView" class="space-y-4">
@@ -239,7 +244,7 @@
   </main>
 
   <!-- Navigation -->
-  <nav class="glass-nav fixed bottom-0 left-0 right-0 z-40 px-6 py-3 flex justify-around items-center border-t border-slate-200/50 dark:border-slate-800/50 select-none">
+  <nav class="glass-nav fixed bottom-0 left-0 right-0 z-40 px-6 py-3 pb-6 flex justify-around items-center border-t border-slate-200/50 dark:border-slate-800/50 select-none">
     <button id="navReadBtn" class="flex flex-col items-center gap-1 text-sky-400 font-bold transition-all">
       <span class="text-xl">📖</span>
       <span class="text-[10px] tracking-wide">Read</span>
