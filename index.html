@@ -141,11 +141,15 @@
           </select>
 
           <!-- Book Selector -->
-          <select id="bookSelect" class="col-span-5 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+          <select id="bookSelect" class="col-span-4 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+          </select>
+
+          <!-- Chapter Dropdown -->
+          <select id="chapterSelect" class="col-span-2 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-1 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
           </select>
           
-          <!-- Chapter / Verse Range Text Input -->
-          <input id="passageRangeInput" type="text" value="12:9-12" class="col-span-4 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="12:9-12" />
+          <!-- Optional Verse(s) Text Input -->
+          <input id="verseRangeInput" type="text" class="col-span-3 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs (opt)" />
         </div>
 
         <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all select-none cursor-pointer">
@@ -270,6 +274,12 @@
       NT: ["Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"]
     };
 
+    // Total Chapters Per Book
+    const CHAPTER_COUNTS = {
+      "Genesis": 50, "Exodus": 40, "Leviticus": 27, "Numbers": 36, "Deuteronomy": 34, "Joshua": 24, "Judges": 21, "Ruth": 4, "1 Samuel": 31, "2 Samuel": 24, "1 Kings": 22, "2 Kings": 25, "1 Chronicles": 29, "2 Chronicles": 36, "Ezra": 10, "Nehemiah": 13, "Esther": 10, "Job": 42, "Psalms": 150, "Proverbs": 31, "Ecclesiastes": 12, "Song of Solomon": 8, "Isaiah": 66, "Jeremiah": 52, "Lamentations": 5, "Ezekiel": 48, "Daniel": 12, "Hosea": 14, "Joel": 3, "Amos": 9, "Obadiah": 1, "Jonah": 4, "Micah": 7, "Nahum": 3, "Habakkuk": 3, "Zephaniah": 3, "Haggai": 2, "Zechariah": 14, "Malachi": 4,
+      "Matthew": 28, "Mark": 16, "Luke": 24, "John": 21, "Acts": 28, "Romans": 16, "1 Corinthians": 16, "2 Corinthians": 13, "Galatians": 6, "Ephesians": 6, "Philippians": 4, "Colossians": 4, "1 Thessalonians": 5, "2 Thessalonians": 3, "1 Timothy": 6, "2 Timothy": 4, "Titus": 3, "Philemon": 1, "Hebrews": 13, "James": 5, "1 Peter": 5, "2 Peter": 3, "1 John": 5, "2 John": 1, "3 John": 1, "Jude": 1, "Revelation": 22
+    };
+
     const LEXICON_DICT = {
       'G3056': { strongs: 'G3056', word: 'λόγος (logos)', transliteration: 'logos', language: 'Greek', partOfSpeech: 'Noun', definition: 'A word, divine expression, or reasoning.', usage: 'Used of the divine Word, Jesus Christ (John 1:1).' },
       'G26': { strongs: 'G26', word: 'ἀγάπη (agape)', transliteration: 'agape', language: 'Greek', partOfSpeech: 'Noun', definition: 'Unconditional, benevolent, self-sacrificing love.', usage: 'God’s divine love towards humanity.' },
@@ -287,7 +297,8 @@
 
     const testamentSelect = document.getElementById('testamentSelect');
     const bookSelect = document.getElementById('bookSelect');
-    const passageRangeInput = document.getElementById('passageRangeInput');
+    const chapterSelect = document.getElementById('chapterSelect');
+    const verseRangeInput = document.getElementById('verseRangeInput');
     const loadBtn = document.getElementById('loadBtn');
     const searchInput = document.getElementById('searchInput');
     const passageTitle = document.getElementById('passageTitle');
@@ -306,7 +317,7 @@
     const lexiconSearchBtn = document.getElementById('lexiconSearchBtn');
     const lexiconResultCard = document.getElementById('lexiconResultCard');
 
-    // Default to Dark Mode & Persist User Preference
+    // Default Dark Theme
     const storedTheme = localStorage.getItem('app_theme');
     if (storedTheme === 'light') {
       document.documentElement.classList.remove('dark');
@@ -319,6 +330,7 @@
       localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
     });
 
+    // Populate Books & Trigger Chapter Count
     function populateBooks() {
       const selectedTestament = testamentSelect.value || 'NT';
       const books = BIBLE_BOOKS[selectedTestament];
@@ -331,9 +343,26 @@
         if (book === 'Romans') opt.selected = true;
         bookSelect.appendChild(opt);
       });
+
+      populateChapters();
+    }
+
+    // Populate Dynamic Chapter Numbers
+    function populateChapters() {
+      const selectedBook = bookSelect.value || 'Romans';
+      const totalChapters = CHAPTER_COUNTS[selectedBook] || 1;
+
+      chapterSelect.innerHTML = '';
+      for (let c = 1; c <= totalChapters; c++) {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = `Ch ${c}`;
+        chapterSelect.appendChild(opt);
+      }
     }
 
     testamentSelect.addEventListener('change', populateBooks);
+    bookSelect.addEventListener('change', populateChapters);
 
     function switchView(activeView, activeBtn) {
       readView.classList.add('hidden');
@@ -353,22 +382,27 @@
       switchView(aiView, navAiBtn);
       
       const currentBook = bookSelect.value || 'Romans';
-      const currentRange = passageRangeInput.value.trim() || '12:9-12';
-      aiPassageInput.value = `${currentBook} ${currentRange}`;
+      const currentChapter = chapterSelect.value || '1';
+      const verses = verseRangeInput.value.trim();
+      
+      aiPassageInput.value = verses ? `${currentBook} ${currentChapter}:${verses}` : `${currentBook} ${currentChapter}`;
     });
     navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
 
-    // Flexible Chapter and Verse Range Reader
+    // Flexible Chapter & Verse Range Reader
     async function fetchPassage() {
       const book = bookSelect.value || 'Romans';
-      const range = passageRangeInput.value.trim() || '12:9-12';
-      const passageRef = `${book} ${range}`;
+      const chapter = chapterSelect.value || '1';
+      const verses = verseRangeInput.value.trim();
+
+      const passageQuery = verses ? `${book}+${chapter}:${verses}` : `${book}+${chapter}`;
+      const passageRef = verses ? `${book} ${chapter}:${verses}` : `${book} ${chapter}`;
       
       passageTitle.textContent = `${passageRef} (ESV)`;
       verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${passageRef} (ESV)...</p>`;
 
       try {
-        const res = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${encodeURIComponent(range)}?translation=esv`);
+        const res = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}?translation=esv`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         
@@ -384,7 +418,7 @@
         }
       } catch (err) {
         try {
-          const fallbackRes = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${encodeURIComponent(range)}`);
+          const fallbackRes = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}`);
           const fallbackData = await fallbackRes.json();
           if (fallbackData && fallbackData.verses) {
             verseDisplay.innerHTML = fallbackData.verses.map(v => `
@@ -397,12 +431,12 @@
           }
         } catch (e) {}
 
-        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${passageRef}. Check range formatting (e.g., 12:9-12).</p>`;
+        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${passageRef}. Check verse formatting (e.g., 9-12).</p>`;
       }
     }
 
     loadBtn.addEventListener('click', fetchPassage);
-    passageRangeInput.addEventListener('keydown', (e) => {
+    verseRangeInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         fetchPassage();
       }
