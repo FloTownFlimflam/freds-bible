@@ -269,6 +269,9 @@
   </nav>
 
   <script>
+    // HARDCODED GEMINI API KEY (Replace string below with your actual API key)
+    const HARDCODED_API_KEY = "AQ.Ab8RN6IOIwDxrrp3rhy_-ZCVH0-SkQkISSKK724RWondI9LiMw";
+
     const BIBLE_BOOKS = {
       OT: ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"],
       NT: ["Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"]
@@ -490,7 +493,19 @@
       });
     });
 
-    if (localStorage.getItem('gemini_key')) {
+    // Handle Hardcoded vs Local Storage API Key Logic
+    function getActiveApiKey() {
+      if (HARDCODED_API_KEY && HARDCODED_API_KEY !== "YOUR_GEMINI_API_KEY_HERE") {
+        return HARDCODED_API_KEY.trim();
+      }
+      return (localStorage.getItem('gemini_key') || '').trim();
+    }
+
+    if (HARDCODED_API_KEY && HARDCODED_API_KEY !== "YOUR_GEMINI_API_KEY_HERE") {
+      apiKeyInput.value = "••••••••••••••••••••••••••••••••";
+      keyStatusText.textContent = "Hardcoded API Key active.";
+      keyStatusText.classList.add("text-emerald-500");
+    } else if (localStorage.getItem('gemini_key')) {
       apiKeyInput.value = localStorage.getItem('gemini_key');
       keyStatusText.textContent = 'Key active & stored in browser.';
       keyStatusText.classList.add('text-emerald-500');
@@ -498,9 +513,9 @@
 
     saveKeyBtn.addEventListener('click', () => {
       const k = apiKeyInput.value.trim();
-      if (k) {
+      if (k && k !== "••••••••••••••••••••••••••••••••") {
         localStorage.setItem('gemini_key', k);
-        keyStatusText.textContent = 'Key saved!';
+        keyStatusText.textContent = 'Key saved locally!';
         keyStatusText.classList.add('text-emerald-500');
       }
     });
@@ -508,9 +523,9 @@
     let currentInsightsText = '';
 
     generateAiBtn.addEventListener('click', async () => {
-      const key = (localStorage.getItem('gemini_key') || '').trim();
+      const key = getActiveApiKey();
       if (!key) {
-        aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Please save a Gemini API Key above first.</p>`;
+        aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Please add your hardcoded API Key or save a Gemini API Key above first.</p>`;
         return;
       }
 
@@ -525,7 +540,6 @@
         </div>
       `;
 
-      // Option 1: 5-Question Dynamic Framework Prompt
       const promptText = `Provide a comprehensive study and teaching pack for ${passage} using the ${translation} translation from a ${tradition} perspective.
 
 Return ONLY a valid JSON object matching this exact schema:
