@@ -577,10 +577,10 @@ Return ONLY a valid JSON object matching this exact schema:
         generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
       };
 
-      // Updated Active Gemini Endpoints
+      // Updated Active Gemini Endpoints (Official gemini-3.1-pro-preview and gemini-2.5-flash)
       const modelEndpoints = [
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${encodeURIComponent(key)}`
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${encodeURIComponent(key)}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`
       ];
 
       let lastError = null;
