@@ -269,8 +269,8 @@
   </nav>
 
   <script>
-    // HARDCODED GEMINI API KEY (Replace string below with your actual API key starting with AQ. or AIzaSy)
-    const HARDCODED_API_KEY = "AQ.Ab8RN6IP5a1bbslIXAQteikNXRIk1DUxRowuxnjcblDoiD2ZkQ";
+    // HARDCODED GEMINI API KEY (Leave empty if pasting keys via UI)
+    const HARDCODED_API_KEY = "";
 
     const BIBLE_BOOKS = {
       OT: ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"],
@@ -493,9 +493,9 @@
       });
     });
 
-    // Flexible API Key Resolver (Supports both AIzaSy and AQ. keys)
+    // API Key Resolver Logic
     function getActiveApiKey() {
-      if (HARDCODED_API_KEY && HARDCODED_API_KEY !== "YOUR_GEMINI_API_KEY_HERE" && HARDCODED_API_KEY.trim().length > 15) {
+      if (HARDCODED_API_KEY && HARDCODED_API_KEY.trim().length > 15) {
         return HARDCODED_API_KEY.trim();
       }
       const savedKey = (localStorage.getItem('gemini_key') || '').trim();
@@ -505,25 +505,32 @@
       return null;
     }
 
-    if (HARDCODED_API_KEY && HARDCODED_API_KEY !== "YOUR_GEMINI_API_KEY_HERE" && HARDCODED_API_KEY.trim().length > 15) {
-      apiKeyInput.value = "••••••••••••••••••••••••••••••••";
-      keyStatusText.textContent = "Hardcoded API Key active.";
-      keyStatusText.classList.remove("text-slate-400");
-      keyStatusText.classList.add("text-emerald-500");
-    } else if (localStorage.getItem('gemini_key')) {
-      apiKeyInput.value = localStorage.getItem('gemini_key');
-      keyStatusText.textContent = 'Key active & stored in browser.';
-      keyStatusText.classList.remove("text-slate-400");
-      keyStatusText.classList.add('text-emerald-500');
+    function syncKeyStatusUI() {
+      if (HARDCODED_API_KEY && HARDCODED_API_KEY.trim().length > 15) {
+        apiKeyInput.value = "••••••••••••••••••••••••••••••••";
+        keyStatusText.textContent = "Hardcoded API Key active.";
+        keyStatusText.classList.remove("text-slate-400");
+        keyStatusText.classList.add("text-emerald-500");
+      } else if (localStorage.getItem('gemini_key')) {
+        apiKeyInput.value = localStorage.getItem('gemini_key');
+        keyStatusText.textContent = 'Key active & stored in browser.';
+        keyStatusText.classList.remove("text-slate-400");
+        keyStatusText.classList.add('text-emerald-500');
+      } else {
+        apiKeyInput.value = "";
+        keyStatusText.textContent = 'Stored locally on device.';
+        keyStatusText.classList.remove("text-emerald-500");
+        keyStatusText.classList.add('text-slate-400');
+      }
     }
+
+    syncKeyStatusUI();
 
     saveKeyBtn.addEventListener('click', () => {
       const k = apiKeyInput.value.trim();
       if (k && k !== "••••••••••••••••••••••••••••••••") {
         localStorage.setItem('gemini_key', k);
-        keyStatusText.textContent = 'Key saved locally!';
-        keyStatusText.classList.remove("text-slate-400");
-        keyStatusText.classList.add('text-emerald-500');
+        syncKeyStatusUI();
       }
     });
 
@@ -532,7 +539,7 @@
     generateAiBtn.addEventListener('click', async () => {
       const key = getActiveApiKey();
       if (!key) {
-        aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Please add your hardcoded API Key or save a Gemini API Key above first.</p>`;
+        aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Please paste and save your Gemini API Key above first.</p>`;
         return;
       }
 
