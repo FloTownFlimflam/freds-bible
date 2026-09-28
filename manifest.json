@@ -1,0 +1,21 @@
+{
+  "short_name": "Fred's Bible",
+  "name": "Fred's Bible Reference",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/isometric/192/bible.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://img.icons8.com/isometric/512/bible.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "display": "standalone",
+  "orientation": "portrait"
+}
