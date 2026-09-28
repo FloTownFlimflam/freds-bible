@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="h-full dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -306,8 +306,17 @@
     const lexiconSearchBtn = document.getElementById('lexiconSearchBtn');
     const lexiconResultCard = document.getElementById('lexiconResultCard');
 
+    // Default to Dark Mode & Persist User Preference
+    const storedTheme = localStorage.getItem('app_theme');
+    if (storedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+
     document.getElementById('themeToggle').addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
     });
 
     function populateBooks() {
