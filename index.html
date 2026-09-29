@@ -533,7 +533,7 @@
     document.getElementById('themeToggle').addEventListener('click', () => {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
-      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️️';
+      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
     });
 
     function populateBooks() {
@@ -753,7 +753,7 @@
       verseDisplay.innerHTML = verses.map(v => `
         <p class="${fontScaleClasses[fontScaleIndex]} leading-relaxed text-slate-700 dark:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-900/50 p-1.5 rounded-lg transition-colors cursor-pointer" onclick="copyVerseText('${v.verse}', \`${v.text.replace(/'/g, "\\'")}\`)">
           <sup class="text-[10px] font-extrabold text-sky-400 mr-1.5 select-none">${v.verse}</sup>
-          <span class="select-text">${v.text.trim()}</span>
+          <span class="select-text">${v.text.trim()}</sup>
         </p>
       `).join('');
       updateFontDisplay();
@@ -781,7 +781,7 @@
       checkbookDatePicker.value = today;
     }
 
-    // Dynamic LyteWord Raw Markdown Fetcher for Faith's Checkbook (Robust Blockquote & Verse Parser)
+    // Dynamic LyteWord Raw Markdown Fetcher for Faith's Checkbook (Universal Inline & Blockquote Verse Parser)
     async function loadCheckbookDevotion() {
       if (!checkbookDatePicker.value) initCheckbookDatePicker();
       
@@ -810,7 +810,7 @@
         </div>
       `;
 
-      // 2. Fetch directly from lyteword/chspurgeon-fcb GitHub raw repository using exact unpadded structure (e.g. september-23.md)
+      // 2. Fetch directly from lyteword/chspurgeon-fcb GitHub raw repository using exact unpadded structure (e.g. september-16.md)
       const fixedMonthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
       const monthIndex = parseInt(month, 10) - 1;
       const monthName = fixedMonthNames[monthIndex];
@@ -844,7 +844,7 @@
       renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs);
     }
 
-    // Parser for LyteWord Markdown structure (Accurately parses blockquotes containing verse and reference)
+    // Universal Parser for LyteWord Markdown structure (Handles both blockquotes and inline italicized verses)
     function parseLyteWordMarkdown(md, defaultTitle) {
       let cleanMd = md;
       if (md.startsWith('---')) {
@@ -865,12 +865,11 @@
           title = line.replace('# ', '').trim();
         } else if (line.startsWith('## ')) {
           scripture = line.replace('## ', '').trim();
-        } else if (line.startsWith('>')) {
-          // Clean blockquote line
+        } else if (line.startsWith('>') || (line.includes('—') && (line.startsWith('*') || line.startsWith('"')))) {
+          // Clean blockquote or inline scripture line
           let bqText = line.replace(/^>\s*/, '').trim();
           
-          // Check if blockquote contains both verse and reference separated by dash/em-dash (e.g. "Verse text" — Amos 9:9)
-          const dashMatch = bqText.match(/(["'].*?["'])\s*[—–-]\s*(.*)$/);
+          const dashMatch = bqText.match(/(["'].*?["'])\s*[—–-]\s*(.*)$/) \vert{}\vert{} bqText.match(/(\*.*?\*)\s*[—–-]\s*(.*)$/);
           if (dashMatch) {
             verse = dashMatch[1].replace(/^["'*]+|["'*]+$/g, '').trim();
             scripture = dashMatch[2].replace(/^["'*]+|["'*]+$/g, '').trim();
