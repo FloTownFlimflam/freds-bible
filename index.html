@@ -533,7 +533,7 @@
     document.getElementById('themeToggle').addEventListener('click', () => {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
-      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
+      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️️';
     });
 
     function populateBooks() {
@@ -781,7 +781,7 @@
       checkbookDatePicker.value = today;
     }
 
-    // Dynamic LyteWord Raw Markdown Fetcher for Faith's Checkbook (With YAML Frontmatter Stripper)
+    // Dynamic LyteWord Raw Markdown Fetcher for Faith's Checkbook (Robust Blockquote & Verse Parser)
     async function loadCheckbookDevotion() {
       if (!checkbookDatePicker.value) initCheckbookDatePicker();
       
@@ -810,9 +810,7 @@
         </div>
       `;
 
-      // 2. Fetch directly from lyteword/chspurgeon-fcb GitHub raw repository using exact unpadded structure (e.g. september-26.md)
-      const monthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "desember"];
-      // Correct spelling index fix for month names
+      // 2. Fetch directly from lyteword/chspurgeon-fcb GitHub raw repository using exact unpadded structure (e.g. september-23.md)
       const fixedMonthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
       const monthIndex = parseInt(month, 10) - 1;
       const monthName = fixedMonthNames[monthIndex];
@@ -846,9 +844,8 @@
       renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs);
     }
 
-    // Parser for LyteWord Markdown structure (Strips YAML frontmatter & extracts title, verse, scripture, paragraphs)
+    // Parser for LyteWord Markdown structure (Accurately parses blockquotes containing verse and reference)
     function parseLyteWordMarkdown(md, defaultTitle) {
-      // 1. Remove YAML frontmatter if present (between --- and ---)
       let cleanMd = md;
       if (md.startsWith('---')) {
         const parts = md.split('---');
@@ -869,18 +866,20 @@
         } else if (line.startsWith('## ')) {
           scripture = line.replace('## ', '').trim();
         } else if (line.startsWith('>')) {
-          // Extract verse text from blockquote, stripping quotes if wrapped
-          verse = line.replace(/^>\s*/, '').trim().replace(/^["'*]+|["'*]+$/g, '').trim();
+          // Clean blockquote line
+          let bqText = line.replace(/^>\s*/, '').trim();
+          
+          // Check if blockquote contains both verse and reference separated by dash/em-dash (e.g. "Verse text" — Amos 9:9)
+          const dashMatch = bqText.match(/(["'].*?["'])\s*[—–-]\s*(.*)$/);
+          if (dashMatch) {
+            verse = dashMatch[1].replace(/^["'*]+|["'*]+$/g, '').trim();
+            scripture = dashMatch[2].replace(/^["'*]+|["'*]+$/g, '').trim();
+          } else {
+            verse = bqText.replace(/^["'*]+|["'*]+$/g, '').trim();
+          }
         } else if (!line.startsWith('*') && !line.startsWith('---')) {
-          // Strip asterisks or markdown bold tags from commentary body paragraphs
           paragraphs.push(line.replace(/\*\*/g, '').replace(/^\*|\*$/g, '').trim());
         }
-      }
-
-      // Clean up title if it contains dates or separators
-      if (title.includes('—')) {
-        const parts = title.split('—');
-        title = parts[parts.length - 1].trim();
       }
 
       return { 
