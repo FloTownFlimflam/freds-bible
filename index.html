@@ -36,13 +36,8 @@
   </script>
 
   <style>
-    :root {
-      color-scheme: light dark;
-    }
-    
-    .dark {
-      color-scheme: dark;
-    }
+    :root { color-scheme: light dark; }
+    .dark { color-scheme: dark; }
 
     .glass-card {
       background: rgba(255, 255, 255, 0.82);
@@ -80,10 +75,8 @@
 
     .glow-bg-1 {
       position: fixed;
-      top: -10%;
-      left: -10%;
-      width: 380px;
-      height: 380px;
+      top: -10%; left: -10%;
+      width: 380px; height: 380px;
       background: radial-gradient(circle, rgba(56, 189, 248, 0.18) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 70%);
       border-radius: 50%;
       filter: blur(60px);
@@ -93,10 +86,8 @@
 
     .glow-bg-2 {
       position: fixed;
-      bottom: 5%;
-      right: -10%;
-      width: 400px;
-      height: 400px;
+      bottom: 5%; right: -10%;
+      width: 400px; height: 400px;
       background: radial-gradient(circle, rgba(129, 140, 248, 0.18) 0%, rgba(168, 85, 247, 0.08) 50%, transparent 70%);
       border-radius: 50%;
       filter: blur(70px);
@@ -115,6 +106,12 @@
 
     body {
       -webkit-tap-highlight-color: transparent;
+    }
+
+    select option {
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 8px;
     }
 
     .reader-text-sm { font-size: 0.875rem; line-height: 1.6; }
@@ -185,11 +182,9 @@
           </select>
 
           <select id="bookSelect" class="col-span-5 bg-slate-900 text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
-            <option value="Romans" selected>Romans</option>
           </select>
 
           <select id="chapterSelect" class="col-span-2 bg-slate-900 text-slate-100 rounded-xl px-1 py-2.5 text-xs font-bold text-center border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
-            <option value="1" selected>Ch 1</option>
           </select>
           
           <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-2 bg-slate-900 text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs (opt)" />
@@ -374,948 +369,683 @@
       <span class="text-[10px] tracking-wide">Checkbook</span>
     </button>
     <button id="navLexiconBtn" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 font-bold transition-all cursor-pointer">
-      <span class="text-xl">🏛️</span>
+      <span class="text-xl">🏛️️</span>
       <span class="text-[10px] tracking-wide">Lexicon</span>
     </button>
   </nav>
 
   <script>
-    // --- SAFE STORAGE HELPERS ---
-    // Prevents script from crashing if cookies/localStorage are blocked by privacy settings
-    function safeGetStorage(key) {
-      try { return localStorage.getItem(key); } catch(e) { return null; }
-    }
-    function safeSetStorage(key, value) {
-      try { localStorage.setItem(key, value); } catch(e) {}
-    }
-    function safeRemoveStorage(key) {
-      try { localStorage.removeItem(key); } catch(e) {}
-    }
-
-    function dismissKeyboard() {
-      if (document.activeElement && typeof document.activeElement.blur === 'function') {
-        document.activeElement.blur();
+    // Completely encapsulated in an IIFE to prevent hot-reloading "already declared" SyntaxErrors
+    (function() {
+      // --- SAFE STORAGE HELPERS ---
+      function safeGetStorage(key) {
+        try { return window.localStorage.getItem(key); } catch(e) { return null; }
       }
-    }
-
-    const fontScaleClasses = ['reader-text-sm', 'reader-text-base', 'reader-text-lg', 'reader-text-xl'];
-    let fontScaleIndex = 1;
-
-    const fontDecBtn = document.getElementById('fontDecBtn');
-    const fontIncBtn = document.getElementById('fontIncBtn');
-    const fontSizeDisplay = document.getElementById('fontSizeDisplay');
-
-    function updateFontDisplay() {
-      const percentages = ['87%', '100%', '112%', '125%'];
-      fontSizeDisplay.textContent = percentages[fontScaleIndex];
-      const verses = verseDisplay.querySelectorAll('p');
-      verses.forEach(p => {
-        fontScaleClasses.forEach(c => p.classList.remove(c));
-        p.classList.add(fontScaleClasses[fontScaleIndex]);
-      });
-    }
-
-    fontDecBtn.addEventListener('click', () => {
-      if (fontScaleIndex > 0) {
-        fontScaleIndex--;
-        updateFontDisplay();
+      function safeSetStorage(key, value) {
+        try { window.localStorage.setItem(key, value); } catch(e) {}
       }
-    });
-
-    fontIncBtn.addEventListener('click', () => {
-      if (fontScaleIndex < fontScaleClasses.length - 1) {
-        fontScaleIndex++;
-        updateFontDisplay();
+      function safeRemoveStorage(key) {
+        try { window.localStorage.removeItem(key); } catch(e) {}
       }
-    });
 
-    function renderReaderSkeleton() {
-      return `
-        <div class="space-y-4 animate-fade-in">
-          ${Array(7).fill(0).map(() => `
-            <div class="space-y-2">
-              <div class="flex items-center gap-2">
-                <div class="w-4 h-3 rounded skeleton-box"></div>
-                <div class="w-full h-4 rounded-md skeleton-box"></div>
+      const fontScaleClasses = ['reader-text-sm', 'reader-text-base', 'reader-text-lg', 'reader-text-xl'];
+      let fontScaleIndex = 1;
+
+      const HARDCODED_API_KEY = "";
+
+      const BIBLE_BOOKS = {
+        OT: ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"],
+        NT: ["Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"]
+      };
+
+      const CHAPTER_COUNTS = {
+        "Genesis": 50, "Exodus": 40, "Leviticus": 27, "Numbers": 36, "Deuteronomy": 34, "Joshua": 24, "Judges": 21, "Ruth": 4, "1 Samuel": 31, "2 Samuel": 24, "1 Kings": 22, "2 Kings": 25, "1 Chronicles": 29, "2 Chronicles": 36, "Ezra": 10, "Nehemiah": 13, "Esther": 10, "Job": 42, "Psalms": 150, "Proverbs": 31, "Ecclesiastes": 12, "Song of Solomon": 8, "Isaiah": 66, "Jeremiah": 52, "Lamentations": 5, "Ezekiel": 48, "Daniel": 12, "Hosea": 14, "Joel": 3, "Amos": 9, "Obadiah": 1, "Jonah": 4, "Micah": 7, "Nahum": 3, "Habakkuk": 3, "Zephaniah": 3, "Haggai": 2, "Zechariah": 14, "Malachi": 4,
+        "Matthew": 28, "Mark": 16, "Luke": 24, "John": 21, "Acts": 28, "Romans": 16, "1 Corinthians": 16, "2 Corinthians": 13, "Galatians": 6, "Ephesians": 6, "Philippians": 4, "Colossians": 4, "1 Thessalonians": 5, "2 Thessalonians": 3, "1 Timothy": 6, "2 Timothy": 4, "Titus": 3, "Philemon": 1, "Hebrews": 13, "James": 5, "1 Peter": 5, "2 Peter": 3, "1 John": 5, "2 John": 1, "3 John": 1, "Jude": 1, "Revelation": 22
+      };
+
+      const LEXICON_DICT = {
+        'G3056': { strongs: 'G3056', word: 'λόγος (logos)', transliteration: 'logos', language: 'Greek', partOfSpeech: 'Noun', definition: 'A word, divine expression, or reasoning.', usage: 'Used of the divine Word, Jesus Christ (John 1:1).' },
+        'G26': { strongs: 'G26', word: 'ἀγάπη (agape)', transliteration: 'agape', language: 'Greek', partOfSpeech: 'Noun', definition: 'Unconditional, benevolent, self-sacrificing love.', usage: 'God’s divine love towards humanity.' },
+        'G4151': { strongs: 'G4151', word: 'πνεῦμα (pneuma)', transliteration: 'pneuma', language: 'Greek', partOfSpeech: 'Noun', definition: 'Wind, breath, spirit.', usage: 'Refers to the Holy Spirit or human spirit.' },
+        'H7225': { strongs: 'H7225', word: 'רֵאשִׁית (reshith)', transliteration: 'reshith', language: 'Hebrew', partOfSpeech: 'Noun', definition: 'Beginning, chief, first fruits.', usage: 'Genesis 1:1 "In the beginning".' },
+        'H430': { strongs: 'H430', word: 'אֱלֹהִים (Elohim)', transliteration: 'elohim', language: 'Hebrew', partOfSpeech: 'Noun', definition: 'God, Supreme Deity.', usage: 'Creator God of Israel.' }
+      };
+
+      function dismissKeyboard() {
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
+      }
+
+      function renderReaderSkeleton() {
+        return `
+          <div class="space-y-4 animate-fade-in">
+            ${Array(7).fill(0).map(() => `
+              <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                  <div class="w-4 h-3 rounded skeleton-box"></div>
+                  <div class="w-full h-4 rounded-md skeleton-box"></div>
+                </div>
+                <div class="w-11/12 h-4 rounded-md skeleton-box ml-6"></div>
+                <div class="w-3/4 h-4 rounded-md skeleton-box ml-6"></div>
               </div>
-              <div class="w-11/12 h-4 rounded-md skeleton-box ml-6"></div>
-              <div class="w-3/4 h-4 rounded-md skeleton-box ml-6"></div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    function renderAiInsightsSkeleton() {
-      return `
-        <div class="space-y-5 animate-fade-in">
-          <div class="space-y-2">
-            <div class="w-28 h-3 rounded skeleton-box"></div>
-            <div class="w-full h-16 rounded-xl skeleton-box"></div>
-          </div>
-          <div class="space-y-2">
-            <div class="w-36 h-3 rounded skeleton-box"></div>
-            <div class="w-full h-20 rounded-xl skeleton-box"></div>
-          </div>
-          <div class="space-y-2">
-            <div class="w-32 h-3 rounded skeleton-box"></div>
-            <div class="w-full h-16 rounded-xl skeleton-box"></div>
-          </div>
-        </div>
-      `;
-    }
-
-    const HARDCODED_API_KEY = "";
-
-    const BIBLE_BOOKS = {
-      OT: ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"],
-      NT: ["Matthew", "Mark", "Luke", "John", "Acts", "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy", "Titus", "Philemon", "Hebrews", "James", "1 Peter", "2 Peter", "1 John", "2 John", "3 John", "Jude", "Revelation"]
-    };
-
-    const CHAPTER_COUNTS = {
-      "Genesis": 50, "Exodus": 40, "Leviticus": 27, "Numbers": 36, "Deuteronomy": 34, "Joshua": 24, "Judges": 21, "Ruth": 4, "1 Samuel": 31, "2 Samuel": 24, "1 Kings": 22, "2 Kings": 25, "1 Chronicles": 29, "2 Chronicles": 36, "Ezra": 10, "Nehemiah": 13, "Esther": 10, "Job": 42, "Psalms": 150, "Proverbs": 31, "Ecclesiastes": 12, "Song of Solomon": 8, "Isaiah": 66, "Jeremiah": 52, "Lamentations": 5, "Ezekiel": 48, "Daniel": 12, "Hosea": 14, "Joel": 3, "Amos": 9, "Obadiah": 1, "Jonah": 4, "Micah": 7, "Nahum": 3, "Habakkuk": 3, "Zephaniah": 3, "Haggai": 2, "Zechariah": 14, "Malachi": 4,
-      "Matthew": 28, "Mark": 16, "Luke": 24, "John": 21, "Acts": 28, "Romans": 16, "1 Corinthians": 16, "2 Corinthians": 13, "Galatians": 6, "Ephesians": 6, "Philippians": 4, "Colossians": 4, "1 Thessalonians": 5, "2 Thessalonians": 3, "1 Timothy": 6, "2 Timothy": 4, "Titus": 3, "Philemon": 1, "Hebrews": 13, "James": 5, "1 Peter": 5, "2 Peter": 3, "1 John": 5, "2 John": 1, "3 John": 1, "Jude": 1, "Revelation": 22
-    };
-
-    const LEXICON_DICT = {
-      'G3056': { strongs: 'G3056', word: 'λόγος (logos)', transliteration: 'logos', language: 'Greek', partOfSpeech: 'Noun', definition: 'A word, divine expression, or reasoning.', usage: 'Used of the divine Word, Jesus Christ (John 1:1).' },
-      'G26': { strongs: 'G26', word: 'ἀγάπη (agape)', transliteration: 'agape', language: 'Greek', partOfSpeech: 'Noun', definition: 'Unconditional, benevolent, self-sacrificing love.', usage: 'God’s divine love towards humanity.' },
-      'G4151': { strongs: 'G4151', word: 'πνεῦμα (pneuma)', transliteration: 'pneuma', language: 'Greek', partOfSpeech: 'Noun', definition: 'Wind, breath, spirit.', usage: 'Refers to the Holy Spirit or human spirit.' },
-      'H7225': { strongs: 'H7225', word: 'רֵאשִׁית (reshith)', transliteration: 'reshith', language: 'Hebrew', partOfSpeech: 'Noun', definition: 'Beginning, chief, first fruits.', usage: 'Genesis 1:1 "In the beginning".' },
-      'H430': { strongs: 'H430', word: 'אֱלֹהִים (Elohim)', transliteration: 'elohim', language: 'Hebrew', partOfSpeech: 'Noun', definition: 'God, Supreme Deity.', usage: 'Creator God of Israel.' }
-    };
-
-    const readView = document.getElementById('readView');
-    const aiView = document.getElementById('aiView');
-    const checkbookView = document.getElementById('checkbookView');
-    const lexiconView = document.getElementById('lexiconView');
-
-    const navReadBtn = document.getElementById('navReadBtn');
-    const navAiBtn = document.getElementById('navAiBtn');
-    const navCheckbookBtn = document.getElementById('navCheckbookBtn');
-    const navLexiconBtn = document.getElementById('navLexiconBtn');
-
-    const testamentSelect = document.getElementById('testamentSelect');
-    const bookSelect = document.getElementById('bookSelect');
-    const chapterSelect = document.getElementById('chapterSelect');
-    const verseRangeInput = document.getElementById('verseRangeInput');
-    const readTranslationSelect = document.getElementById('readTranslationSelect');
-    const loadBtn = document.getElementById('loadBtn');
-    const passageTitle = document.getElementById('passageTitle');
-    const verseDisplay = document.getElementById('verseDisplay');
-    const offlineStatus = document.getElementById('offlineStatus');
-
-    const apiKeyInput = document.getElementById('apiKeyInput');
-    const saveKeyBtn = document.getElementById('saveKeyBtn');
-    const keyStatusText = document.getElementById('keyStatusText');
-    const clearCacheBtn = document.getElementById('clearCacheBtn');
-    const aiPassageInput = document.getElementById('aiPassageInput');
-    const aiTranslationSelect = document.getElementById('aiTranslationSelect');
-    const aiAudienceSelect = document.getElementById('aiAudienceSelect');
-    const compareTraditionsToggle = document.getElementById('compareTraditionsToggle');
-    const compareCalvinismToggle = document.getElementById('compareCalvinismToggle');
-    const syncReaderBtn = document.getElementById('syncReaderBtn');
-    const generateAiBtn = document.getElementById('generateAiBtn');
-    const aiResultsDisplay = document.getElementById('aiResultsDisplay');
-
-    const checkbookDatePicker = document.getElementById('checkbookDatePicker');
-    const checkbookTodayBtn = document.getElementById('checkbookTodayBtn');
-    const checkbookDisplay = document.getElementById('checkbookDisplay');
-
-    const crossRefModal = document.getElementById('crossRefModal');
-    const popoverRefTitle = document.getElementById('popoverRefTitle');
-    const popoverRefContent = document.getElementById('popoverRefContent');
-    const closeCrossRefModal = document.getElementById('closeCrossRefModal');
-
-    const strongsInput = document.getElementById('strongsInput');
-    const lexiconSearchBtn = document.getElementById('lexiconSearchBtn');
-    const lexiconResultCard = document.getElementById('lexiconResultCard');
-
-    const storedTheme = safeGetStorage('app_theme');
-    if (storedTheme === 'light') {
-      document.documentElement.classList.remove('dark');
-      document.getElementById('themeIcon').textContent = '☀️';
-    } else {
-      document.documentElement.classList.add('dark');
-      document.getElementById('themeIcon').textContent = '🌙';
-    }
-
-    document.getElementById('themeToggle').addEventListener('click', () => {
-      const isDark = document.documentElement.classList.toggle('dark');
-      safeSetStorage('app_theme', isDark ? 'dark' : 'light');
-      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
-    });
-
-    function populateBooks() {
-      const selectedTestament = testamentSelect.value || 'NT';
-      const books = BIBLE_BOOKS[selectedTestament];
-      
-      bookSelect.innerHTML = '';
-      books.forEach(book => {
-        const opt = document.createElement('option');
-        opt.value = book;
-        opt.textContent = book;
-        if (selectedTestament === 'NT' && book === 'Romans') opt.selected = true;
-        bookSelect.appendChild(opt);
-      });
-
-      populateChapters();
-    }
-
-    function populateChapters() {
-      const selectedBook = bookSelect.value || 'Romans';
-      const totalChapters = CHAPTER_COUNTS[selectedBook] || 1;
-
-      chapterSelect.innerHTML = '';
-      for (let c = 1; c <= totalChapters; c++) {
-        const opt = document.createElement('option');
-        opt.value = c;
-        opt.textContent = `Ch ${c}`;
-        if (c === 1) opt.selected = true;
-        chapterSelect.appendChild(opt);
-      }
-    }
-
-    testamentSelect.addEventListener('change', populateBooks);
-    bookSelect.addEventListener('change', populateChapters);
-
-    function switchView(targetView, targetBtn) {
-      dismissKeyboard();
-      
-      readView.classList.add('hidden');
-      aiView.classList.add('hidden');
-      checkbookView.classList.add('hidden');
-      lexiconView.classList.add('hidden');
-
-      const inactiveClass = "flex flex-col items-center gap-1 text-slate-400 font-bold transition-all cursor-pointer";
-      navReadBtn.className = inactiveClass;
-      navAiBtn.className = inactiveClass;
-      navCheckbookBtn.className = inactiveClass;
-      navLexiconBtn.className = inactiveClass;
-
-      targetView.classList.remove('hidden');
-      targetBtn.className = "flex flex-col items-center gap-1 text-sky-400 font-bold transition-all cursor-pointer";
-    }
-
-    navReadBtn.addEventListener('click', () => switchView(readView, navReadBtn));
-    navAiBtn.addEventListener('click', () => switchView(aiView, navAiBtn));
-    navCheckbookBtn.addEventListener('click', () => {
-      switchView(checkbookView, navCheckbookBtn);
-      loadCheckbookDevotion();
-    });
-    navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
-
-    syncReaderBtn.addEventListener('click', () => {
-      const currentBook = bookSelect.value || 'Romans';
-      const currentChapter = chapterSelect.value || '1';
-      const verses = verseRangeInput.value.trim();
-      aiPassageInput.value = verses ? `${currentBook} ${currentChapter}:${verses}` : `${currentBook} ${currentChapter}`;
-    });
-
-    async function fetchPassage() {
-      dismissKeyboard();
-      const book = bookSelect.value || 'Romans';
-      const chapter = parseInt(chapterSelect.value || '1', 10);
-      const versesInput = verseRangeInput.value.trim();
-      const selectedTranslation = readTranslationSelect.value || 'KJV';
-
-      const passageQuery = versesInput ? `${book} ${chapter}:${versesInput}` : `${book} ${chapter}`;
-      const passageRef = passageQuery;
-      const cacheKey = `bcache_${selectedTranslation}_${book}_${chapter}_${versesInput || 'all'}`;
-
-      passageTitle.textContent = `${passageRef} (${selectedTranslation})`;
-
-      const cachedData = safeGetStorage(cacheKey);
-      if (cachedData) {
-        try {
-          const parsed = JSON.parse(cachedData);
-          if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-            renderVerses(parsed);
-            offlineStatus.textContent = `${selectedTranslation} Cached ⚡`;
-            offlineStatus.className = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
-            return;
-          }
-        } catch (e) {
-          safeRemoveStorage(cacheKey);
-        }
-      }
-
-      verseDisplay.innerHTML = renderReaderSkeleton();
-
-      if (selectedTranslation === 'KJV') {
-        try {
-          const res = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}?translation=kjv`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.verses && data.verses.length > 0) {
-              renderVerses(data.verses);
-              safeSetStorage(cacheKey, JSON.stringify(data.verses));
-              offlineStatus.textContent = `KJV Active`;
-              offlineStatus.className = 'bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
-              return;
-            }
-          } else {
-            const errorText = await res.text();
-            renderVerboseError(verseDisplay, `Bible API (KJV) HTTP ${res.status}`, errorText);
-            return;
-          }
-        } catch (e) {
-          renderVerboseError(verseDisplay, 'Bible API Network Exception', e.stack || e.message);
-          return;
-        }
-      }
-
-      const key = getActiveApiKey();
-      if (!key) {
-        offlineStatus.textContent = `Key Missing`;
-        offlineStatus.className = 'bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
-        verseDisplay.innerHTML = `
-          <div class="text-center py-8 space-y-2">
-            <p class="text-xs text-rose-500 font-bold">Gemini API Key Required for ${selectedTranslation}</p>
-            <p class="text-[11px] text-slate-400">Save your free Gemini API Key in the AI Insights tab to render ${selectedTranslation} passages.</p>
+            `).join('')}
           </div>
         `;
-        return;
       }
 
-      const promptText = `Provide the complete verse text for ${passageRef} in ${selectedTranslation}.`;
+      function renderAiInsightsSkeleton() {
+        return `
+          <div class="space-y-5 animate-fade-in">
+            <div class="space-y-2">
+              <div class="w-28 h-3 rounded skeleton-box"></div>
+              <div class="w-full h-16 rounded-xl skeleton-box"></div>
+            </div>
+            <div class="space-y-2">
+              <div class="w-36 h-3 rounded skeleton-box"></div>
+              <div class="w-full h-20 rounded-xl skeleton-box"></div>
+            </div>
+            <div class="space-y-2">
+              <div class="w-32 h-3 rounded skeleton-box"></div>
+              <div class="w-full h-16 rounded-xl skeleton-box"></div>
+            </div>
+          </div>
+        `;
+      }
 
-      const requestPayload = {
-        contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: { 
-          temperature: 0.1,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "OBJECT",
-            properties: {
-              verses: {
-                type: "ARRAY",
-                items: {
-                  type: "OBJECT",
-                  properties: {
-                    verse: { type: "INTEGER" },
-                    text: { type: "STRING" }
-                  },
-                  required: ["verse", "text"]
-                }
-              }
-            },
-            required: ["verses"]
-          }
+      function speakText(text) {
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const currentSpeechUtterance = new SpeechSynthesisUtterance(text);
+          currentSpeechUtterance.rate = 0.95;
+          window.speechSynthesis.speak(currentSpeechUtterance);
         }
-      };
+      }
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`;
+      // ----------------------------------------------------
+      // BOOTSTRAP: Retrieve elements and bind listeners safely
+      // ----------------------------------------------------
+      function bootstrapApp() {
+        // Elements
+        const fontDecBtn = document.getElementById('fontDecBtn');
+        const fontIncBtn = document.getElementById('fontIncBtn');
+        const fontSizeDisplay = document.getElementById('fontSizeDisplay');
+        const readView = document.getElementById('readView');
+        const aiView = document.getElementById('aiView');
+        const checkbookView = document.getElementById('checkbookView');
+        const lexiconView = document.getElementById('lexiconView');
+        const navReadBtn = document.getElementById('navReadBtn');
+        const navAiBtn = document.getElementById('navAiBtn');
+        const navCheckbookBtn = document.getElementById('navCheckbookBtn');
+        const navLexiconBtn = document.getElementById('navLexiconBtn');
+        const testamentSelect = document.getElementById('testamentSelect');
+        const bookSelect = document.getElementById('bookSelect');
+        const chapterSelect = document.getElementById('chapterSelect');
+        const verseRangeInput = document.getElementById('verseRangeInput');
+        const readTranslationSelect = document.getElementById('readTranslationSelect');
+        const loadBtn = document.getElementById('loadBtn');
+        const passageTitle = document.getElementById('passageTitle');
+        const verseDisplay = document.getElementById('verseDisplay');
+        const offlineStatus = document.getElementById('offlineStatus');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveKeyBtn = document.getElementById('saveKeyBtn');
+        const keyStatusText = document.getElementById('keyStatusText');
+        const clearCacheBtn = document.getElementById('clearCacheBtn');
+        const aiPassageInput = document.getElementById('aiPassageInput');
+        const aiTranslationSelect = document.getElementById('aiTranslationSelect');
+        const aiAudienceSelect = document.getElementById('aiAudienceSelect');
+        const compareTraditionsToggle = document.getElementById('compareTraditionsToggle');
+        const compareCalvinismToggle = document.getElementById('compareCalvinismToggle');
+        const syncReaderBtn = document.getElementById('syncReaderBtn');
+        const generateAiBtn = document.getElementById('generateAiBtn');
+        const aiResultsDisplay = document.getElementById('aiResultsDisplay');
+        const checkbookDatePicker = document.getElementById('checkbookDatePicker');
+        const checkbookTodayBtn = document.getElementById('checkbookTodayBtn');
+        const checkbookDisplay = document.getElementById('checkbookDisplay');
+        const crossRefModal = document.getElementById('crossRefModal');
+        const popoverRefTitle = document.getElementById('popoverRefTitle');
+        const popoverRefContent = document.getElementById('popoverRefContent');
+        const closeCrossRefModal = document.getElementById('closeCrossRefModal');
+        const strongsInput = document.getElementById('strongsInput');
+        const lexiconSearchBtn = document.getElementById('lexiconSearchBtn');
+        const lexiconResultCard = document.getElementById('lexiconResultCard');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
 
-      try {
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestPayload)
-        });
-
-        if (res.ok) {
-          const successData = await res.json();
-          const rawText = successData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-          const parsed = JSON.parse(rawText);
-          
-          if (parsed && parsed.verses && parsed.verses.length > 0) {
-            renderVerses(parsed.verses);
-            safeSetStorage(cacheKey, JSON.stringify(parsed.verses));
-            offlineStatus.textContent = `${selectedTranslation} Gemini Active`;
-            offlineStatus.className = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
-            return;
-          } else {
-            renderVerboseError(verseDisplay, 'Gemini Response Structure Invalid', `Raw Response:\n${JSON.stringify(successData, null, 2)}`);
-            return;
-          }
+        // Theme Initialization
+        const storedTheme = safeGetStorage('app_theme');
+        if (storedTheme === 'light') {
+          document.documentElement.classList.remove('dark');
+          themeIcon.textContent = '☀️';
         } else {
-          const errorJson = await res.json().catch(() => ({}));
-          const detailedMsg = errorJson.error ? JSON.stringify(errorJson.error, null, 2) : `HTTP Status: ${res.status}`;
-          renderVerboseError(verseDisplay, `Gemini API HTTP ${res.status}`, detailedMsg);
-          return;
+          document.documentElement.classList.add('dark');
+          themeIcon.textContent = '🌙';
         }
-      } catch (e) {
-        renderVerboseError(verseDisplay, 'Fetch Network Exception', e.stack || e.message);
-        return;
-      }
-    }
 
-    function renderVerboseError(containerElement, errorTitle, errorDetails) {
-      offlineStatus.textContent = `API Error`;
-      offlineStatus.className = 'bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
-
-      containerElement.innerHTML = `
-        <div class="p-4 space-y-3 bg-rose-950/20 border border-rose-500/30 rounded-xl">
-          <div class="flex items-center gap-2 text-rose-400 font-bold text-xs">
-            <span>🚨</span>
-            <span>${errorTitle}</span>
-          </div>
-          <div class="text-[11px] font-mono text-rose-300/90 bg-slate-950/80 p-3 rounded-lg border border-rose-900/50 overflow-x-auto whitespace-pre-wrap select-text max-h-60">
-            ${errorDetails}
-          </div>
-          <p class="text-[10px] text-slate-400 italic">Check your API Key settings, model access, network connectivity, or quota parameters.</p>
-        </div>
-      `;
-    }
-
-    function renderVerses(verses) {
-      verseDisplay.innerHTML = verses.map(v => `
-        <p class="${fontScaleClasses[fontScaleIndex]} leading-relaxed text-slate-700 dark:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-900/50 p-1.5 rounded-lg transition-colors cursor-pointer" onclick="copyVerseText('${v.verse}', \`${v.text.replace(/'/g, "\\'")}\`)">
-          <sup class="text-[10px] font-extrabold text-sky-400 mr-1.5 select-none">${v.verse}</sup>
-          <span class="select-text">${v.text.trim()}</span>
-        </p>
-      `).join('');
-      updateFontDisplay();
-    }
-
-    function copyVerseText(num, text) {
-      const ref = `${bookSelect.value} ${chapterSelect.value}:${num}`;
-      navigator.clipboard.writeText(`"${text}" (${ref})`);
-      offlineStatus.textContent = `Copied ${ref}!`;
-      setTimeout(() => {
-        offlineStatus.textContent = `Ready`;
-      }, 2000);
-    }
-
-    loadBtn.addEventListener('click', fetchPassage);
-    verseRangeInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        dismissKeyboard();
-        fetchPassage();
-      }
-    });
-
-    function initCheckbookDatePicker() {
-      const today = new Date().toISOString().split('T')[0];
-      checkbookDatePicker.value = today;
-    }
-
-    async function loadCheckbookDevotion() {
-      if (!checkbookDatePicker.value) initCheckbookDatePicker();
-      
-      const dateVal = checkbookDatePicker.value;
-      const [year, month, day] = dateVal.split('-');
-      const monthDayKey = `${month}-${day}`;
-      const cacheKey = `spcache_${monthDayKey}`;
-
-      const selectedDate = new Date(`${dateVal}T00:00:00`);
-      const formattedDateStr = selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-
-      const cached = safeGetStorage(cacheKey);
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          renderCheckbookUI(formattedDateStr, parsed.title, parsed.scripture, parsed.verse, parsed.paragraphs);
-          return;
-        } catch (e) {}
-      }
-
-      checkbookDisplay.innerHTML = `
-        <div class="text-center py-10 space-y-3">
-          <div class="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p class="text-xs text-sky-400 font-bold">Loading Spurgeon's Checkbook for ${formattedDateStr}...</p>
-        </div>
-      `;
-
-      const fixedMonthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
-      const monthIndex = parseInt(month, 10) - 1;
-      const monthName = fixedMonthNames[monthIndex];
-      const dayNum = parseInt(day, 10);
-      const rawUrl = `https://raw.githubusercontent.com/lyteword/chspurgeon-fcb/main/${monthName}/${monthName}-${dayNum}.md`;
-
-      try {
-        const res = await fetch(rawUrl);
-        if (res.ok) {
-          const mdText = await res.text();
-          const parsedEntry = parseLyteWordMarkdown(mdText, formattedDateStr);
-          if (parsedEntry) {
-            safeSetStorage(cacheKey, JSON.stringify(parsedEntry));
-            renderCheckbookUI(formattedDateStr, parsedEntry.title, parsedEntry.scripture, parsedEntry.verse, parsedEntry.paragraphs);
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn("Failed to fetch from LyteWord repo, attempting fallback...", err);
-      }
-
-      const fallback = {
-        title: `Faith's Daily Promise for ${formattedDateStr}`,
-        scripture: "Proverbs 3:5-6",
-        verse: "Trust in the Lord with all thine heart; and lean not unto thine own understanding.",
-        paragraphs: [
-          `As you walk through ${formattedDateStr}, remember that the Lord holds your steps in His hands. His promises are sure and steadfast for every day of the year.`
-        ]
-      };
-      renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs);
-    }
-
-    function parseLyteWordMarkdown(md, defaultTitle) {
-      let cleanMd = md;
-      if (md.startsWith('---')) {
-        const parts = md.split('---');
-        if (parts.length >= 3) {
-          cleanMd = parts.slice(2).join('---').trim();
-        }
-      }
-
-      const lines = cleanMd.split('\n').map(l => l.trim()).filter(Boolean);
-      let title = defaultTitle;
-      let scripture = "Scripture Promise";
-      let verse = "";
-      let paragraphs = [];
-
-      for (let line of lines) {
-        if (line.startsWith('# ')) {
-          title = line.replace('# ', '').trim();
-        } else if (line.startsWith('## ')) {
-          scripture = line.replace('## ', '').trim();
-        } else if (line.startsWith('>') || (line.includes('—') && (line.startsWith('*') || line.startsWith('"')))) {
-          let bqText = line.replace(/^>\s*/, '').trim();
-          
-          const dashMatch = bqText.match(/(["'].*?["'])\s*[—–-]\s*(.*)$/) \vert{}\vert{} bqText.match(/(\*.*?\*)\s*[—–-]\s*(.*)$/);
-          if (dashMatch) {
-            verse = dashMatch[1].replace(/^["'*]+|["'*]+$/g, '').trim();
-            scripture = dashMatch[2].replace(/^["'*]+|["'*]+$/g, '').trim();
-          } else {
-            verse = bqText.replace(/^["'*]+|["'*]+$/g, '').trim();
-          }
-        } else if (!line.startsWith('*') && !line.startsWith('---')) {
-          paragraphs.push(line.replace(/\*\*/g, '').replace(/^\*|\*$/g, '').trim());
-        }
-      }
-
-      return { 
-        title: title || defaultTitle, 
-        scripture: scripture || "Scripture Promise", 
-        verse: verse || "Thy word is a lamp unto my feet.", 
-        paragraphs: paragraphs.length ? paragraphs : [cleanMd] 
-      };
-    }
-
-    function renderCheckbookUI(dateHeader, title, scripture, verse, content) {
-      let paragraphsHtml = '';
-      if (Array.isArray(content)) {
-        paragraphsHtml = content.map(p => `<p class="leading-relaxed select-text">${p}</p>`).join('');
-      } else if (typeof content === 'string') {
-        paragraphsHtml = `<p class="leading-relaxed select-text">${content}</p>`;
-      } else {
-        paragraphsHtml = `<p class="leading-relaxed text-slate-400">Content loading...</p>`;
-      }
-
-      checkbookDisplay.innerHTML = `
-        <div class="space-y-4">
-          <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-            <span class="text-xs font-extrabold text-sky-400 uppercase tracking-wider">${dateHeader} Promise</span>
-          </div>
-
-          <h3 class="text-base font-extrabold text-slate-100 select-text">${title}</h3>
-
-          <div class="space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider select-none">Scripture Promise</span>
-              <button id="copyCheckbookVerseBtn" class="text-[10px] font-bold bg-slate-800 hover:bg-sky-500 hover:text-white text-slate-200 px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 select-none">
-                <span>📋</span> Copy Verse
-              </button>
-            </div>
-            
-            <blockquote class="text-xs italic leading-relaxed text-slate-200 bg-sky-500/10 border-l-4 border-sky-500 p-3.5 rounded-r-xl select-text space-y-2">
-              <p>"${verse}"</p>
-              <p class="text-[11px] font-bold text-sky-400 not-italic select-text">— ${scripture}</p>
-            </blockquote>
-          </div>
-
-          <div class="space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider select-none">Spurgeon's Commentary</span>
-              <button id="copyCheckbookDevotionBtn" class="text-[10px] font-bold bg-slate-800 hover:bg-sky-500 hover:text-white text-slate-200 px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 select-none">
-                <span>📋</span> Copy Devotional
-              </button>
-            </div>
-
-            <div id="checkbookDevotionBody" class="text-xs text-slate-300 bg-slate-900 p-4 rounded-xl border border-slate-800 select-text space-y-3">
-              ${paragraphsHtml}
-            </div>
-          </div>
-        </div>
-      `;
-
-      document.getElementById('copyCheckbookVerseBtn').addEventListener('click', () => {
-        navigator.clipboard.writeText(`"${verse}" (${scripture})`);
-        const btn = document.getElementById('copyCheckbookVerseBtn');
-        btn.textContent = '✅ Copied Verse!';
-        setTimeout(() => {
-          btn.innerHTML = `<span>📋</span> Copy Verse`;
-        }, 2000);
-      });
-
-      document.getElementById('copyCheckbookDevotionBtn').addEventListener('click', () => {
-        const bodyText = document.getElementById('checkbookDevotionBody').innerText;
-        navigator.clipboard.writeText(bodyText);
-        const btn = document.getElementById('copyCheckbookDevotionBtn');
-        btn.textContent = '✅ Copied Devotional!';
-        setTimeout(() => {
-          btn.innerHTML = `<span>📋</span> Copy Devotional`;
-        }, 2000);
-      });
-    }
-
-    checkbookDatePicker.addEventListener('change', loadCheckbookDevotion);
-    checkbookTodayBtn.addEventListener('click', () => {
-      initCheckbookDatePicker();
-      loadCheckbookDevotion();
-    });
-
-    async function openCrossRefPopover(refText) {
-      popoverRefTitle.textContent = `Cross Reference: ${refText}`;
-      popoverRefContent.innerHTML = `<p class="text-slate-400 animate-pulse text-center py-6">Loading passage text...</p>`;
-      crossRefModal.classList.remove('hidden');
-
-      try {
-        const res = await fetch(`https://bible-api.com/${encodeURIComponent(refText)}?translation=kjv`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.verses) {
-            popoverRefContent.innerHTML = data.verses.map(v => `
-              <p class="select-text"><sup class="font-bold text-sky-400 mr-1">${v.verse}</sup>${v.text}</p>
-            `).join('');
-            return;
-          }
-        }
-      } catch (e) {}
-
-      popoverRefContent.innerHTML = `<p class="text-rose-400 text-center py-4">Unable to fetch passage for ${refText}.</p>`;
-    }
-
-    closeCrossRefModal.addEventListener('click', () => {
-      crossRefModal.classList.add('hidden');
-    });
-
-    function lookupStrongs(id) {
-      dismissKeyboard();
-      if (!id) return;
-      const cleanId = id.trim().toUpperCase();
-      const entry = LEXICON_DICT[cleanId] || {
-        strongs: cleanId,
-        word: 'Lexical Entry',
-        transliteration: cleanId,
-        language: cleanId.startsWith('G') ? 'Greek' : 'Hebrew',
-        partOfSpeech: 'Word Root',
-        definition: `Strong's definition entry for ${cleanId}.`,
-        usage: 'Grammatical and biblical context entry.'
-      };
-
-      lexiconResultCard.innerHTML = `
-        <div class="space-y-3">
-          <div class="flex justify-between items-start border-b border-slate-800 pb-2">
-            <div>
-              <span class="text-[10px] font-extrabold text-sky-400 uppercase tracking-wider">${entry.language} (${entry.strongs})</span>
-              <h3 class="text-xl font-bold text-slate-100 select-text">${entry.word}</h3>
-              <p class="text-xs italic text-slate-400 select-text">Transliteration: ${entry.transliteration}</p>
-            </div>
-            <span class="text-[10px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-1 rounded-lg select-none">${entry.partOfSpeech}</span>
-          </div>
-
-          <div>
-            <h4 class="text-xs font-bold text-slate-300 mb-1 select-none">Definition</h4>
-            <p class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-3 rounded-xl border border-slate-800 select-text">${entry.definition}</p>
-          </div>
-
-          <div>
-            <h4 class="text-xs font-bold text-slate-300 mb-1 select-none">Usage</h4>
-            <p class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-3 rounded-xl border border-slate-800 select-text">${entry.usage}</p>
-          </div>
-        </div>
-      `;
-    }
-
-    lexiconSearchBtn.addEventListener('click', () => lookupStrongs(strongsInput.value));
-    strongsInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') lookupStrongs(strongsInput.value);
-    });
-
-    document.querySelectorAll('.preset-tag').forEach(tag => {
-      tag.addEventListener('click', (e) => {
-        const id = e.target.getAttribute('data-strongs');
-        strongsInput.value = id;
-        lookupStrongs(id);
-      });
-    });
-
-    function getActiveApiKey() {
-      if (HARDCODED_API_KEY && HARDCODED_API_KEY.trim().length > 15) {
-        return HARDCODED_API_KEY.trim();
-      }
-      const savedKey = (safeGetStorage('gemini_key') || '').trim();
-      if (savedKey.length > 15) return savedKey;
-      return null;
-    }
-
-    function syncKeyStatusUI() {
-      if (HARDCODED_API_KEY && HARDCODED_API_KEY.trim().length > 15) {
-        apiKeyInput.value = "••••••••••••••••••••••••••••••••";
-        keyStatusText.textContent = "Hardcoded API Key active.";
-        keyStatusText.classList.remove("text-slate-400");
-        keyStatusText.classList.add("text-emerald-500");
-      } else if (safeGetStorage('gemini_key')) {
-        apiKeyInput.value = safeGetStorage('gemini_key');
-        keyStatusText.textContent = 'Key active & stored in browser.';
-        keyStatusText.classList.remove("text-slate-400");
-        keyStatusText.classList.add('text-emerald-500');
-      } else {
-        apiKeyInput.value = "";
-        keyStatusText.textContent = 'Stored locally on device.';
-        keyStatusText.classList.remove("text-emerald-500");
-        keyStatusText.classList.add('text-slate-400');
-      }
-    }
-
-    syncKeyStatusUI();
-
-    saveKeyBtn.addEventListener('click', () => {
-      dismissKeyboard();
-      const k = apiKeyInput.value.trim();
-      if (k) {
-        safeSetStorage('gemini_key', k);
-        syncKeyStatusUI();
-      }
-    });
-
-    clearCacheBtn.addEventListener('click', () => {
-      try {
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && (k.startsWith('bcache_') || k.startsWith('spcache_'))) {
-            keysToRemove.push(k);
-          }
-        }
-        keysToRemove.forEach(k => localStorage.removeItem(k));
-        alert(`Cleared ${keysToRemove.length} cached item(s).`);
-        loadCheckbookDevotion();
-      } catch (e) {
-        alert("Cache is already empty or access is restricted.");
-      }
-    });
-
-    let currentSpeechUtterance = null;
-
-    function speakText(text) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        currentSpeechUtterance = new SpeechSynthesisUtterance(text);
-        currentSpeechUtterance.rate = 0.95;
-        window.speechSynthesis.speak(currentSpeechUtterance);
-      }
-    }
-
-    generateAiBtn.addEventListener('click', async () => {
-      dismissKeyboard();
-      const key = getActiveApiKey();
-      if (!key) {
-        aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Please paste and save your Gemini API Key above first.</p>`;
-        return;
-      }
-
-      const passage = aiPassageInput.value.trim();
-      const translation = aiTranslationSelect.value;
-      const audience = aiAudienceSelect.value;
-      const compareTraditions = compareTraditionsToggle.checked;
-      const compareCalvinism = compareCalvinismToggle.checked;
-
-      aiResultsDisplay.innerHTML = renderAiInsightsSkeleton();
-
-      let promptText = `Provide a tailored study output for ${passage} (${translation}) targeting preset: ${audience}.`;
-      if (compareTraditions) promptText += ` Include comparisons across Traditional Protestant, Reformed, and Expository traditions.`;
-      if (compareCalvinism) promptText += ` Include explicit analysis comparing Calvinist vs. Arminian views.`;
-
-      const propertiesSchema = {
-        theologicalSummary: { type: "STRING" },
-        mainOutput: { type: "STRING" },
-        keyWords: {
-          type: "ARRAY",
-          items: {
-            type: "OBJECT",
-            properties: {
-              word: { type: "STRING" },
-              strongs: { type: "STRING" },
-              meaning: { type: "STRING" }
-            },
-            required: ["word", "strongs", "meaning"]
-          }
-        },
-        crossReferences: { type: "ARRAY", items: { type: "STRING" } }
-      };
-
-      const requiredFields = ["theologicalSummary", "mainOutput", "keyWords", "crossReferences"];
-
-      if (compareTraditions) {
-        propertiesSchema.traditionComparison = {
-          type: "OBJECT",
-          properties: {
-            traditionalProtestant: { type: "STRING" },
-            reformed: { type: "STRING" },
-            expository: { type: "STRING" }
-          },
-          required: ["traditionalProtestant", "reformed", "expository"]
-        };
-        requiredFields.push("traditionComparison");
-      }
-
-      if (compareCalvinism) {
-        propertiesSchema.calvinismVsArminianism = {
-          type: "OBJECT",
-          properties: {
-            calvinistView: { type: "STRING" },
-            arminianView: { type: "STRING" },
-            consensusOrDivergence: { type: "STRING" }
-          },
-          required: ["calvinistView", "arminianView", "consensusOrDivergence"]
-        };
-        requiredFields.push("calvinismVsArminianism");
-      }
-
-      const requestPayload = {
-        contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: { 
-          temperature: 0.7,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "OBJECT",
-            properties: propertiesSchema,
-            required: requiredFields
-          }
-        }
-      };
-
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`;
-
-      try {
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestPayload)
+        themeToggle.addEventListener('click', () => {
+          const isDark = document.documentElement.classList.toggle('dark');
+          safeSetStorage('app_theme', isDark ? 'dark' : 'light');
+          themeIcon.textContent = isDark ? '🌙' : '☀️';
         });
 
-        if (res.ok) {
-          const successData = await res.json();
-          const rawText = successData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-          const data = JSON.parse(rawText);
+        // Reader Functions
+        function updateFontDisplay() {
+          const percentages = ['87%', '100%', '112%', '125%'];
+          fontSizeDisplay.textContent = percentages[fontScaleIndex];
+          const verses = verseDisplay.querySelectorAll('p');
+          verses.forEach(p => {
+            fontScaleClasses.forEach(c => p.classList.remove(c));
+            p.classList.add(fontScaleClasses[fontScaleIndex]);
+          });
+        }
 
-          aiResultsDisplay.innerHTML = `
+        fontDecBtn.addEventListener('click', () => {
+          if (fontScaleIndex > 0) { fontScaleIndex--; updateFontDisplay(); }
+        });
+
+        fontIncBtn.addEventListener('click', () => {
+          if (fontScaleIndex < fontScaleClasses.length - 1) { fontScaleIndex++; updateFontDisplay(); }
+        });
+
+        function populateBooks() {
+          const selectedTestament = testamentSelect.value || 'NT';
+          const books = BIBLE_BOOKS[selectedTestament];
+          
+          bookSelect.innerHTML = '';
+          books.forEach(book => {
+            const opt = document.createElement('option');
+            opt.value = book;
+            opt.textContent = book;
+            if (selectedTestament === 'NT' && book === 'Romans') opt.selected = true;
+            bookSelect.appendChild(opt);
+          });
+          populateChapters();
+        }
+
+        function populateChapters() {
+          const selectedBook = bookSelect.value || 'Romans';
+          const totalChapters = CHAPTER_COUNTS[selectedBook] || 1;
+
+          chapterSelect.innerHTML = '';
+          for (let c = 1; c <= totalChapters; c++) {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = `Ch ${c}`;
+            if (c === 1) opt.selected = true;
+            chapterSelect.appendChild(opt);
+          }
+        }
+
+        testamentSelect.addEventListener('change', populateBooks);
+        bookSelect.addEventListener('change', populateChapters);
+
+        function switchView(targetView, targetBtn) {
+          dismissKeyboard();
+          readView.classList.add('hidden');
+          aiView.classList.add('hidden');
+          checkbookView.classList.add('hidden');
+          lexiconView.classList.add('hidden');
+
+          const inactiveClass = "flex flex-col items-center gap-1 text-slate-400 font-bold transition-all cursor-pointer";
+          navReadBtn.className = inactiveClass;
+          navAiBtn.className = inactiveClass;
+          navCheckbookBtn.className = inactiveClass;
+          navLexiconBtn.className = inactiveClass;
+
+          targetView.classList.remove('hidden');
+          targetBtn.className = "flex flex-col items-center gap-1 text-sky-400 font-bold transition-all cursor-pointer";
+        }
+
+        navReadBtn.addEventListener('click', () => switchView(readView, navReadBtn));
+        navAiBtn.addEventListener('click', () => switchView(aiView, navAiBtn));
+        navCheckbookBtn.addEventListener('click', () => {
+          switchView(checkbookView, navCheckbookBtn);
+          loadCheckbookDevotion();
+        });
+        navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
+
+        syncReaderBtn.addEventListener('click', () => {
+          const currentBook = bookSelect.value || 'Romans';
+          const currentChapter = chapterSelect.value || '1';
+          const verses = verseRangeInput.value.trim();
+          aiPassageInput.value = verses ? `${currentBook} ${currentChapter}:${verses}` : `${currentBook} ${currentChapter}`;
+        });
+
+        function copyVerseText(num, text) {
+          const ref = `${bookSelect.value} ${chapterSelect.value}:${num}`;
+          navigator.clipboard.writeText(`"${text}" (${ref})`);
+          offlineStatus.textContent = `Copied ${ref}!`;
+          setTimeout(() => { offlineStatus.textContent = `Ready`; }, 2000);
+        }
+
+        // Safe robust rendering method (replaces brittle innerHTML strings)
+        function renderVerses(verses) {
+          verseDisplay.innerHTML = ''; // clear skeleton
+          verses.forEach(v => {
+            const p = document.createElement('p');
+            p.className = `${fontScaleClasses[fontScaleIndex]} leading-relaxed text-slate-700 dark:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-900/50 p-1.5 rounded-lg transition-colors cursor-pointer`;
+            
+            const sup = document.createElement('sup');
+            sup.className = 'text-[10px] font-extrabold text-sky-400 mr-1.5 select-none';
+            sup.textContent = v.verse;
+            
+            const span = document.createElement('span');
+            span.className = 'select-text';
+            span.textContent = v.text.trim();
+            
+            p.appendChild(sup);
+            p.appendChild(span);
+            p.addEventListener('click', () => copyVerseText(v.verse, v.text.trim()));
+            verseDisplay.appendChild(p);
+          });
+          updateFontDisplay();
+        }
+
+        function renderVerboseError(containerElement, errorTitle, errorDetails) {
+          offlineStatus.textContent = `API Error`;
+          offlineStatus.className = 'bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
+          containerElement.innerHTML = `
+            <div class="p-4 space-y-3 bg-rose-950/20 border border-rose-500/30 rounded-xl">
+              <div class="flex items-center gap-2 text-rose-400 font-bold text-xs"><span>🚨</span><span>${errorTitle}</span></div>
+              <div class="text-[11px] font-mono text-rose-300/90 bg-slate-950/80 p-3 rounded-lg border border-rose-900/50 overflow-x-auto whitespace-pre-wrap select-text max-h-60">${errorDetails}</div>
+              <p class="text-[10px] text-slate-400 italic">Check your API Key settings, model access, network connectivity, or quota parameters.</p>
+            </div>
+          `;
+        }
+
+        async function fetchPassage() {
+          dismissKeyboard();
+          const book = bookSelect.value || 'Romans';
+          const chapter = parseInt(chapterSelect.value || '1', 10);
+          const versesInput = verseRangeInput.value.trim();
+          const selectedTranslation = readTranslationSelect.value || 'KJV';
+
+          const passageQuery = versesInput ? `${book} ${chapter}:${versesInput}` : `${book} ${chapter}`;
+          const cacheKey = `bcache_${selectedTranslation}_${book}_${chapter}_${versesInput || 'all'}`;
+
+          passageTitle.textContent = `${passageQuery} (${selectedTranslation})`;
+          const cachedData = safeGetStorage(cacheKey);
+
+          if (cachedData) {
+            try {
+              const parsed = JSON.parse(cachedData);
+              if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+                renderVerses(parsed);
+                offlineStatus.textContent = `${selectedTranslation} Cached ⚡`;
+                offlineStatus.className = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
+                return;
+              }
+            } catch (e) { safeRemoveStorage(cacheKey); }
+          }
+
+          verseDisplay.innerHTML = renderReaderSkeleton();
+
+          if (selectedTranslation === 'KJV') {
+            try {
+              const res = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}?translation=kjv`);
+              if (res.ok) {
+                const data = await res.json();
+                if (data && data.verses && data.verses.length > 0) {
+                  renderVerses(data.verses);
+                  safeSetStorage(cacheKey, JSON.stringify(data.verses));
+                  offlineStatus.textContent = `KJV Active`;
+                  offlineStatus.className = 'bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
+                  return;
+                }
+              } else {
+                renderVerboseError(verseDisplay, `Bible API (KJV) HTTP ${res.status}`, await res.text());
+                return;
+              }
+            } catch (e) {
+              renderVerboseError(verseDisplay, 'Bible API Network Exception', e.stack || e.message);
+              return;
+            }
+          }
+
+          const key = getActiveApiKey();
+          if (!key) {
+            offlineStatus.textContent = `Key Missing`;
+            offlineStatus.className = 'bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
+            verseDisplay.innerHTML = `<div class="text-center py-8 space-y-2"><p class="text-xs text-rose-500 font-bold">Gemini API Key Required for ${selectedTranslation}</p><p class="text-[11px] text-slate-400">Save your free Gemini API Key in the AI Insights tab to render ${selectedTranslation} passages.</p></div>`;
+            return;
+          }
+
+          const requestPayload = {
+            contents: [{ parts: [{ text: `Provide the complete verse text for ${passageQuery} in ${selectedTranslation}.` }] }],
+            generationConfig: { 
+              temperature: 0.1, responseMimeType: "application/json",
+              responseSchema: {
+                type: "OBJECT", required: ["verses"],
+                properties: { verses: { type: "ARRAY", items: { type: "OBJECT", required: ["verse", "text"], properties: { verse: { type: "INTEGER" }, text: { type: "STRING" } } } } }
+              }
+            }
+          };
+
+          try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestPayload)
+            });
+
+            if (res.ok) {
+              const successData = await res.json();
+              const rawText = successData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+              const parsed = JSON.parse(rawText);
+              
+              if (parsed && parsed.verses && parsed.verses.length > 0) {
+                renderVerses(parsed.verses);
+                safeSetStorage(cacheKey, JSON.stringify(parsed.verses));
+                offlineStatus.textContent = `${selectedTranslation} Gemini Active`;
+                offlineStatus.className = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
+              } else {
+                renderVerboseError(verseDisplay, 'Gemini Response Structure Invalid', `Raw Response:\n${JSON.stringify(successData, null, 2)}`);
+              }
+            } else {
+              const errorJson = await res.json().catch(() => ({}));
+              renderVerboseError(verseDisplay, `Gemini API HTTP ${res.status}`, errorJson.error ? JSON.stringify(errorJson.error, null, 2) : `HTTP Status: ${res.status}`);
+            }
+          } catch (e) {
+            renderVerboseError(verseDisplay, 'Fetch Network Exception', e.stack || e.message);
+          }
+        }
+
+        loadBtn.addEventListener('click', fetchPassage);
+        verseRangeInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { dismissKeyboard(); fetchPassage(); }
+        });
+
+        // Checkbook Functions
+        function initCheckbookDatePicker() {
+          const today = new Date().toISOString().split('T')[0];
+          checkbookDatePicker.value = today;
+        }
+
+        async function loadCheckbookDevotion() {
+          if (!checkbookDatePicker.value) initCheckbookDatePicker();
+          
+          const dateVal = checkbookDatePicker.value;
+          const [year, month, day] = dateVal.split('-');
+          const cacheKey = `spcache_${month}-${day}`;
+          const formattedDateStr = new Date(`${dateVal}T00:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+
+          const cached = safeGetStorage(cacheKey);
+          if (cached) {
+            try {
+              const parsed = JSON.parse(cached);
+              renderCheckbookUI(formattedDateStr, parsed.title, parsed.scripture, parsed.verse, parsed.paragraphs);
+              return;
+            } catch (e) {}
+          }
+
+          checkbookDisplay.innerHTML = `<div class="text-center py-10 space-y-3"><div class="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div><p class="text-xs text-sky-400 font-bold">Loading Spurgeon's Checkbook for ${formattedDateStr}...</p></div>`;
+
+          const fixedMonthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+          const monthName = fixedMonthNames[parseInt(month, 10) - 1];
+          const rawUrl = `https://raw.githubusercontent.com/lyteword/chspurgeon-fcb/main/${monthName}/${monthName}-${parseInt(day, 10)}.md`;
+
+          try {
+            const res = await fetch(rawUrl);
+            if (res.ok) {
+              const mdText = await res.text();
+              const parsedEntry = parseLyteWordMarkdown(mdText, formattedDateStr);
+              if (parsedEntry) {
+                safeSetStorage(cacheKey, JSON.stringify(parsedEntry));
+                renderCheckbookUI(formattedDateStr, parsedEntry.title, parsedEntry.scripture, parsedEntry.verse, parsedEntry.paragraphs);
+                return;
+              }
+            }
+          } catch (err) {}
+
+          const fallback = {
+            title: `Faith's Daily Promise for ${formattedDateStr}`, scripture: "Proverbs 3:5-6",
+            verse: "Trust in the Lord with all thine heart; and lean not unto thine own understanding.",
+            paragraphs: [`As you walk through ${formattedDateStr}, remember that the Lord holds your steps in His hands.`]
+          };
+          renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs);
+        }
+
+        function parseLyteWordMarkdown(md, defaultTitle) {
+          let cleanMd = md;
+          if (md.startsWith('---')) {
+            const parts = md.split('---');
+            if (parts.length >= 3) cleanMd = parts.slice(2).join('---').trim();
+          }
+          const lines = cleanMd.split('\n').map(l => l.trim()).filter(Boolean);
+          let title = defaultTitle, scripture = "Scripture Promise", verse = "", paragraphs = [];
+
+          for (let line of lines) {
+            if (line.startsWith('# ')) title = line.replace('# ', '').trim();
+            else if (line.startsWith('## ')) scripture = line.replace('## ', '').trim();
+            else if (line.startsWith('>') || (line.includes('—') && (line.startsWith('*') || line.startsWith('"')))) {
+              let bqText = line.replace(/^>\s*/, '').trim();
+              const dashMatch = bqText.match(/(["'].*?["'])\s*[—–-]\s*(.*)$/) \vert{}\vert{} bqText.match(/(\*.*?\*)\s*[—–-]\s*(.*)$/);
+              if (dashMatch) {
+                verse = dashMatch[1].replace(/^["'*]+|["'*]+$/g, '').trim();
+                scripture = dashMatch[2].replace(/^["'*]+|["'*]+$/g, '').trim();
+              } else verse = bqText.replace(/^["'*]+|["'*]+$/g, '').trim();
+            } else if (!line.startsWith('*') && !line.startsWith('---')) {
+              paragraphs.push(line.replace(/\*\*/g, '').replace(/^\*|\*$/g, '').trim());
+            }
+          }
+          return { title, scripture, verse: verse || "Thy word is a lamp unto my feet.", paragraphs: paragraphs.length ? paragraphs : [cleanMd] };
+        }
+
+        function renderCheckbookUI(dateHeader, title, scripture, verse, content) {
+          let paragraphsHtml = Array.isArray(content) ? content.map(p => `<p class="leading-relaxed select-text">${p}</p>`).join('') : `<p class="leading-relaxed select-text">${content}</p>`;
+          
+          checkbookDisplay.innerHTML = `
             <div class="space-y-4">
-              <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <span class="text-xs font-bold text-slate-400">Target: ${passage} (${translation})</span>
-                <button id="ttsListenBtn" class="bg-sky-500/10 text-sky-400 border border-sky-500/20 px-3 py-1 rounded-lg text-xs font-bold active:scale-95 transition-all cursor-pointer flex items-center gap-1">
-                  🔊 Listen to Devotional
-                </button>
+              <div class="flex justify-between items-center border-b border-slate-800 pb-2"><span class="text-xs font-extrabold text-sky-400 uppercase tracking-wider">${dateHeader} Promise</span></div>
+              <h3 class="text-base font-extrabold text-slate-100 select-text">${title}</h3>
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider select-none">Scripture Promise</span>
+                  <button id="copyCheckbookVerseBtn" class="text-[10px] font-bold bg-slate-800 hover:bg-sky-500 hover:text-white text-slate-200 px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 select-none"><span>📋</span> Copy Verse</button>
+                </div>
+                <blockquote class="text-xs italic leading-relaxed text-slate-200 bg-sky-500/10 border-l-4 border-sky-500 p-3.5 rounded-r-xl select-text space-y-2"><p>"${verse}"</p><p class="text-[11px] font-bold text-sky-400 not-italic select-text">— ${scripture}</p></blockquote>
               </div>
-
-              <div>
-                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-1 select-none">Overview</h3>
-                <p class="text-xs leading-relaxed text-slate-200 bg-sky-500/10 border border-sky-500/20 p-3 rounded-xl font-medium select-text">${data.theologicalSummary}</p>
-              </div>
-
-              <div>
-                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">${audience} Content</h3>
-                <div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-3.5 rounded-xl border border-slate-800 whitespace-pre-wrap select-text">
-                  ${data.mainOutput}
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider select-none">Spurgeon's Commentary</span>
+                  <button id="copyCheckbookDevotionBtn" class="text-[10px] font-bold bg-slate-800 hover:bg-sky-500 hover:text-white text-slate-200 px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 select-none"><span>📋</span> Copy Devotional</button>
                 </div>
-              </div>
-
-              ${data.keyWords && data.keyWords.length > 0 ? `
-                <div>
-                  <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🔑 Key Word Breakdown (Lexicon)</h3>
-                  <div class="flex flex-wrap gap-2">
-                    ${data.keyWords.map(kw => `
-                      <button class="keyword-pill text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded-xl cursor-pointer hover:bg-indigo-500/20" data-strongs="${kw.strongs}">
-                        ${kw.word} (${kw.strongs}) - <span class="font-normal italic">${kw.meaning}</span>
-                      </button>
-                    `).join('')}
-                  </div>
-                </div>
-              ` : ''}
-
-              ${data.traditionComparison ? `
-                <div class="p-3 bg-purple-950/20 border border-purple-500/30 rounded-xl space-y-2">
-                  <h3 class="text-xs font-extrabold uppercase tracking-wider text-purple-400 select-none">🏛️ Tradition Comparison</h3>
-                  <div class="text-xs space-y-1.5 text-slate-200">
-                    <p><strong>Traditional Protestant:</strong> ${data.traditionComparison.traditionalProtestant}</p>
-                    <p><strong>Reformed:</strong> ${data.traditionComparison.reformed}</p>
-                    <p><strong>Expository:</strong> ${data.traditionComparison.expository}</p>
-                  </div>
-                </div>
-              ` : ''}
-
-              ${data.calvinismVsArminianism ? `
-                <div class="p-3 bg-indigo-950/20 border border-indigo-500/30 rounded-xl space-y-2">
-                  <h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-400 select-none">⚖️ Calvinist vs. Arminian Analysis</h3>
-                  <div class="text-xs space-y-1.5 text-slate-200">
-                    <p><strong>Calvinist View:</strong> ${data.calvinistView || data.calvinismVsArminianism.calvinistView}</p>
-                    <p><strong>Arminian View:</strong> ${data.arminianView || data.calvinismVsArminianism.arminianView}</p>
-                    <p class="italic text-slate-400"><strong>Summary:</strong> ${data.consensusOrDivergence || data.calvinismVsArminianism.consensusOrDivergence}</p>
-                  </div>
-                </div>
-              ` : ''}
-
-              <div>
-                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🔗 Interactive Cross-References</h3>
-                <div class="flex flex-wrap gap-1.5">
-                  ${data.crossReferences.map(ref => `
-                    <button class="crossref-pill text-xs font-mono bg-slate-900 text-sky-400 border border-slate-800 px-2.5 py-1 rounded-lg cursor-pointer hover:bg-slate-800">
-                      📍 ${ref}
-                    </button>
-                  `).join('')}
-                </div>
+                <div id="checkbookDevotionBody" class="text-xs text-slate-300 bg-slate-900 p-4 rounded-xl border border-slate-800 select-text space-y-3">${paragraphsHtml}</div>
               </div>
             </div>
           `;
 
-          document.getElementById('ttsListenBtn').addEventListener('click', () => {
-            speakText(`${data.theologicalSummary}. ${data.mainOutput}`);
+          document.getElementById('copyCheckbookVerseBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(`"${verse}" (${scripture})`);
+            const btn = document.getElementById('copyCheckbookVerseBtn');
+            btn.textContent = '✅ Copied Verse!';
+            setTimeout(() => { btn.innerHTML = `<span>📋</span> Copy Verse`; }, 2000);
           });
 
-          document.querySelectorAll('.crossref-pill').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-              const ref = e.target.textContent.replace('📍', '').trim();
-              openCrossRefPopover(ref);
-            });
+          document.getElementById('copyCheckbookDevotionBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(document.getElementById('checkbookDevotionBody').innerText);
+            const btn = document.getElementById('copyCheckbookDevotionBtn');
+            btn.textContent = '✅ Copied Devotional!';
+            setTimeout(() => { btn.innerHTML = `<span>📋</span> Copy Devotional`; }, 2000);
           });
-
-          document.querySelectorAll('.keyword-pill').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-              const strongs = btn.getAttribute('data-strongs');
-              switchView(lexiconView, navLexiconBtn);
-              strongsInput.value = strongs;
-              lookupStrongs(strongs);
-            });
-          });
-
-          return;
-        } else {
-          const errorJson = await res.json().catch(() => ({}));
-          const detailedMsg = errorJson.error ? JSON.stringify(errorJson.error, null, 2) : `HTTP Status: ${res.status}`;
-          renderVerboseError(aiResultsDisplay, `Gemini API HTTP ${res.status}`, detailedMsg);
-          return;
         }
-      } catch (e) {
-        renderVerboseError(aiResultsDisplay, 'Generate Insights Network Exception', e.stack || e.message);
-        return;
-      }
-    });
 
-    // Boot App safely using Document Context
-    function initApp() {
-      populateBooks();
-      fetchPassage();
-      initCheckbookDatePicker();
-    }
-    
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initApp);
-    } else {
-      initApp();
-    }
+        checkbookDatePicker.addEventListener('change', loadCheckbookDevotion);
+        checkbookTodayBtn.addEventListener('click', () => { initCheckbookDatePicker(); loadCheckbookDevotion(); });
+
+        // Lexicon & Crossref Functions
+        async function openCrossRefPopover(refText) {
+          popoverRefTitle.textContent = `Cross Reference: ${refText}`;
+          popoverRefContent.innerHTML = `<p class="text-slate-400 animate-pulse text-center py-6">Loading passage text...</p>`;
+          crossRefModal.classList.remove('hidden');
+
+          try {
+            const res = await fetch(`https://bible-api.com/${encodeURIComponent(refText)}?translation=kjv`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.verses) {
+                popoverRefContent.innerHTML = data.verses.map(v => `<p class="select-text"><sup class="font-bold text-sky-400 mr-1">${v.verse}</sup>${v.text}</p>`).join('');
+                return;
+              }
+            }
+          } catch (e) {}
+          popoverRefContent.innerHTML = `<p class="text-rose-400 text-center py-4">Unable to fetch passage for ${refText}.</p>`;
+        }
+
+        closeCrossRefModal.addEventListener('click', () => crossRefModal.classList.add('hidden'));
+
+        function lookupStrongs(id) {
+          dismissKeyboard();
+          if (!id) return;
+          const cleanId = id.trim().toUpperCase();
+          const entry = LEXICON_DICT[cleanId] || { strongs: cleanId, word: 'Lexical Entry', transliteration: cleanId, language: cleanId.startsWith('G') ? 'Greek' : 'Hebrew', partOfSpeech: 'Word Root', definition: `Strong's definition entry for ${cleanId}.`, usage: 'Grammatical and biblical context entry.' };
+
+          lexiconResultCard.innerHTML = `
+            <div class="space-y-3">
+              <div class="flex justify-between items-start border-b border-slate-800 pb-2">
+                <div><span class="text-[10px] font-extrabold text-sky-400 uppercase tracking-wider">${entry.language} (${entry.strongs})</span><h3 class="text-xl font-bold text-slate-100 select-text">${entry.word}</h3><p class="text-xs italic text-slate-400 select-text">Transliteration: ${entry.transliteration}</p></div>
+                <span class="text-[10px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-1 rounded-lg select-none">${entry.partOfSpeech}</span>
+              </div>
+              <div><h4 class="text-xs font-bold text-slate-300 mb-1 select-none">Definition</h4><p class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-3 rounded-xl border border-slate-800 select-text">${entry.definition}</p></div>
+              <div><h4 class="text-xs font-bold text-slate-300 mb-1 select-none">Usage</h4><p class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-3 rounded-xl border border-slate-800 select-text">${entry.usage}</p></div>
+            </div>
+          `;
+        }
+
+        lexiconSearchBtn.addEventListener('click', () => lookupStrongs(strongsInput.value));
+        strongsInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') lookupStrongs(strongsInput.value); });
+        
+        document.querySelectorAll('.preset-tag').forEach(tag => {
+          tag.addEventListener('click', (e) => {
+            const id = e.target.getAttribute('data-strongs');
+            strongsInput.value = id;
+            lookupStrongs(id);
+          });
+        });
+
+        // AI Key Management
+        function getActiveApiKey() {
+          if (HARDCODED_API_KEY && HARDCODED_API_KEY.trim().length > 15) return HARDCODED_API_KEY.trim();
+          const savedKey = (safeGetStorage('gemini_key') || '').trim();
+          if (savedKey.length > 15) return savedKey;
+          return null;
+        }
+
+        function syncKeyStatusUI() {
+          if (HARDCODED_API_KEY && HARDCODED_API_KEY.trim().length > 15) {
+            apiKeyInput.value = "••••••••••••••••••••••••••••••••";
+            keyStatusText.textContent = "Hardcoded API Key active.";
+            keyStatusText.classList.remove("text-slate-400");
+            keyStatusText.classList.add("text-emerald-500");
+          } else if (safeGetStorage('gemini_key')) {
+            apiKeyInput.value = safeGetStorage('gemini_key');
+            keyStatusText.textContent = 'Key active & stored in browser.';
+            keyStatusText.classList.remove("text-slate-400");
+            keyStatusText.classList.add('text-emerald-500');
+          } else {
+            apiKeyInput.value = "";
+            keyStatusText.textContent = 'Stored locally on device.';
+            keyStatusText.classList.remove("text-emerald-500");
+            keyStatusText.classList.add('text-slate-400');
+          }
+        }
+
+        syncKeyStatusUI();
+        saveKeyBtn.addEventListener('click', () => {
+          dismissKeyboard();
+          if (apiKeyInput.value.trim()) { safeSetStorage('gemini_key', apiKeyInput.value.trim()); syncKeyStatusUI(); }
+        });
+
+        clearCacheBtn.addEventListener('click', () => {
+          try {
+            const keysToRemove = [];
+            for (let i = 0; i < window.localStorage.length; i++) {
+              const k = window.localStorage.key(i);
+              if (k && (k.startsWith('bcache_') || k.startsWith('spcache_'))) keysToRemove.push(k);
+            }
+            keysToRemove.forEach(k => window.localStorage.removeItem(k));
+            alert(`Cleared ${keysToRemove.length} cached item(s).`);
+            loadCheckbookDevotion();
+          } catch (e) { alert("Cache is already empty or access is restricted."); }
+        });
+
+        // Generate AI Output
+        generateAiBtn.addEventListener('click', async () => {
+          dismissKeyboard();
+          const key = getActiveApiKey();
+          if (!key) {
+            aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Please paste and save your Gemini API Key above first.</p>`;
+            return;
+          }
+
+          aiResultsDisplay.innerHTML = renderAiInsightsSkeleton();
+
+          let promptText = `Provide a tailored study output for ${aiPassageInput.value.trim()} (${aiTranslationSelect.value}) targeting preset: ${aiAudienceSelect.value}.`;
+          if (compareTraditionsToggle.checked) promptText += ` Include comparisons across Traditional Protestant, Reformed, and Expository traditions.`;
+          if (compareCalvinismToggle.checked) promptText += ` Include explicit analysis comparing Calvinist vs. Arminian views.`;
+
+          const propertiesSchema = {
+            theologicalSummary: { type: "STRING" }, mainOutput: { type: "STRING" }, crossReferences: { type: "ARRAY", items: { type: "STRING" } },
+            keyWords: { type: "ARRAY", items: { type: "OBJECT", required: ["word", "strongs", "meaning"], properties: { word: { type: "STRING" }, strongs: { type: "STRING" }, meaning: { type: "STRING" } } } }
+          };
+          const requiredFields = ["theologicalSummary", "mainOutput", "keyWords", "crossReferences"];
+
+          if (compareTraditionsToggle.checked) {
+            propertiesSchema.traditionComparison = { type: "OBJECT", required: ["traditionalProtestant", "reformed", "expository"], properties: { traditionalProtestant: { type: "STRING" }, reformed: { type: "STRING" }, expository: { type: "STRING" } } };
+            requiredFields.push("traditionComparison");
+          }
+
+          if (compareCalvinismToggle.checked) {
+            propertiesSchema.calvinismVsArminianism = { type: "OBJECT", required: ["calvinistView", "arminianView", "consensusOrDivergence"], properties: { calvinistView: { type: "STRING" }, arminianView: { type: "STRING" }, consensusOrDivergence: { type: "STRING" } } };
+            requiredFields.push("calvinismVsArminianism");
+          }
+
+          try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }], generationConfig: { temperature: 0.7, responseMimeType: "application/json", responseSchema: { type: "OBJECT", properties: propertiesSchema, required: requiredFields } } })
+            });
+
+            if (res.ok) {
+              const successData = await res.json();
+              const data = JSON.parse(successData.candidates?.[0]?.content?.parts?.[0]?.text || '{}');
+
+              aiResultsDisplay.innerHTML = `
+                <div class="space-y-4">
+                  <div class="flex justify-between items-center border-b border-slate-800 pb-2"><span class="text-xs font-bold text-slate-400">Target: ${aiPassageInput.value} (${aiTranslationSelect.value})</span><button id="ttsListenBtn" class="bg-sky-500/10 text-sky-400 border border-sky-500/20 px-3 py-1 rounded-lg text-xs font-bold active:scale-95 transition-all cursor-pointer flex items-center gap-1">🔊 Listen</button></div>
+                  <div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-1 select-none">Overview</h3><p class="text-xs leading-relaxed text-slate-200 bg-sky-500/10 border border-sky-500/20 p-3 rounded-xl font-medium select-text">${data.theologicalSummary}</p></div>
+                  <div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">${aiAudienceSelect.value} Content</h3><div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-3.5 rounded-xl border border-slate-800 whitespace-pre-wrap select-text">${data.mainOutput}</div></div>
+                  ${data.keyWords?.length ? `<div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🔑 Key Word Breakdown</h3><div class="flex flex-wrap gap-2">${data.keyWords.map(kw => `<button class="keyword-pill text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded-xl cursor-pointer hover:bg-indigo-500/20" data-strongs="${kw.strongs}">${kw.word} (${kw.strongs}) - <span class="font-normal italic">${kw.meaning}</span></button>`).join('')}</div></div>` : ''}
+                  ${data.traditionComparison ? `<div class="p-3 bg-purple-950/20 border border-purple-500/30 rounded-xl space-y-2"><h3 class="text-xs font-extrabold uppercase tracking-wider text-purple-400 select-none">🏛️ Tradition Comparison</h3><div class="text-xs space-y-1.5 text-slate-200"><p><strong>Traditional Protestant:</strong> ${data.traditionComparison.traditionalProtestant}</p><p><strong>Reformed:</strong> ${data.traditionComparison.reformed}</p><p><strong>Expository:</strong>${data.traditionComparison.expository}</p></div></div>` : ''}
+                  ${data.calvinismVsArminianism ? `<div class="p-3 bg-indigo-950/20 border border-indigo-500/30 rounded-xl space-y-2"><h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-400 select-none">⚖️ Calvinist vs. Arminian Analysis</h3><div class="text-xs space-y-1.5 text-slate-200"><p><strong>Calvinist View:</strong> ${data.calvinistView \vert{}\vert{} data.calvinismVsArminianism.calvinistView}</p><p><strong>Arminian View:</strong>${data.arminianView || data.calvinismVsArminianism.arminianView}</p><p class="italic text-slate-400"><strong>Summary:</strong> ${data.consensusOrDivergence || data.calvinismVsArminianism.consensusOrDivergence}</p></div></div>` : ''}
+                  <div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🔗 Cross-References</h3><div class="flex flex-wrap gap-1.5">${data.crossReferences.map(ref => `<button class="crossref-pill text-xs font-mono bg-slate-900 text-sky-400 border border-slate-800 px-2.5 py-1 rounded-lg cursor-pointer hover:bg-slate-800">📍 ${ref}</button>`).join('')}</div></div>
+                </div>
+              `;
+              document.getElementById('ttsListenBtn').addEventListener('click', () => speakText(`${data.theologicalSummary}. ${data.mainOutput}`));
+              document.querySelectorAll('.crossref-pill').forEach(btn => btn.addEventListener('click', e => openCrossRefPopover(e.target.textContent.replace('📍', '').trim())));
+              document.querySelectorAll('.keyword-pill').forEach(btn => btn.addEventListener('click', () => {
+                const strongs = btn.getAttribute('data-strongs');
+                switchView(lexiconView, navLexiconBtn); strongsInput.value = strongs; lookupStrongs(strongs);
+              }));
+            } else {
+              renderVerboseError(aiResultsDisplay, `Gemini API HTTP ${res.status}`, await res.text());
+            }
+          } catch (e) { renderVerboseError(aiResultsDisplay, 'Generate Insights Error', e.stack || e.message); }
+        });
+
+        // ----------------------------------------------------
+        // EXECUTE INITIALIZATION (Safe to run now)
+        // ----------------------------------------------------
+        populateBooks();
+        fetchPassage();
+        initCheckbookDatePicker();
+      }
+
+      // Safe DOM Bootloader
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootstrapApp);
+      } else {
+        bootstrapApp(); // DOM already loaded (e.g. async/hot-reload)
+      }
+    })();
   </script>
 </body>
 </html>
