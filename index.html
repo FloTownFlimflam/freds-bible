@@ -246,7 +246,7 @@
     <div id="lexiconView" class="space-y-4 hidden">
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
-          <span>🏛️</span> Greek & Hebrew Lexicon
+          <span>🏛️️</span> Greek & Hebrew Lexicon
         </h2>
         <div class="flex gap-2">
           <input id="strongsInput" type="text" enterkeyhint="search" placeholder="e.g. G3056 or H7225..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
@@ -482,20 +482,14 @@
         return;
       }
 
-      const promptText = `Provide the exact biblical verse text for ${passageRef} in the ${selectedTranslation} translation.
-Return ONLY a valid JSON object with key "verses" containing an array of objects with "verse" (number) and "text" (string):
-{
-  "verses": [
-    { "verse": 1, "text": "Verse text here..." }
-  ]
-}`;
+      const promptText = `Provide the complete verse text for ${passageRef} in ${selectedTranslation}.
+Return ONLY a JSON object formatted as {"verses":[{"verse":1,"text":"..."}]}.`;
 
       const requestPayload = {
         contents: [{ parts: [{ text: promptText }] }],
         generationConfig: { temperature: 0.1 }
       };
 
-      // Model endpoints updated explicitly to gemini-3.8-flash as requested by API error message
       const modelEndpoints = [
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`,
         `https://generativelanguage.googleapis.com/v1/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`
@@ -505,7 +499,8 @@ Return ONLY a valid JSON object with key "verses" containing an array of objects
 
       for (const endpoint of modelEndpoints) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        // Extended timeout to 18 seconds to accommodate multi-verse generating delay
+        const timeoutId = setTimeout(() => controller.abort(), 18000);
 
         try {
           const res = await fetch(endpoint, {
@@ -534,7 +529,7 @@ Return ONLY a valid JSON object with key "verses" containing an array of objects
           }
         } catch (e) {
           clearTimeout(timeoutId);
-          lastErrorDetail = e.name === 'AbortError' ? 'Request timed out (8s)' : e.message;
+          lastErrorDetail = e.name === 'AbortError' ? 'Request timed out (18s)' : e.message;
         }
       }
 
