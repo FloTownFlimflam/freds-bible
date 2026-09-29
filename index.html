@@ -36,6 +36,14 @@
   </script>
 
   <style>
+    :root {
+      color-scheme: light dark;
+    }
+    
+    .dark {
+      color-scheme: dark;
+    }
+
     .glass-card {
       background: rgba(255, 255, 255, 0.82);
       backdrop-filter: blur(24px) saturate(190%);
@@ -109,12 +117,6 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    select option {
-      background-color: #0f172a;
-      color: #f8fafc;
-      padding: 8px;
-    }
-
     .reader-text-sm { font-size: 0.875rem; line-height: 1.6; }
     .reader-text-base { font-size: 1rem; line-height: 1.7; }
     .reader-text-lg { font-size: 1.125rem; line-height: 1.8; }
@@ -183,9 +185,11 @@
           </select>
 
           <select id="bookSelect" class="col-span-5 bg-slate-900 text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
+            <option value="Romans" selected>Romans</option>
           </select>
 
           <select id="chapterSelect" class="col-span-2 bg-slate-900 text-slate-100 rounded-xl px-1 py-2.5 text-xs font-bold text-center border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
+            <option value="1" selected>Ch 1</option>
           </select>
           
           <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-2 bg-slate-900 text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs (opt)" />
@@ -376,6 +380,18 @@
   </nav>
 
   <script>
+    // --- SAFE STORAGE HELPERS ---
+    // Prevents script from crashing if cookies/localStorage are blocked by privacy settings
+    function safeGetStorage(key) {
+      try { return localStorage.getItem(key); } catch(e) { return null; }
+    }
+    function safeSetStorage(key, value) {
+      try { localStorage.setItem(key, value); } catch(e) {}
+    }
+    function safeRemoveStorage(key) {
+      try { localStorage.removeItem(key); } catch(e) {}
+    }
+
     function dismissKeyboard() {
       if (document.activeElement && typeof document.activeElement.blur === 'function') {
         document.activeElement.blur();
@@ -515,7 +531,7 @@
     const lexiconSearchBtn = document.getElementById('lexiconSearchBtn');
     const lexiconResultCard = document.getElementById('lexiconResultCard');
 
-    const storedTheme = localStorage.getItem('app_theme');
+    const storedTheme = safeGetStorage('app_theme');
     if (storedTheme === 'light') {
       document.documentElement.classList.remove('dark');
       document.getElementById('themeIcon').textContent = '☀️';
@@ -526,7 +542,7 @@
 
     document.getElementById('themeToggle').addEventListener('click', () => {
       const isDark = document.documentElement.classList.toggle('dark');
-      localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
+      safeSetStorage('app_theme', isDark ? 'dark' : 'light');
       document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
     });
 
@@ -609,9 +625,9 @@
 
       passageTitle.textContent = `${passageRef} (${selectedTranslation})`;
 
-      try {
-        const cachedData = localStorage.getItem(cacheKey);
-        if (cachedData) {
+      const cachedData = safeGetStorage(cacheKey);
+      if (cachedData) {
+        try {
           const parsed = JSON.parse(cachedData);
           if (parsed && Array.isArray(parsed) && parsed.length > 0) {
             renderVerses(parsed);
@@ -619,9 +635,9 @@
             offlineStatus.className = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
             return;
           }
+        } catch (e) {
+          safeRemoveStorage(cacheKey);
         }
-      } catch (e) {
-        localStorage.removeItem(cacheKey);
       }
 
       verseDisplay.innerHTML = renderReaderSkeleton();
@@ -633,7 +649,7 @@
             const data = await res.json();
             if (data && data.verses && data.verses.length > 0) {
               renderVerses(data.verses);
-              try { localStorage.setItem(cacheKey, JSON.stringify(data.verses)); } catch(e){}
+              safeSetStorage(cacheKey, JSON.stringify(data.verses));
               offlineStatus.textContent = `KJV Active`;
               offlineStatus.className = 'bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
               return;
@@ -705,7 +721,7 @@
           
           if (parsed && parsed.verses && parsed.verses.length > 0) {
             renderVerses(parsed.verses);
-            try { localStorage.setItem(cacheKey, JSON.stringify(parsed.verses)); } catch (e) {}
+            safeSetStorage(cacheKey, JSON.stringify(parsed.verses));
             offlineStatus.textContent = `${selectedTranslation} Gemini Active`;
             offlineStatus.className = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
             return;
@@ -786,14 +802,14 @@
       const selectedDate = new Date(`${dateVal}T00:00:00`);
       const formattedDateStr = selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 
-      try {
-        const cached = localStorage.getItem(cacheKey);
-        if (cached) {
+      const cached = safeGetStorage(cacheKey);
+      if (cached) {
+        try {
           const parsed = JSON.parse(cached);
           renderCheckbookUI(formattedDateStr, parsed.title, parsed.scripture, parsed.verse, parsed.paragraphs);
           return;
-        }
-      } catch (e) {}
+        } catch (e) {}
+      }
 
       checkbookDisplay.innerHTML = `
         <div class="text-center py-10 space-y-3">
@@ -814,7 +830,7 @@
           const mdText = await res.text();
           const parsedEntry = parseLyteWordMarkdown(mdText, formattedDateStr);
           if (parsedEntry) {
-            try { localStorage.setItem(cacheKey, JSON.stringify(parsedEntry)); } catch(e){}
+            safeSetStorage(cacheKey, JSON.stringify(parsedEntry));
             renderCheckbookUI(formattedDateStr, parsedEntry.title, parsedEntry.scripture, parsedEntry.verse, parsedEntry.paragraphs);
             return;
           }
@@ -1030,7 +1046,7 @@
       if (HARDCODED_API_KEY && HARDCODED_API_KEY.trim().length > 15) {
         return HARDCODED_API_KEY.trim();
       }
-      const savedKey = (localStorage.getItem('gemini_key') || '').trim();
+      const savedKey = (safeGetStorage('gemini_key') || '').trim();
       if (savedKey.length > 15) return savedKey;
       return null;
     }
@@ -1041,8 +1057,8 @@
         keyStatusText.textContent = "Hardcoded API Key active.";
         keyStatusText.classList.remove("text-slate-400");
         keyStatusText.classList.add("text-emerald-500");
-      } else if (localStorage.getItem('gemini_key')) {
-        apiKeyInput.value = localStorage.getItem('gemini_key');
+      } else if (safeGetStorage('gemini_key')) {
+        apiKeyInput.value = safeGetStorage('gemini_key');
         keyStatusText.textContent = 'Key active & stored in browser.';
         keyStatusText.classList.remove("text-slate-400");
         keyStatusText.classList.add('text-emerald-500');
@@ -1060,22 +1076,26 @@
       dismissKeyboard();
       const k = apiKeyInput.value.trim();
       if (k) {
-        localStorage.setItem('gemini_key', k);
+        safeSetStorage('gemini_key', k);
         syncKeyStatusUI();
       }
     });
 
     clearCacheBtn.addEventListener('click', () => {
-      const keysToRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && (k.startsWith('bcache_') || k.startsWith('spcache_'))) {
-          keysToRemove.push(k);
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('bcache_') || k.startsWith('spcache_'))) {
+            keysToRemove.push(k);
+          }
         }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+        alert(`Cleared ${keysToRemove.length} cached item(s).`);
+        loadCheckbookDevotion();
+      } catch (e) {
+        alert("Cache is already empty or access is restricted.");
       }
-      keysToRemove.forEach(k => localStorage.removeItem(k));
-      alert(`Cleared ${keysToRemove.length} cached item(s).`);
-      loadCheckbookDevotion();
     });
 
     let currentSpeechUtterance = null;
@@ -1284,10 +1304,18 @@
       }
     });
 
-    // Initialize application immediately on load
-    populateBooks();
-    fetchPassage();
-    initCheckbookDatePicker();
+    // Boot App safely using Document Context
+    function initApp() {
+      populateBooks();
+      fetchPassage();
+      initCheckbookDatePicker();
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
   </script>
 </body>
 </html>
