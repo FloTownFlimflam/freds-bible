@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en" class="h-full dark">
 <head>
@@ -157,7 +158,7 @@
         </button>
 
         <div class="relative">
-          <input id="searchInput" type="text" placeholder="Search loaded text..." class="w-full bg-slate-200/50 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100 rounded-xl pl-9 pr-3 py-2 text-xs font-medium border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <input id="searchInput" type="text" placeholder="Search local Bible verses..." class="w-full bg-slate-200/50 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100 rounded-xl pl-9 pr-3 py-2 text-xs font-medium border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
           <span class="absolute left-3 top-2.5 text-xs text-slate-400 select-none">🔍</span>
         </div>
       </div>
@@ -174,6 +175,7 @@
 
     <!-- AI INSIGHTS VIEW -->
     <div id="aiView" class="space-y-4 hidden">
+      <!-- Gemini Key Section -->
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
           <span>⚙️</span> Gemini API Settings
@@ -185,6 +187,25 @@
           </button>
         </div>
         <p id="keyStatusText" class="text-[11px] text-slate-400 select-none">Stored locally on device.</p>
+      </div>
+
+      <!-- Bulk Download Section (Option B Engine) -->
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
+          <span>💾</span> Local Storage & Offline Download
+        </h2>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          Pre-load Bible passages into local IndexedDB storage (~5 MB) for 100% offline access and fast local keyword searches.
+        </p>
+        <button id="preloadBibleBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-bold py-2.5 rounded-xl border border-slate-700 transition-all cursor-pointer flex items-center justify-center gap-2">
+          <span>📥</span> Download Full Bible (ESV) to IndexedDB
+        </button>
+        <div id="preloadProgressContainer" class="hidden space-y-1.5">
+          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+            <div id="preloadProgressBar" class="bg-sky-400 h-2 w-0 transition-all duration-200"></div>
+          </div>
+          <p id="preloadProgressText" class="text-[10px] text-slate-400 font-mono text-center">Starting download...</p>
+        </div>
       </div>
 
       <div class="glass-card rounded-2xl p-4 space-y-3">
@@ -269,7 +290,87 @@
   </nav>
 
   <script>
-    // HARDCODED GEMINI API KEY (Leave empty if pasting keys via UI)
+    // --- INDEXEDDB OFFLINE DATABASE ENGINE ---
+    const DB_NAME = 'FredsBibleDB';
+    const DB_VERSION = 1;
+    const STORE_VERSES = 'verses';
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(STORE_VERSES)) {
+            const store = db.createObjectStore(STORE_VERSES, { keyPath: 'id' });
+            store.createIndex('book_chapter', ['book', 'chapter'], { unique: false });
+            store.createIndex('text', 'text', { unique: false });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function saveVerses(verses) {
+      if (!verses || !verses.length) return false;
+      const db = await openDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_VERSES, 'readwrite');
+        const store = tx.objectStore(STORE_VERSES);
+        verses.forEach((verse) => store.put(verse));
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    async function getChapterVerses(book, chapter) {
+      const db = await openDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_VERSES, 'readonly');
+        const store = tx.objectStore(STORE_VERSES);
+        const index = store.index('book_chapter');
+        const request = index.getAll([book, parseInt(chapter, 10)]);
+
+        request.onsuccess = () => {
+          const results = request.result || [];
+          results.sort((a, b) => a.verse - b.verse);
+          resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function searchLocalVerses(query) {
+      if (!query || query.trim().length < 2) return [];
+      const db = await openDB();
+      const cleanQuery = query.toLowerCase().trim();
+
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_VERSES, 'readonly');
+        const store = tx.objectStore(STORE_VERSES);
+        const request = store.openCursor();
+        const matches = [];
+
+        request.onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (cursor) {
+            if (cursor.value.text && cursor.value.text.toLowerCase().includes(cleanQuery)) {
+              matches.push(cursor.value);
+            }
+            if (matches.length >= 50) {
+              resolve(matches);
+              return;
+            }
+            cursor.continue();
+          } else {
+            resolve(matches);
+          }
+        };
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    // --- APPLICATION LOGIC ---
     const HARDCODED_API_KEY = "";
 
     const BIBLE_BOOKS = {
@@ -305,6 +406,7 @@
     const searchInput = document.getElementById('searchInput');
     const passageTitle = document.getElementById('passageTitle');
     const verseDisplay = document.getElementById('verseDisplay');
+    const offlineStatus = document.getElementById('offlineStatus');
 
     const apiKeyInput = document.getElementById('apiKeyInput');
     const saveKeyBtn = document.getElementById('saveKeyBtn');
@@ -315,11 +417,16 @@
     const generateAiBtn = document.getElementById('generateAiBtn');
     const aiResultsDisplay = document.getElementById('aiResultsDisplay');
 
+    const preloadBibleBtn = document.getElementById('preloadBibleBtn');
+    const preloadProgressContainer = document.getElementById('preloadProgressContainer');
+    const preloadProgressBar = document.getElementById('preloadProgressBar');
+    const preloadProgressText = document.getElementById('preloadProgressText');
+
     const strongsInput = document.getElementById('strongsInput');
     const lexiconSearchBtn = document.getElementById('lexiconSearchBtn');
     const lexiconResultCard = document.getElementById('lexiconResultCard');
 
-    // Theme Selector
+    // Theme Setup
     const storedTheme = localStorage.getItem('app_theme');
     if (storedTheme === 'light') {
       document.documentElement.classList.remove('dark');
@@ -389,58 +496,150 @@
     });
     navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
 
+    // --- PASSAGE FETCHING & LOCAL CACHING ENGINE ---
     async function fetchPassage() {
       const book = bookSelect.value || 'Romans';
-      const chapter = chapterSelect.value || '1';
-      const verses = verseRangeInput.value.trim();
+      const chapter = parseInt(chapterSelect.value || '1', 10);
+      const versesInput = verseRangeInput.value.trim();
 
-      const passageQuery = verses ? `${book}+${chapter}:${verses}` : `${book}+${chapter}`;
-      const passageRef = verses ? `${book} ${chapter}:${verses}` : `${book} ${chapter}`;
+      const passageQuery = versesInput ? `${book}+${chapter}:${versesInput}` : `${book}+${chapter}`;
+      const passageRef = versesInput ? `${book} ${chapter}:${versesInput}` : `${book} ${chapter}`;
       
       passageTitle.textContent = `${passageRef} (ESV)`;
-      verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${passageRef} (ESV)...</p>`;
+      verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${passageRef}...</p>`;
 
+      // Step 1: Attempt local IndexedDB retrieval first
+      try {
+        const localVerses = await getChapterVerses(book, chapter);
+        if (localVerses && localVerses.length > 0) {
+          let filtered = localVerses;
+          if (versesInput) {
+            const rangeMatch = versesInput.match(/^(\d+)(?:-(\d+))?$/);
+            if (rangeMatch) {
+              const start = parseInt(rangeMatch[1], 10);
+              const end = rangeMatch[2] ? parseInt(rangeMatch[2], 10) : start;
+              filtered = localVerses.filter(v => v.verse >= start && v.verse <= end);
+            }
+          }
+
+          if (filtered.length > 0) {
+            renderVerses(filtered);
+            offlineStatus.textContent = 'ESV Local Cache';
+            offlineStatus.className = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Local storage read error:', err);
+      }
+
+      // Step 2: Fall back to online fetch and cache result
       try {
         const res = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}?translation=esv`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         
         if (data && data.verses && data.verses.length > 0) {
-          verseDisplay.innerHTML = data.verses.map(v => `
-            <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-100">
-              <sup class="text-[10px] font-extrabold text-sky-400 mr-1 select-none">${v.verse}</sup>
-              <span class="select-text">${v.text.trim()}</span>
-            </p>
-          `).join('');
+          renderVerses(data.verses);
+          offlineStatus.textContent = 'ESV Online Active';
+          offlineStatus.className = 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
+
+          // Cache loaded verses locally
+          const formattedVerses = data.verses.map(v => ({
+            id: `${v.book_id || book}.${v.chapter}.${v.verse}`,
+            book: book,
+            chapter: v.chapter,
+            verse: v.verse,
+            text: v.text.trim()
+          }));
+          saveVerses(formattedVerses).catch(() => {});
         } else {
           throw new Error('No verses returned.');
         }
       } catch (err) {
-        try {
-          const fallbackRes = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}`);
-          const fallbackData = await fallbackRes.json();
-          if (fallbackData && fallbackData.verses) {
-            verseDisplay.innerHTML = fallbackData.verses.map(v => `
-              <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-100">
-                <sup class="text-[10px] font-extrabold text-sky-400 mr-1 select-none">${v.verse}</sup>
-                <span class="select-text">${v.text.trim()}</span>
-              </p>
-            `).join('');
-            return;
-          }
-        } catch (e) {}
-
-        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${passageRef}. Check verse formatting (e.g., 9-12).</p>`;
+        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${passageRef}. Connect online or pre-load offline text.</p>`;
       }
+    }
+
+    function renderVerses(verses) {
+      verseDisplay.innerHTML = verses.map(v => `
+        <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-100">
+          <sup class="text-[10px] font-extrabold text-sky-400 mr-1 select-none">${v.verse}</sup>
+          <span class="select-text">${v.text.trim()}</span>
+        </p>
+      `).join('');
     }
 
     loadBtn.addEventListener('click', fetchPassage);
     verseRangeInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        fetchPassage();
+      if (e.key === 'Enter') fetchPassage();
+    });
+
+    // --- LOCAL KEYWORD SEARCH ---
+    searchInput.addEventListener('input', async (e) => {
+      const query = e.target.value.trim();
+      if (query.length < 2) {
+        return;
+      }
+
+      const matches = await searchLocalVerses(query);
+      if (matches.length > 0) {
+        passageTitle.textContent = `Search: "${query}" (${matches.length} found)`;
+        verseDisplay.innerHTML = matches.map(v => `
+          <div class="border-b border-slate-200/40 dark:border-slate-800/60 pb-2">
+            <span class="text-[10px] font-black text-sky-400">${v.book} ${v.chapter}:${v.verse}</span>
+            <p class="text-xs text-slate-700 dark:text-slate-200">${v.text}</p>
+          </div>
+        `).join('');
+      } else {
+        passageTitle.textContent = `Search: "${query}"`;
+        verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No local matches found. Try pre-loading the Bible in Settings.</p>`;
       }
     });
 
+    // --- BULK DOWNLOAD ENGINE (OPTION B) ---
+    preloadBibleBtn.addEventListener('click', async () => {
+      preloadBibleBtn.disabled = true;
+      preloadBibleBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      preloadProgressContainer.classList.remove('hidden');
+
+      const allBooks = [...BIBLE_BOOKS.OT, ...BIBLE_BOOKS.NT];
+      let completed = 0;
+
+      for (const book of allBooks) {
+        const totalChapters = CHAPTER_COUNTS[book] || 1;
+        preloadProgressText.textContent = `Downloading ${book}... (${completed}/${allBooks.length} books)`;
+
+        for (let ch = 1; ch <= totalChapters; ch++) {
+          try {
+            const res = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${ch}?translation=esv`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.verses) {
+                const formatted = data.verses.map(v => ({
+                  id: `${v.book_id || book}.${v.chapter}.${v.verse}`,
+                  book: book,
+                  chapter: v.chapter,
+                  verse: v.verse,
+                  text: v.text.trim()
+                }));
+                await saveVerses(formatted);
+              }
+            }
+          } catch (e) {}
+        }
+
+        completed++;
+        const pct = Math.round((completed / allBooks.length) * 100);
+        preloadProgressBar.style.width = `${pct}%`;
+      }
+
+      preloadProgressText.textContent = "✅ Download Complete! Offline Bible Ready.";
+      preloadBibleBtn.disabled = false;
+      preloadBibleBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    });
+
+    // --- LEXICON LOOKUP ENGINE ---
     function lookupStrongs(id) {
       if (!id) return;
       const cleanId = id.trim().toUpperCase();
@@ -480,9 +679,7 @@
 
     lexiconSearchBtn.addEventListener('click', () => lookupStrongs(strongsInput.value));
     strongsInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        lookupStrongs(strongsInput.value);
-      }
+      if (e.key === 'Enter') lookupStrongs(strongsInput.value);
     });
 
     document.querySelectorAll('.preset-tag').forEach(tag => {
@@ -493,15 +690,13 @@
       });
     });
 
-    // API Key Resolver Logic
+    // --- GEMINI API ENGINE ---
     function getActiveApiKey() {
       if (HARDCODED_API_KEY && HARDCODED_API_KEY.trim().length > 15) {
         return HARDCODED_API_KEY.trim();
       }
       const savedKey = (localStorage.getItem('gemini_key') || '').trim();
-      if (savedKey.length > 15) {
-        return savedKey;
-      }
+      if (savedKey.length > 15) return savedKey;
       return null;
     }
 
@@ -577,7 +772,6 @@ Return ONLY a valid JSON object matching this exact schema:
         generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
       };
 
-      // Updated Active Gemini Endpoints (Official gemini-3.1-pro-preview and gemini-2.5-flash)
       const modelEndpoints = [
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${encodeURIComponent(key)}`,
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`
