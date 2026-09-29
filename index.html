@@ -199,7 +199,7 @@
           <span>🗑️</span> Cache & Storage Management
         </h2>
         <p class="text-[11px] text-slate-400 leading-relaxed">
-          Clear old local database entries (such as WEB translation verses) from Safari/PWA storage.
+          Clear local database storage and reset cache entries.
         </p>
         <button id="clearCacheBtn" class="w-full bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2">
           <span>🗑️</span> Clear Local Storage Cache
@@ -438,7 +438,7 @@
     });
     navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
 
-    // --- PASSAGE FETCHING ENGINE (ESV / KJV / PHILLIPS) ---
+    // --- PASSAGE FETCHING ENGINE (KJV via REST / ESV & PHILLIPS via GEMINI) ---
     async function fetchPassage() {
       dismissKeyboard();
       const book = bookSelect.value || 'John';
@@ -452,28 +452,75 @@
       passageTitle.textContent = `${passageRef} (${selectedTranslation})`;
       verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${passageRef} (${selectedTranslation})...</p>`;
 
-      let apiUrl = `https://bible-api.com/${encodeURIComponent(passageQuery)}`;
+      // Option A: KJV via Public REST Endpoint
       if (selectedTranslation === 'KJV') {
-        apiUrl += '?translation=kjv';
-      } else if (selectedTranslation === 'ESV') {
-        apiUrl += '?translation=esv';
+        try {
+          const res = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}?translation=kjv`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (data && data.verses && data.verses.length > 0) {
+            renderVerses(data.verses);
+            offlineStatus.textContent = `KJV Active`;
+            offlineStatus.className = 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
+            return;
+          }
+        } catch (e) {}
       }
 
-      try {
-        const res = await fetch(apiUrl);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        
-        if (data && data.verses && data.verses.length > 0) {
-          renderVerses(data.verses);
-          offlineStatus.textContent = `${selectedTranslation} Active`;
-          offlineStatus.className = 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
-        } else {
-          throw new Error('No verses returned.');
-        }
-      } catch (err) {
-        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${passageRef} in ${selectedTranslation}. Ensure internet connection is active.</p>`;
+      // Option B: ESV & Phillips NT via Gemini API Engine
+      const key = getActiveApiKey();
+      if (!key) {
+        verseDisplay.innerHTML = `
+          <div class="text-center py-8 space-y-2">
+            <p class="text-xs text-rose-500 font-bold">API Key Required for ${selectedTranslation}</p>
+            <p class="text-[11px] text-slate-400">Save your free Gemini API Key in the AI Insights tab to load ${selectedTranslation} passages.</p>
+          </div>
+        `;
+        return;
       }
+
+      const promptText = `Provide the exact scripture passage for ${passageRef} in the ${selectedTranslation} translation.
+Return ONLY a valid JSON object matching this schema:
+{
+  "verses": [
+    { "verse": 1, "text": "Exact verse text here..." },
+    { "verse": 2, "text": "Exact verse text here..." }
+  ]
+}`;
+
+      const requestPayload = {
+        contents: [{ parts: [{ text: promptText }] }],
+        generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
+      };
+
+      const modelEndpoints = [
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${encodeURIComponent(key)}`
+      ];
+
+      for (const endpoint of modelEndpoints) {
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestPayload)
+          });
+
+          if (res.ok) {
+            const successData = await res.json();
+            const jsonText = successData.candidates?.[0]?.content?.parts?.[0]?.text;
+            const parsed = JSON.parse(jsonText);
+            if (parsed && parsed.verses && parsed.verses.length > 0) {
+              renderVerses(parsed.verses);
+              offlineStatus.textContent = `${selectedTranslation} Gemini Active`;
+              offlineStatus.className = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
+              return;
+            }
+          }
+        } catch (e) {}
+      }
+
+      verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to render ${passageRef} in ${selectedTranslation}. Check internet connection or Gemini API key.</p>`;
     }
 
     function renderVerses(verses) {
@@ -640,8 +687,8 @@ Return ONLY a valid JSON object matching this exact schema:
       };
 
       const modelEndpoints = [
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${encodeURIComponent(key)}`,
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${encodeURIComponent(key)}`
       ];
 
       let lastError = null;
