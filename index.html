@@ -153,19 +153,23 @@
           <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-3 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs (opt)" />
         </div>
 
+        <div class="grid grid-cols-12 gap-2">
+          <!-- Translation Selector for Reading -->
+          <select id="readTranslationSelect" class="col-span-12 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+            <option value="ESV" selected>ESV - English Standard Version</option>
+            <option value="KJV">KJV - King James Version</option>
+            <option value="PHILLIPS">Phillips NT - J.B. Phillips New Testament</option>
+          </select>
+        </div>
+
         <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all select-none cursor-pointer">
           Load Passage
         </button>
-
-        <div class="relative">
-          <input id="searchInput" type="text" enterkeyhint="search" placeholder="Search local Bible verses..." class="w-full bg-slate-200/50 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100 rounded-xl pl-9 pr-3 py-2 text-xs font-medium border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
-          <span class="absolute left-3 top-2.5 text-xs text-slate-400 select-none">🔍</span>
-        </div>
       </div>
 
       <div id="passageHeader" class="px-1 flex justify-between items-center text-xs font-bold text-slate-600 dark:text-slate-300">
-        <span id="passageTitle" class="text-sm bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">John 1</span>
-        <span id="offlineStatus" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none">Ready</span>
+        <span id="passageTitle" class="text-sm bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">John 1 (ESV)</span>
+        <span id="offlineStatus" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none">ESV Active</span>
       </div>
 
       <div id="verseDisplay" class="glass-card rounded-2xl p-5 space-y-3 min-h-[320px]">
@@ -189,23 +193,18 @@
         <p id="keyStatusText" class="text-[11px] text-slate-400 select-none">Stored locally on device.</p>
       </div>
 
-      <!-- Bulk Download Section (Option B Engine) -->
+      <!-- Cache Management Section -->
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
-          <span>💾</span> Local Storage & Offline Download
+          <span>🗑️</span> Cache & Storage Management
         </h2>
         <p class="text-[11px] text-slate-400 leading-relaxed">
-          Pre-load Bible passages into local IndexedDB storage (~5 MB) for 100% offline access and fast local keyword searches.
+          Clear old local database entries (such as WEB translation verses) from Safari/PWA storage.
         </p>
-        <button id="preloadBibleBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-bold py-2.5 rounded-xl border border-slate-700 transition-all cursor-pointer flex items-center justify-center gap-2">
-          <span>📥</span> Download Full Bible to IndexedDB
+        <button id="clearCacheBtn" class="w-full bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2">
+          <span>🗑️</span> Clear Local Storage Cache
         </button>
-        <div id="preloadProgressContainer" class="hidden space-y-1.5">
-          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-            <div id="preloadProgressBar" class="bg-sky-400 h-2 w-0 transition-all duration-200"></div>
-          </div>
-          <p id="preloadProgressText" class="text-[10px] text-slate-400 font-mono text-center">Starting download...</p>
-        </div>
+        <p id="clearCacheStatus" class="text-[10px] text-slate-400 text-center hidden"></p>
       </div>
 
       <div class="glass-card rounded-2xl p-4 space-y-3">
@@ -219,8 +218,8 @@
             <label class="text-[11px] font-semibold text-slate-400 select-none">Translation</label>
             <select id="aiTranslationSelect" class="w-full bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2 text-xs font-semibold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
               <option value="ESV" selected>ESV</option>
-              <option value="NASB">NASB</option>
               <option value="KJV">KJV</option>
+              <option value="Phillips NT">Phillips NT</option>
             </select>
           </div>
           <div>
@@ -297,101 +296,20 @@
       }
     }
 
-    // Dismiss keyboard when tapping empty space outside inputs
     document.addEventListener('touchstart', (e) => {
       if (!['INPUT', 'SELECT', 'BUTTON', 'TEXTAREA'].includes(e.target.tagName)) {
         dismissKeyboard();
       }
     }, { passive: true });
 
-    // --- INDEXEDDB OFFLINE DATABASE ENGINE ---
+    // --- INDEXEDDB CLEAR RITUAL ---
     const DB_NAME = 'FredsBibleDB';
-    const DB_VERSION = 1;
-    const STORE_VERSES = 'verses';
 
-    function openDB() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onupgradeneeded = (event) => {
-          const db = event.target.result;
-          if (!db.objectStoreNames.contains(STORE_VERSES)) {
-            const store = db.createObjectStore(STORE_VERSES, { keyPath: 'id' });
-            store.createIndex('book_chapter', ['book', 'chapter'], { unique: false });
-            store.createIndex('text', 'text', { unique: false });
-          }
-        };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      });
-    }
-
-    async function saveVerses(verses) {
-      if (!verses || !verses.length) return false;
-      const db = await openDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_VERSES, 'readwrite');
-        const store = tx.objectStore(STORE_VERSES);
-        
-        verses.forEach((verse) => {
-          store.put({
-            id: verse.id || `${verse.book}.${verse.chapter}.${verse.verse}`,
-            book: String(verse.book),
-            chapter: parseInt(verse.chapter, 10),
-            verse: parseInt(verse.verse, 10),
-            text: String(verse.text || '').trim()
-          });
-        });
-        
-        tx.oncomplete = () => resolve(true);
-        tx.onerror = () => reject(tx.error);
-      });
-    }
-
-    async function getChapterVerses(book, chapter) {
-      const db = await openDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_VERSES, 'readonly');
-        const store = tx.objectStore(STORE_VERSES);
-        const index = store.index('book_chapter');
-        
-        const request = index.getAll([String(book), parseInt(chapter, 10)]);
-
-        request.onsuccess = () => {
-          const results = request.result || [];
-          results.sort((a, b) => a.verse - b.verse);
-          resolve(results);
-        };
-        request.onerror = () => reject(request.error);
-      });
-    }
-
-    async function searchLocalVerses(query) {
-      if (!query || query.trim().length < 2) return [];
-      const db = await openDB();
-      const cleanQuery = query.toLowerCase().trim();
-
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_VERSES, 'readonly');
-        const store = tx.objectStore(STORE_VERSES);
-        const request = store.openCursor();
-        const matches = [];
-
-        request.onsuccess = (event) => {
-          const cursor = event.target.result;
-          if (cursor) {
-            if (cursor.value.text && cursor.value.text.toLowerCase().includes(cleanQuery)) {
-              matches.push(cursor.value);
-            }
-            if (matches.length >= 50) {
-              resolve(matches);
-              return;
-            }
-            cursor.continue();
-          } else {
-            resolve(matches);
-          }
-        };
-        request.onerror = () => reject(request.error);
+    async function wipeLocalDatabase() {
+      return new Promise((resolve) => {
+        const req = indexedDB.deleteDatabase(DB_NAME);
+        req.onsuccess = () => resolve(true);
+        req.onerror = () => resolve(false);
       });
     }
 
@@ -427,8 +345,8 @@
     const bookSelect = document.getElementById('bookSelect');
     const chapterSelect = document.getElementById('chapterSelect');
     const verseRangeInput = document.getElementById('verseRangeInput');
+    const readTranslationSelect = document.getElementById('readTranslationSelect');
     const loadBtn = document.getElementById('loadBtn');
-    const searchInput = document.getElementById('searchInput');
     const passageTitle = document.getElementById('passageTitle');
     const verseDisplay = document.getElementById('verseDisplay');
     const offlineStatus = document.getElementById('offlineStatus');
@@ -442,10 +360,8 @@
     const generateAiBtn = document.getElementById('generateAiBtn');
     const aiResultsDisplay = document.getElementById('aiResultsDisplay');
 
-    const preloadBibleBtn = document.getElementById('preloadBibleBtn');
-    const preloadProgressContainer = document.getElementById('preloadProgressContainer');
-    const preloadProgressBar = document.getElementById('preloadProgressBar');
-    const preloadProgressText = document.getElementById('preloadProgressText');
+    const clearCacheBtn = document.getElementById('clearCacheBtn');
+    const clearCacheStatus = document.getElementById('clearCacheStatus');
 
     const strongsInput = document.getElementById('strongsInput');
     const lexiconSearchBtn = document.getElementById('lexiconSearchBtn');
@@ -522,71 +438,41 @@
     });
     navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
 
-    // --- PASSAGE FETCHING & LOCAL CACHING ENGINE ---
+    // --- PASSAGE FETCHING ENGINE (ESV / KJV / PHILLIPS) ---
     async function fetchPassage() {
       dismissKeyboard();
       const book = bookSelect.value || 'John';
       const chapter = parseInt(chapterSelect.value || '1', 10);
       const versesInput = verseRangeInput.value.trim();
+      const selectedTranslation = readTranslationSelect.value || 'ESV';
 
       const passageQuery = versesInput ? `${book}+${chapter}:${versesInput}` : `${book}+${chapter}`;
       const passageRef = versesInput ? `${book} ${chapter}:${versesInput}` : `${book} ${chapter}`;
       
-      passageTitle.textContent = `${passageRef}`;
-      verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${passageRef}...</p>`;
+      passageTitle.textContent = `${passageRef} (${selectedTranslation})`;
+      verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${passageRef} (${selectedTranslation})...</p>`;
 
-      // Step 1: Attempt local IndexedDB retrieval first
-      try {
-        const localVerses = await getChapterVerses(book, chapter);
-        if (localVerses && localVerses.length > 0) {
-          let filtered = localVerses;
-          if (versesInput) {
-            const rangeMatch = versesInput.match(/^(\d+)(?:-(\d+))?$/);
-            if (rangeMatch) {
-              const start = parseInt(rangeMatch[1], 10);
-              const end = rangeMatch[2] ? parseInt(rangeMatch[2], 10) : start;
-              filtered = localVerses.filter(v => v.verse >= start && v.verse <= end);
-            }
-          }
-
-          if (filtered.length > 0) {
-            renderVerses(filtered);
-            offlineStatus.textContent = 'Local Cache';
-            offlineStatus.className = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('Local storage read error:', err);
+      let apiUrl = `https://bible-api.com/${encodeURIComponent(passageQuery)}`;
+      if (selectedTranslation === 'KJV') {
+        apiUrl += '?translation=kjv';
+      } else if (selectedTranslation === 'ESV') {
+        apiUrl += '?translation=esv';
       }
 
-      // Step 2: Online Fetch using WEB public translation
       try {
-        const res = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}?translation=web`);
+        const res = await fetch(apiUrl);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         
         if (data && data.verses && data.verses.length > 0) {
           renderVerses(data.verses);
-          const transName = data.translation_name || 'WEB';
-          passageTitle.textContent = `${passageRef} (${transName})`;
-          offlineStatus.textContent = `${transName} Online`;
+          offlineStatus.textContent = `${selectedTranslation} Active`;
           offlineStatus.className = 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
-
-          // Cache loaded verses locally into IndexedDB
-          const formattedVerses = data.verses.map(v => ({
-            id: `${book}.${v.chapter}.${v.verse}`,
-            book: book,
-            chapter: parseInt(v.chapter, 10),
-            verse: parseInt(v.verse, 10),
-            text: String(v.text || '').trim()
-          }));
-          await saveVerses(formattedVerses);
         } else {
           throw new Error('No verses returned.');
         }
       } catch (err) {
-        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${passageRef}. Connect online or pre-load offline text.</p>`;
+        verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${passageRef} in ${selectedTranslation}. Ensure internet connection is active.</p>`;
       }
     }
 
@@ -607,77 +493,14 @@
       }
     });
 
-    // --- LOCAL KEYWORD SEARCH ENGINE ---
-    searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        dismissKeyboard();
-      }
-    });
-
-    searchInput.addEventListener('input', async (e) => {
-      const query = e.target.value.trim();
-      if (query.length < 2) return;
-
-      const matches = await searchLocalVerses(query);
-      if (matches.length > 0) {
-        passageTitle.textContent = `Search: "${query}" (${matches.length} found)`;
-        verseDisplay.innerHTML = matches.map(v => `
-          <div class="border-b border-slate-200/40 dark:border-slate-800/60 pb-2">
-            <span class="text-[10px] font-black text-sky-400">${v.book} ${v.chapter}:${v.verse}</span>
-            <p class="text-xs text-slate-700 dark:text-slate-200">${v.text}</p>
-          </div>
-        `).join('');
-      } else {
-        passageTitle.textContent = `Search: "${query}"`;
-        verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No local matches found. Try pre-loading the Bible in Settings.</p>`;
-      }
-    });
-
-    // --- THROTTLED BULK DOWNLOAD ENGINE (OPTION B) ---
-    const delay = ms => new Promise(res => setTimeout(res, ms));
-
-    preloadBibleBtn.addEventListener('click', async () => {
-      dismissKeyboard();
-      preloadBibleBtn.disabled = true;
-      preloadBibleBtn.classList.add('opacity-50', 'cursor-not-allowed');
-      preloadProgressContainer.classList.remove('hidden');
-
-      const allBooks = [...BIBLE_BOOKS.OT, ...BIBLE_BOOKS.NT];
-      let completed = 0;
-
-      for (const book of allBooks) {
-        const totalChapters = CHAPTER_COUNTS[book] || 1;
-        preloadProgressText.textContent = `Downloading ${book}... (${completed}/${allBooks.length} books)`;
-
-        for (let ch = 1; ch <= totalChapters; ch++) {
-          try {
-            const res = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${ch}?translation=web`);
-            if (res.ok) {
-              const data = await res.json();
-              if (data && data.verses) {
-                const formatted = data.verses.map(v => ({
-                  id: `${book}.${v.chapter}.${v.verse}`,
-                  book: book,
-                  chapter: parseInt(v.chapter, 10),
-                  verse: parseInt(v.verse, 10),
-                  text: String(v.text || '').trim()
-                }));
-                await saveVerses(formatted);
-              }
-            }
-          } catch (e) {}
-          // Gentle rate-limit pause to prevent browser/network drops
-          await delay(50);
-        }
-
-        completed++;
-        const pct = Math.round((completed / allBooks.length) * 100);
-        preloadProgressBar.style.width = `${pct}%`;
-      }
-
-      preloadProgressText.textContent = "✅ Download Complete! Offline Bible Ready.";
-      preloadBibleBtn.disabled = false;
-      preloadBibleBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    // --- CACHE CLEARING EVENT ---
+    clearCacheBtn.addEventListener('click', async () => {
+      clearCacheStatus.classList.remove('hidden');
+      clearCacheStatus.textContent = "Clearing local cache...";
+      await wipeLocalDatabase();
+      localStorage.removeItem('app_theme');
+      clearCacheStatus.textContent = "✅ Cache Cleared! App is completely reset.";
+      setTimeout(() => { clearCacheStatus.classList.add('hidden'); }, 3000);
     });
 
     // --- LEXICON LOOKUP ENGINE ---
@@ -789,7 +612,7 @@
       aiResultsDisplay.innerHTML = `
         <div class="py-12 text-center space-y-2">
           <div class="animate-spin text-2xl inline-block">✨</div>
-          <p class="text-xs text-slate-400 animate-pulse">Generating ${tradition} teaching pack for ${passage}...</p>
+          <p class="text-xs text-slate-400 animate-pulse">Generating ${tradition} teaching pack for ${passage}... (${translation})</p>
         </div>
       `;
 
@@ -798,7 +621,7 @@
 Return ONLY a valid JSON object matching this exact schema:
 {
   "theologicalSummary": "A concise 2-3 sentence overview highlighting structural, grammatical, or theological context.",
-  "sermonIllustration": "A vivid classic sermon illustration or object lesson (e.g. Francis Chan's eternity rope, Spurgeon's water pitcher, illustrative parables) tailored to the theme of this passage.",
+  "sermonIllustration": "A vivid classic sermon illustration or object lesson tailored to the theme of this passage.",
   "conceptualAnalogy": "A clear, modern analogy explaining the central doctrine or practical point.",
   "famousQuote": "A notable quote from a theologian, C.S. Lewis, Church Father, or historical Christian author relevant to this verse (include author name).",
   "crossReferences": ["Book Ch:Vs - Brief note on connection", "Book Ch:Vs - Brief note on connection"],
@@ -883,7 +706,7 @@ ${data.studyQuestions.map((q, i) => `${i + 1}.${q}`).join('\n')}`;
         aiResultsDisplay.innerHTML = `
           <div class="space-y-4">
             <div class="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800 pb-2">
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Target: ${passage}</span>
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Target: ${passage} (${translation})</span>
               <button id="copyAllInsightsBtn" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-3 py-1 rounded-lg text-xs font-bold active:scale-95 transition-all select-none cursor-pointer">
                 📋 Copy All Insights
               </button>
