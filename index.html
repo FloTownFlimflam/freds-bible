@@ -198,10 +198,10 @@
           <span>🗑️</span> Cache & Storage Management
         </h2>
         <p class="text-[11px] text-slate-400 leading-relaxed">
-          Clear local database storage and reset cache entries.
+          Clear local database storage and reset cached Bible chapters.
         </p>
         <button id="clearCacheBtn" class="w-full bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2">
-          <span>🗑️</span> Clear Local Storage Cache
+          <span>🗑️</span> Clear Saved Bible Cache
         </button>
         <p id="clearCacheStatus" class="text-[10px] text-slate-400 text-center hidden"></p>
       </div>
@@ -246,7 +246,7 @@
     <div id="lexiconView" class="space-y-4 hidden">
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
-          <span>🏛️️</span> Greek & Hebrew Lexicon
+          <span>🏛️</span> Greek & Hebrew Lexicon
         </h2>
         <div class="flex gap-2">
           <input id="strongsInput" type="text" enterkeyhint="search" placeholder="e.g. G3056 or H7225..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
@@ -300,17 +300,6 @@
         dismissKeyboard();
       }
     }, { passive: true });
-
-    // --- INDEXEDDB CLEAR RITUAL ---
-    const DB_NAME = 'FredsBibleDB';
-
-    async function wipeLocalDatabase() {
-      return new Promise((resolve) => {
-        const req = indexedDB.deleteDatabase(DB_NAME);
-        req.onsuccess = () => resolve(true);
-        req.onerror = () => resolve(false);
-      });
-    }
 
     // --- APPLICATION LOGIC ---
     const HARDCODED_API_KEY = "";
@@ -438,7 +427,7 @@
     });
     navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
 
-    // --- PASSAGE FETCHING ENGINE ---
+    // --- PASSAGE FETCHING & LIGHTWEIGHT CACHING ENGINE ---
     async function fetchPassage() {
       dismissKeyboard();
       const book = bookSelect.value || 'Romans';
@@ -448,8 +437,26 @@
 
       const passageQuery = versesInput ? `${book}+${chapter}:${versesInput}` : `${book}+${chapter}`;
       const passageRef = versesInput ? `${book} ${chapter}:${versesInput}` : `${book} ${chapter}`;
-      
+      const cacheKey = `bcache_${selectedTranslation}_${book}_${chapter}_${versesInput || 'all'}`;
+
       passageTitle.textContent = `${passageRef} (${selectedTranslation})`;
+
+      // 1. Check Local Cache First (Instant load in 0ms)
+      try {
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+          const parsed = JSON.parse(cachedData);
+          if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+            renderVerses(parsed);
+            offlineStatus.textContent = `${selectedTranslation} Cached ⚡`;
+            offlineStatus.className = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
+            return;
+          }
+        }
+      } catch (e) {
+        localStorage.removeItem(cacheKey); // Clean invalid entries safely
+      }
+
       verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${passageRef} (${selectedTranslation})...</p>`;
 
       // Option A: KJV via Public Endpoint
@@ -460,6 +467,7 @@
             const data = await res.json();
             if (data && data.verses && data.verses.length > 0) {
               renderVerses(data.verses);
+              localStorage.setItem(cacheKey, JSON.stringify(data.verses));
               offlineStatus.textContent = `KJV Active`;
               offlineStatus.className = 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
               return;
@@ -499,7 +507,6 @@ Return ONLY a JSON object formatted as {"verses":[{"verse":1,"text":"..."}]}.`;
 
       for (const endpoint of modelEndpoints) {
         const controller = new AbortController();
-        // Extended timeout to 18 seconds to accommodate multi-verse generating delay
         const timeoutId = setTimeout(() => controller.abort(), 18000);
 
         try {
@@ -519,6 +526,10 @@ Return ONLY a JSON object formatted as {"verses":[{"verse":1,"text":"..."}]}.`;
             
             if (parsed && parsed.verses && parsed.verses.length > 0) {
               renderVerses(parsed.verses);
+              // Save to cache for instant subsequent reads
+              try {
+                localStorage.setItem(cacheKey, JSON.stringify(parsed.verses));
+              } catch (e) {}
               offlineStatus.textContent = `${selectedTranslation} Gemini Active`;
               offlineStatus.className = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
               return;
@@ -564,10 +575,16 @@ Return ONLY a JSON object formatted as {"verses":[{"verse":1,"text":"..."}]}.`;
     // --- CACHE CLEARING EVENT ---
     clearCacheBtn.addEventListener('click', async () => {
       clearCacheStatus.classList.remove('hidden');
-      clearCacheStatus.textContent = "Clearing local cache...";
-      await wipeLocalDatabase();
-      localStorage.removeItem('app_theme');
-      clearCacheStatus.textContent = "✅ Cache Cleared! App is completely reset.";
+      clearCacheStatus.textContent = "Clearing saved Bible cache...";
+      
+      // Selectively clear only Bible cache entries
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('bcache_')) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      clearCacheStatus.textContent = "✅ Saved Bible cache cleared!";
       setTimeout(() => { clearCacheStatus.classList.add('hidden'); }, 3000);
     });
 
