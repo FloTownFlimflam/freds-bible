@@ -469,12 +469,17 @@
       'H430': { strongs: 'H430', word: 'אֱלֹהִים (Elohim)', transliteration: 'elohim', language: 'Hebrew', partOfSpeech: 'Noun', definition: 'God, Supreme Deity.', usage: 'Creator God of Israel.' }
     };
 
+    // Authentic Unabridged Map for Key Calendar Days
     const SPURGEON_CALENDAR_MAP = {
       '09-29': {
         title: "To Glorify Christ Jesus",
         scripture: "John 16:14",
         verse: "He shall glorify me: for he shall receive of mine, and shall shew it unto you.",
-        devotion: "The Holy Ghost Himself cannot better glorify the Lord Jesus than by showing to us Christ's own things. Jesus is His own best commendation. There is no adorning Him except with His own gold. The Comforter shows us that which He has received of our Lord Jesus. We never see anything aright till He reveals it. He has a way of opening our minds and of opening the Scriptures, and by this double process He sets forth our Lord to us."
+        paragraphs: [
+          "The Holy Ghost Himself cannot better glorify the Lord Jesus than by showing to us Christ's own things. Jesus is His own best commendation. There is no adorning Him except with his own gold.",
+          "The Comforter shows us that which He has received of our Lord Jesus. We never see anything aright till He reveals it. He has a way of opening our minds and of opening the Scriptures, and by this double process He sets forth our Lord to us. There is much art in setting forth a matter, and that art belongs in the highest degree to the Spirit of truth. He shows us the things themselves. This is a great privilege, as those know who have enjoyed the hallowed vision.",
+          "Let us seek the illumination of the Spirit; not to gratify our curiosity, nor even to bring us personal comfort, so much as to glorify the Lord Jesus. Oh, to have worthy ideas of Him! Groveling notions dishonor our precious Lord. Oh, to have such vivid impressions of His person, and work, and glory that we may with heart and soul cry out to His praise! Where there is a heart enriched by the Holy Ghost's teaching there will be a Savior glorified beyond expression. Come, Holy Spirit, heavenly light, and show us Jesus our Lord!"
+        ]
       }
     };
 
@@ -572,7 +577,6 @@
     testamentSelect.addEventListener('change', populateBooks);
     bookSelect.addEventListener('change', populateChapters);
 
-    // Dynamic Tab Switching Engine
     function switchView(targetView, targetBtn) {
       dismissKeyboard();
       
@@ -800,23 +804,27 @@
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           const parsed = JSON.parse(cached);
-          renderCheckbookUI(formattedDateStr, parsed.title, parsed.scripture, parsed.verse, parsed.devotion);
+          renderCheckbookUI(formattedDateStr, parsed.title, parsed.scripture, parsed.verse, parsed.paragraphs);
           return;
         }
       } catch (e) {}
 
       if (SPURGEON_CALENDAR_MAP[monthDayKey]) {
         const fallback = SPURGEON_CALENDAR_MAP[monthDayKey];
-        renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.devotion);
+        renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs);
         try { localStorage.setItem(cacheKey, JSON.stringify(fallback)); } catch (e) {}
         return;
       }
 
       const fallback = SPURGEON_CALENDAR_MAP['09-29'];
-      renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.devotion);
+      renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs);
     }
 
-    function renderCheckbookUI(dateHeader, title, scripture, verse, devotion) {
+    function renderCheckbookUI(dateHeader, title, scripture, verse, paragraphs) {
+      const paragraphsHtml = Array.isArray(paragraphs) 
+        ? paragraphs.map(p => `<p class="leading-relaxed">${p}</p>`).join('')
+        : `<p class="leading-relaxed">${paragraphs}</p>`;
+
       checkbookDisplay.innerHTML = `
         <div class="space-y-4">
           <div class="flex justify-between items-center border-b border-slate-200/40 dark:border-slate-800 pb-2">
@@ -830,8 +838,8 @@
             "${verse}"
           </blockquote>
 
-          <div class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-900/90 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/80 select-text space-y-2">
-            ${devotion}
+          <div class="text-xs text-slate-600 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-900/90 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/80 select-text space-y-3">
+            ${paragraphsHtml}
           </div>
         </div>
       `;
