@@ -468,9 +468,11 @@
         } catch (e) {}
       }
 
-      // Option B: ESV & Phillips via Gemini API Engine (production endpoints)
+      // Option B: ESV & Phillips via Gemini AI Engine
       const key = getActiveApiKey();
       if (!key) {
+        offlineStatus.textContent = `Key Missing`;
+        offlineStatus.className = 'bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
         verseDisplay.innerHTML = `
           <div class="text-center py-8 space-y-2">
             <p class="text-xs text-rose-500 font-bold">Gemini API Key Required for ${selectedTranslation}</p>
@@ -493,10 +495,10 @@ Return ONLY a valid JSON object with key "verses" containing an array of objects
         generationConfig: { temperature: 0.1 }
       };
 
-      // Updated model endpoint endpoints using gemini-2.5-flash and gemini-2.5-pro
+      // Updated model endpoint URLs using gemini-2.5-flash and gemini-2.5-flash-lite
       const modelEndpoints = [
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${encodeURIComponent(key)}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${encodeURIComponent(key)}`,
         `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`
       ];
 
@@ -536,6 +538,9 @@ Return ONLY a valid JSON object with key "verses" containing an array of objects
           lastErrorDetail = e.name === 'AbortError' ? 'Request timed out (8s)' : e.message;
         }
       }
+
+      offlineStatus.textContent = `${selectedTranslation} Error`;
+      offlineStatus.className = 'bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
 
       verseDisplay.innerHTML = `
         <div class="text-center py-6 space-y-2">
@@ -710,7 +715,7 @@ Return ONLY a valid JSON object matching this exact schema:
 
       const modelEndpoints = [
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${encodeURIComponent(key)}`
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${encodeURIComponent(key)}`
       ];
 
       let lastError = null;
