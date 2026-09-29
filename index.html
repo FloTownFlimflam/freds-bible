@@ -604,8 +604,15 @@
               offlineStatus.className = 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
               return;
             }
+          } else {
+            const errorText = await res.text();
+            renderVerboseError(verseDisplay, `Bible API (KJV) HTTP ${res.status}`, errorText);
+            return;
           }
-        } catch (e) {}
+        } catch (e) {
+          renderVerboseError(verseDisplay, 'Bible API Network Exception', e.stack || e.message);
+          return;
+        }
       }
 
       // Gemini AI Engine
@@ -669,16 +676,36 @@
             offlineStatus.textContent = `${selectedTranslation} Gemini Active`;
             offlineStatus.className = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
             return;
+          } else {
+            renderVerboseError(verseDisplay, 'Gemini Response Structure Invalid', `Raw Response:\n${JSON.stringify(successData, null, 2)}`);
+            return;
           }
+        } else {
+          const errorJson = await res.json().catch(() => ({}));
+          const detailedMsg = errorJson.error ? JSON.stringify(errorJson.error, null, 2) : `HTTP Status: ${res.status}`;
+          renderVerboseError(verseDisplay, `Gemini API HTTP ${res.status}`, detailedMsg);
+          return;
         }
-      } catch (e) {}
+      } catch (e) {
+        renderVerboseError(verseDisplay, 'Fetch Network Exception', e.stack || e.message);
+        return;
+      }
+    }
 
-      offlineStatus.textContent = `${selectedTranslation} Error`;
+    function renderVerboseError(containerElement, errorTitle, errorDetails) {
+      offlineStatus.textContent = `API Error`;
       offlineStatus.className = 'bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
 
-      verseDisplay.innerHTML = `
-        <div class="text-center py-6 space-y-2">
-          <p class="text-xs text-rose-500 font-bold">Unable to render ${passageRef} in ${selectedTranslation}</p>
+      containerElement.innerHTML = `
+        <div class="p-4 space-y-3 bg-rose-950/20 border border-rose-500/30 rounded-xl">
+          <div class="flex items-center gap-2 text-rose-400 font-bold text-xs">
+            <span>🚨</span>
+            <span>${errorTitle}</span>
+          </div>
+          <div class="text-[11px] font-mono text-rose-300/90 bg-slate-950/80 p-3 rounded-lg border border-rose-900/50 overflow-x-auto whitespace-pre-wrap select-text max-h-60">
+            ${errorDetails}
+          </div>
+          <p class="text-[10px] text-slate-400 italic">Check your API Key settings, model access, network connectivity, or quota parameters.</p>
         </div>
       `;
     }
@@ -956,14 +983,16 @@ ${data.studyQuestions.map((q, i) => `${i + 1}.${q}`).join('\n')}`;
             setTimeout(() => { btn.textContent = '📋 Copy All Insights'; }, 2000);
           });
           return;
+        } else {
+          const errorJson = await res.json().catch(() => ({}));
+          const detailedMsg = errorJson.error ? JSON.stringify(errorJson.error, null, 2) : `HTTP Status: ${res.status}`;
+          renderVerboseError(aiResultsDisplay, `Gemini API HTTP ${res.status}`, detailedMsg);
+          return;
         }
-      } catch (e) {}
-
-      aiResultsDisplay.innerHTML = `
-        <div class="text-center py-6 space-y-2">
-          <p class="text-xs text-rose-500 font-bold">API Connection Error</p>
-        </div>
-      `;
+      } catch (e) {
+        renderVerboseError(aiResultsDisplay, 'Generate Insights Network Exception', e.stack || e.message);
+        return;
+      }
     });
 
     populateBooks();
