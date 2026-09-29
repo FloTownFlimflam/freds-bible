@@ -230,7 +230,7 @@
     <div id="aiView" class="space-y-4 hidden">
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
-          <span>⚙️️</span> Gemini API Settings
+          <span>⚙️</span> Gemini API Settings
         </h2>
         <div class="flex gap-2">
           <input id="apiKeyInput" type="password" enterkeyhint="done" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
@@ -828,9 +828,9 @@
     function renderCheckbookUI(dateHeader, title, scripture, verse, content) {
       let paragraphsHtml = '';
       if (Array.isArray(content)) {
-        paragraphsHtml = content.map(p => `<p class="leading-relaxed">${p}</p>`).join('');
+        paragraphsHtml = content.map(p => `<p class="leading-relaxed select-text">${p}</p>`).join('');
       } else if (typeof content === 'string') {
-        paragraphsHtml = `<p class="leading-relaxed">${content}</p>`;
+        paragraphsHtml = `<p class="leading-relaxed select-text">${content}</p>`;
       } else {
         paragraphsHtml = `<p class="leading-relaxed text-slate-400">Content loading...</p>`;
       }
@@ -839,10 +839,15 @@
         <div class="space-y-4">
           <div class="flex justify-between items-center border-b border-slate-200/40 dark:border-slate-800 pb-2">
             <span class="text-xs font-extrabold text-sky-400 uppercase tracking-wider">${dateHeader} Promise</span>
-            <span class="text-[10px] font-bold bg-sky-500/10 text-sky-400 px-2.5 py-1 rounded-md border border-sky-500/20">${scripture}</span>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold bg-sky-500/10 text-sky-400 px-2.5 py-1 rounded-md border border-sky-500/20 select-text">${scripture}</span>
+              <button id="copyCheckbookVerseBtn" class="text-[10px] font-bold bg-slate-200 dark:bg-slate-800 hover:bg-sky-500 hover:text-white text-slate-700 dark:text-slate-200 px-2 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 select-none">
+                <span>📋</span> Copy Verse
+              </button>
+            </div>
           </div>
 
-          <h3 class="text-base font-extrabold text-slate-900 dark:text-slate-100">${title}</h3>
+          <h3 class="text-base font-extrabold text-slate-900 dark:text-slate-100 select-text">${title}</h3>
 
           <blockquote class="text-xs italic leading-relaxed text-slate-700 dark:text-slate-200 bg-sky-500/10 border-l-4 border-sky-500 p-3.5 rounded-r-xl select-text">
             "${verse}"
@@ -853,6 +858,15 @@
           </div>
         </div>
       `;
+
+      document.getElementById('copyCheckbookVerseBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText(`"${verse}" (${scripture})`);
+        const btn = document.getElementById('copyCheckbookVerseBtn');
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => {
+          btn.innerHTML = `<span>📋</span> Copy Verse`;
+        }, 2000);
+      });
     }
 
     checkbookDatePicker.addEventListener('change', loadCheckbookDevotion);
@@ -872,7 +886,7 @@
           const data = await res.json();
           if (data && data.verses) {
             popoverRefContent.innerHTML = data.verses.map(v => `
-              <p><sup class="font-bold text-sky-400 mr-1">${v.verse}</sup>${v.text}</p>
+              <p class="select-text"><sup class="font-bold text-sky-400 mr-1">${v.verse}</sup>${v.text}</p>
             `).join('');
             return;
           }
