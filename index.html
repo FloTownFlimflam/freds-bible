@@ -186,9 +186,11 @@
           </select>
 
           <select id="bookSelect" class="col-span-5 bg-slate-200 dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+            <!-- Dynamically populated -->
           </select>
 
           <select id="chapterSelect" class="col-span-2 bg-slate-200 dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl px-1 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+            <!-- Dynamically populated -->
           </select>
           
           <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-2 bg-slate-200 dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs (opt)" />
@@ -530,7 +532,7 @@
     document.getElementById('themeToggle').addEventListener('click', () => {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
-      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️️';
+      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
     });
 
     function populateBooks() {
@@ -1287,8 +1289,11 @@
       }
     });
 
-    // Execute startup initialization cleanly once
+    // Initialize dropdowns and load passage on startup
     populateBooks();
+    bookSelect.value = 'Romans';
+    populateChapters();
+    chapterSelect.value = '1';
     fetchPassage();
     initCheckbookDatePicker();
   </script>
