@@ -369,13 +369,12 @@
       <span class="text-[10px] tracking-wide">Checkbook</span>
     </button>
     <button id="navLexiconBtn" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 font-bold transition-all cursor-pointer">
-      <span class="text-xl">🏛️️</span>
+      <span class="text-xl">🏛</span>
       <span class="text-[10px] tracking-wide">Lexicon</span>
     </button>
   </nav>
 
   <script>
-    // Completely encapsulated in an IIFE to prevent hot-reloading "already declared" SyntaxErrors
     (function() {
       // --- SAFE STORAGE HELPERS ---
       function safeGetStorage(key) {
@@ -462,9 +461,6 @@
         }
       }
 
-      // ----------------------------------------------------
-      // BOOTSTRAP: Retrieve elements and bind listeners safely
-      // ----------------------------------------------------
       function bootstrapApp() {
         // Elements
         const fontDecBtn = document.getElementById('fontDecBtn');
@@ -525,7 +521,7 @@
         themeToggle.addEventListener('click', () => {
           const isDark = document.documentElement.classList.toggle('dark');
           safeSetStorage('app_theme', isDark ? 'dark' : 'light');
-          themeIcon.textContent = isDark ? '🌙' : '☀️';
+          themeIcon.textContent = isDark ? '🌙' : '☀️️';
         });
 
         // Reader Functions
@@ -549,15 +545,15 @@
 
         function populateBooks() {
           const selectedTestament = testamentSelect.value || 'NT';
-          const books = BIBLE_BOOKS[selectedTestament];
+          const books = BIBLE_BOOKS[selectedTestament] || BIBLE_BOOKS['NT'];
           
-          bookSelect.innerHTML = '';
+          bookSelect.length = 0; // Cross-browser safe clear
           books.forEach(book => {
             const opt = document.createElement('option');
             opt.value = book;
             opt.textContent = book;
             if (selectedTestament === 'NT' && book === 'Romans') opt.selected = true;
-            bookSelect.appendChild(opt);
+            bookSelect.add(opt); // Native add instead of appendChild
           });
           populateChapters();
         }
@@ -566,13 +562,13 @@
           const selectedBook = bookSelect.value || 'Romans';
           const totalChapters = CHAPTER_COUNTS[selectedBook] || 1;
 
-          chapterSelect.innerHTML = '';
+          chapterSelect.length = 0; // Cross-browser safe clear
           for (let c = 1; c <= totalChapters; c++) {
             const opt = document.createElement('option');
             opt.value = c;
             opt.textContent = `Ch ${c}`;
             if (c === 1) opt.selected = true;
-            chapterSelect.appendChild(opt);
+            chapterSelect.add(opt);
           }
         }
 
@@ -618,21 +614,17 @@
           setTimeout(() => { offlineStatus.textContent = `Ready`; }, 2000);
         }
 
-        // Safe robust rendering method (replaces brittle innerHTML strings)
         function renderVerses(verses) {
-          verseDisplay.innerHTML = ''; // clear skeleton
+          verseDisplay.innerHTML = '';
           verses.forEach(v => {
             const p = document.createElement('p');
             p.className = `${fontScaleClasses[fontScaleIndex]} leading-relaxed text-slate-700 dark:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-900/50 p-1.5 rounded-lg transition-colors cursor-pointer`;
-            
             const sup = document.createElement('sup');
             sup.className = 'text-[10px] font-extrabold text-sky-400 mr-1.5 select-none';
             sup.textContent = v.verse;
-            
             const span = document.createElement('span');
             span.className = 'select-text';
             span.textContent = v.text.trim();
-            
             p.appendChild(sup);
             p.appendChild(span);
             p.addEventListener('click', () => copyVerseText(v.verse, v.text.trim()));
@@ -728,7 +720,16 @@
 
             if (res.ok) {
               const successData = await res.json();
-              const rawText = successData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+              
+              // REMOVED ES2020 OPTIONAL CHAINING FOR STRICT COMPATIBILITY
+              let rawText = '{}';
+              if (successData && successData.candidates && successData.candidates.length > 0) {
+                const firstCandidate = successData.candidates[0];
+                if (firstCandidate.content && firstCandidate.content.parts && firstCandidate.content.parts.length > 0) {
+                  rawText = firstCandidate.content.parts[0].text || '{}';
+                }
+              }
+
               const parsed = JSON.parse(rawText);
               
               if (parsed && parsed.verses && parsed.verses.length > 0) {
@@ -1006,14 +1007,27 @@
 
             if (res.ok) {
               const successData = await res.json();
-              const data = JSON.parse(successData.candidates?.[0]?.content?.parts?.[0]?.text || '{}');
+              
+              // REMOVED ES2020 OPTIONAL CHAINING FOR STRICT COMPATIBILITY
+              let rawText = '{}';
+              if (successData && successData.candidates && successData.candidates.length > 0) {
+                const firstCandidate = successData.candidates[0];
+                if (firstCandidate.content && firstCandidate.content.parts && firstCandidate.content.parts.length > 0) {
+                  rawText = firstCandidate.content.parts[0].text || '{}';
+                }
+              }
+
+              const data = JSON.parse(rawText);
+
+              // REPLACED ES2020 OPTIONAL CHAINING IN TEMPLATE EVALUATION
+              const hasKeyWords = (data && data.keyWords && data.keyWords.length > 0);
 
               aiResultsDisplay.innerHTML = `
                 <div class="space-y-4">
                   <div class="flex justify-between items-center border-b border-slate-800 pb-2"><span class="text-xs font-bold text-slate-400">Target: ${aiPassageInput.value} (${aiTranslationSelect.value})</span><button id="ttsListenBtn" class="bg-sky-500/10 text-sky-400 border border-sky-500/20 px-3 py-1 rounded-lg text-xs font-bold active:scale-95 transition-all cursor-pointer flex items-center gap-1">🔊 Listen</button></div>
                   <div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-1 select-none">Overview</h3><p class="text-xs leading-relaxed text-slate-200 bg-sky-500/10 border border-sky-500/20 p-3 rounded-xl font-medium select-text">${data.theologicalSummary}</p></div>
                   <div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">${aiAudienceSelect.value} Content</h3><div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-3.5 rounded-xl border border-slate-800 whitespace-pre-wrap select-text">${data.mainOutput}</div></div>
-                  ${data.keyWords?.length ? `<div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🔑 Key Word Breakdown</h3><div class="flex flex-wrap gap-2">${data.keyWords.map(kw => `<button class="keyword-pill text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded-xl cursor-pointer hover:bg-indigo-500/20" data-strongs="${kw.strongs}">${kw.word} (${kw.strongs}) - <span class="font-normal italic">${kw.meaning}</span></button>`).join('')}</div></div>` : ''}
+                  ${hasKeyWords ? `<div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🔑 Key Word Breakdown</h3><div class="flex flex-wrap gap-2">${data.keyWords.map(kw => `<button class="keyword-pill text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded-xl cursor-pointer hover:bg-indigo-500/20" data-strongs="${kw.strongs}">${kw.word} (${kw.strongs}) - <span class="font-normal italic">${kw.meaning}</span></button>`).join('')}</div></div>` : ''}
                   ${data.traditionComparison ? `<div class="p-3 bg-purple-950/20 border border-purple-500/30 rounded-xl space-y-2"><h3 class="text-xs font-extrabold uppercase tracking-wider text-purple-400 select-none">🏛️ Tradition Comparison</h3><div class="text-xs space-y-1.5 text-slate-200"><p><strong>Traditional Protestant:</strong> ${data.traditionComparison.traditionalProtestant}</p><p><strong>Reformed:</strong> ${data.traditionComparison.reformed}</p><p><strong>Expository:</strong>${data.traditionComparison.expository}</p></div></div>` : ''}
                   ${data.calvinismVsArminianism ? `<div class="p-3 bg-indigo-950/20 border border-indigo-500/30 rounded-xl space-y-2"><h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-400 select-none">⚖️ Calvinist vs. Arminian Analysis</h3><div class="text-xs space-y-1.5 text-slate-200"><p><strong>Calvinist View:</strong> ${data.calvinistView \vert{}\vert{} data.calvinismVsArminianism.calvinistView}</p><p><strong>Arminian View:</strong>${data.arminianView || data.calvinismVsArminianism.arminianView}</p><p class="italic text-slate-400"><strong>Summary:</strong> ${data.consensusOrDivergence || data.calvinismVsArminianism.consensusOrDivergence}</p></div></div>` : ''}
                   <div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🔗 Cross-References</h3><div class="flex flex-wrap gap-1.5">${data.crossReferences.map(ref => `<button class="crossref-pill text-xs font-mono bg-slate-900 text-sky-400 border border-slate-800 px-2.5 py-1 rounded-lg cursor-pointer hover:bg-slate-800">📍 ${ref}</button>`).join('')}</div></div>
@@ -1043,7 +1057,7 @@
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', bootstrapApp);
       } else {
-        bootstrapApp(); // DOM already loaded (e.g. async/hot-reload)
+        bootstrapApp();
       }
     })();
   </script>
