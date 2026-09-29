@@ -355,7 +355,7 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation (High Z-Index) -->
+  <!-- Navigation -->
   <nav class="glass-nav fixed bottom-0 left-0 right-0 z-50 px-4 py-3 pb-6 flex justify-around items-center border-t border-slate-200/50 dark:border-slate-800/50 select-none max-w-4xl mx-auto">
     <button id="navReadBtn" class="flex flex-col items-center gap-1 text-sky-400 font-bold transition-all cursor-pointer">
       <span class="text-xl">📖</span>
@@ -469,7 +469,6 @@
       'H430': { strongs: 'H430', word: 'אֱלֹהִים (Elohim)', transliteration: 'elohim', language: 'Hebrew', partOfSpeech: 'Noun', definition: 'God, Supreme Deity.', usage: 'Creator God of Israel.' }
     };
 
-    // Authentic Unabridged Map for Key Calendar Days
     const SPURGEON_CALENDAR_MAP = {
       '09-29': {
         title: "To Glorify Christ Jesus",
@@ -528,7 +527,6 @@
     const lexiconSearchBtn = document.getElementById('lexiconSearchBtn');
     const lexiconResultCard = document.getElementById('lexiconResultCard');
 
-    // Theme Setup
     const storedTheme = localStorage.getItem('app_theme');
     if (storedTheme === 'light') {
       document.documentElement.classList.remove('dark');
@@ -804,26 +802,31 @@
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           const parsed = JSON.parse(cached);
-          renderCheckbookUI(formattedDateStr, parsed.title, parsed.scripture, parsed.verse, parsed.paragraphs);
+          renderCheckbookUI(formattedDateStr, parsed.title, parsed.scripture, parsed.verse, parsed.paragraphs || parsed.devotion);
           return;
         }
       } catch (e) {}
 
       if (SPURGEON_CALENDAR_MAP[monthDayKey]) {
         const fallback = SPURGEON_CALENDAR_MAP[monthDayKey];
-        renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs);
+        renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs || fallback.devotion);
         try { localStorage.setItem(cacheKey, JSON.stringify(fallback)); } catch (e) {}
         return;
       }
 
       const fallback = SPURGEON_CALENDAR_MAP['09-29'];
-      renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs);
+      renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs || fallback.devotion);
     }
 
-    function renderCheckbookUI(dateHeader, title, scripture, verse, paragraphs) {
-      const paragraphsHtml = Array.isArray(paragraphs) 
-        ? paragraphs.map(p => `<p class="leading-relaxed">${p}</p>`).join('')
-        : `<p class="leading-relaxed">${paragraphs}</p>`;
+    function renderCheckbookUI(dateHeader, title, scripture, verse, content) {
+      let paragraphsHtml = '';
+      if (Array.isArray(content)) {
+        paragraphsHtml = content.map(p => `<p class="leading-relaxed">${p}</p>`).join('');
+      } else if (typeof content === 'string') {
+        paragraphsHtml = `<p class="leading-relaxed">${content}</p>`;
+      } else {
+        paragraphsHtml = `<p class="leading-relaxed text-slate-400">Content loading...</p>`;
+      }
 
       checkbookDisplay.innerHTML = `
         <div class="space-y-4">
