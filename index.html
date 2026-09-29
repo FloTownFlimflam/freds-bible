@@ -150,7 +150,7 @@
           </select>
           
           <!-- Optional Verse(s) Text Input -->
-          <input id="verseRangeInput" type="text" class="col-span-3 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs (opt)" />
+          <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-3 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs (opt)" />
         </div>
 
         <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all select-none cursor-pointer">
@@ -158,14 +158,14 @@
         </button>
 
         <div class="relative">
-          <input id="searchInput" type="text" placeholder="Search local Bible verses..." class="w-full bg-slate-200/50 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100 rounded-xl pl-9 pr-3 py-2 text-xs font-medium border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <input id="searchInput" type="text" enterkeyhint="search" placeholder="Search local Bible verses..." class="w-full bg-slate-200/50 dark:bg-slate-900/60 text-slate-900 dark:text-slate-100 rounded-xl pl-9 pr-3 py-2 text-xs font-medium border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
           <span class="absolute left-3 top-2.5 text-xs text-slate-400 select-none">🔍</span>
         </div>
       </div>
 
       <div id="passageHeader" class="px-1 flex justify-between items-center text-xs font-bold text-slate-600 dark:text-slate-300">
-        <span id="passageTitle" class="text-sm bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">John 1 (ESV)</span>
-        <span id="offlineStatus" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none">ESV Active</span>
+        <span id="passageTitle" class="text-sm bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">John 1</span>
+        <span id="offlineStatus" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none">Ready</span>
       </div>
 
       <div id="verseDisplay" class="glass-card rounded-2xl p-5 space-y-3 min-h-[320px]">
@@ -181,7 +181,7 @@
           <span>⚙️</span> Gemini API Settings
         </h2>
         <div class="flex gap-2">
-          <input id="apiKeyInput" type="password" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <input id="apiKeyInput" type="password" enterkeyhint="done" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
           <button id="saveKeyBtn" class="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold px-3 py-2 rounded-xl active:scale-95 transition-all select-none cursor-pointer">
             Save Key
           </button>
@@ -198,7 +198,7 @@
           Pre-load Bible passages into local IndexedDB storage (~5 MB) for 100% offline access and fast local keyword searches.
         </p>
         <button id="preloadBibleBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-bold py-2.5 rounded-xl border border-slate-700 transition-all cursor-pointer flex items-center justify-center gap-2">
-          <span>📥</span> Download Full Bible (ESV) to IndexedDB
+          <span>📥</span> Download Full Bible to IndexedDB
         </button>
         <div id="preloadProgressContainer" class="hidden space-y-1.5">
           <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
@@ -211,7 +211,7 @@
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <div class="space-y-1">
           <label class="text-xs font-bold text-slate-600 dark:text-slate-300 select-none">Target Passage</label>
-          <input id="aiPassageInput" type="text" value="John 1:1-14" class="w-full bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <input id="aiPassageInput" type="text" enterkeyhint="done" value="John 1:1-14" class="w-full bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
         </div>
 
         <div class="grid grid-cols-2 gap-2">
@@ -251,7 +251,7 @@
           <span>🏛️</span> Greek & Hebrew Lexicon
         </h2>
         <div class="flex gap-2">
-          <input id="strongsInput" type="text" placeholder="e.g. G3056 or H7225..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <input id="strongsInput" type="text" enterkeyhint="search" placeholder="e.g. G3056 or H7225..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
           <button id="lexiconSearchBtn" class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-xl active:scale-95 transition-all select-none cursor-pointer">
             Lookup
           </button>
@@ -290,6 +290,20 @@
   </nav>
 
   <script>
+    // --- KEYBOARD DISMISSAL HELPERS ---
+    function dismissKeyboard() {
+      if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+      }
+    }
+
+    // Dismiss keyboard when tapping empty space outside inputs
+    document.addEventListener('touchstart', (e) => {
+      if (!['INPUT', 'SELECT', 'BUTTON', 'TEXTAREA'].includes(e.target.tagName)) {
+        dismissKeyboard();
+      }
+    }, { passive: true });
+
     // --- INDEXEDDB OFFLINE DATABASE ENGINE ---
     const DB_NAME = 'FredsBibleDB';
     const DB_VERSION = 1;
@@ -318,7 +332,6 @@
         const tx = db.transaction(STORE_VERSES, 'readwrite');
         const store = tx.objectStore(STORE_VERSES);
         
-        // Ensure book is string and chapter/verse are clean integers
         verses.forEach((verse) => {
           store.put({
             id: verse.id || `${verse.book}.${verse.chapter}.${verse.verse}`,
@@ -341,7 +354,6 @@
         const store = tx.objectStore(STORE_VERSES);
         const index = store.index('book_chapter');
         
-        // Enforce exact type match: book string, chapter integer
         const request = index.getAll([String(book), parseInt(chapter, 10)]);
 
         request.onsuccess = () => {
@@ -485,6 +497,7 @@
     bookSelect.addEventListener('change', populateChapters);
 
     function switchView(activeView, activeBtn) {
+      dismissKeyboard();
       readView.classList.add('hidden');
       aiView.classList.add('hidden');
       lexiconView.classList.add('hidden');
@@ -511,6 +524,7 @@
 
     // --- PASSAGE FETCHING & LOCAL CACHING ENGINE ---
     async function fetchPassage() {
+      dismissKeyboard();
       const book = bookSelect.value || 'John';
       const chapter = parseInt(chapterSelect.value || '1', 10);
       const versesInput = verseRangeInput.value.trim();
@@ -518,7 +532,7 @@
       const passageQuery = versesInput ? `${book}+${chapter}:${versesInput}` : `${book}+${chapter}`;
       const passageRef = versesInput ? `${book} ${chapter}:${versesInput}` : `${book} ${chapter}`;
       
-      passageTitle.textContent = `${passageRef} (ESV)`;
+      passageTitle.textContent = `${passageRef}`;
       verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${passageRef}...</p>`;
 
       // Step 1: Attempt local IndexedDB retrieval first
@@ -537,7 +551,7 @@
 
           if (filtered.length > 0) {
             renderVerses(filtered);
-            offlineStatus.textContent = 'ESV Local Cache';
+            offlineStatus.textContent = 'Local Cache';
             offlineStatus.className = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
             return;
           }
@@ -546,18 +560,20 @@
         console.warn('Local storage read error:', err);
       }
 
-      // Step 2: Fall back to online fetch and cache result
+      // Step 2: Online Fetch using WEB public translation
       try {
-        const res = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}?translation=esv`);
+        const res = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}?translation=web`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         
         if (data && data.verses && data.verses.length > 0) {
           renderVerses(data.verses);
-          offlineStatus.textContent = 'ESV Online Active';
+          const transName = data.translation_name || 'WEB';
+          passageTitle.textContent = `${passageRef} (${transName})`;
+          offlineStatus.textContent = `${transName} Online`;
           offlineStatus.className = 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
 
-          // Cache loaded verses locally
+          // Cache loaded verses locally into IndexedDB
           const formattedVerses = data.verses.map(v => ({
             id: `${book}.${v.chapter}.${v.verse}`,
             book: book,
@@ -567,32 +583,9 @@
           }));
           await saveVerses(formattedVerses);
         } else {
-          throw new Error('No verses returned from primary API.');
+          throw new Error('No verses returned.');
         }
       } catch (err) {
-        // Step 3: Secondary API endpoint retry fallback
-        try {
-          const fallbackRes = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}`);
-          if (fallbackRes.ok) {
-            const fallbackData = await fallbackRes.json();
-            if (fallbackData && fallbackData.verses) {
-              renderVerses(fallbackData.verses);
-              offlineStatus.textContent = 'ESV Fallback Active';
-              offlineStatus.className = 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
-              
-              const formatted = fallbackData.verses.map(v => ({
-                id: `${book}.${v.chapter}.${v.verse}`,
-                book: book,
-                chapter: parseInt(v.chapter, 10),
-                verse: parseInt(v.verse, 10),
-                text: String(v.text || '').trim()
-              }));
-              await saveVerses(formatted);
-              return;
-            }
-          }
-        } catch (e) {}
-
         verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to load ${passageRef}. Connect online or pre-load offline text.</p>`;
       }
     }
@@ -608,10 +601,19 @@
 
     loadBtn.addEventListener('click', fetchPassage);
     verseRangeInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') fetchPassage();
+      if (e.key === 'Enter') {
+        dismissKeyboard();
+        fetchPassage();
+      }
     });
 
-    // --- LOCAL KEYWORD SEARCH ---
+    // --- LOCAL KEYWORD SEARCH ENGINE ---
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        dismissKeyboard();
+      }
+    });
+
     searchInput.addEventListener('input', async (e) => {
       const query = e.target.value.trim();
       if (query.length < 2) return;
@@ -631,8 +633,11 @@
       }
     });
 
-    // --- BULK DOWNLOAD ENGINE (OPTION B) ---
+    // --- THROTTLED BULK DOWNLOAD ENGINE (OPTION B) ---
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+
     preloadBibleBtn.addEventListener('click', async () => {
+      dismissKeyboard();
       preloadBibleBtn.disabled = true;
       preloadBibleBtn.classList.add('opacity-50', 'cursor-not-allowed');
       preloadProgressContainer.classList.remove('hidden');
@@ -646,7 +651,7 @@
 
         for (let ch = 1; ch <= totalChapters; ch++) {
           try {
-            const res = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${ch}?translation=esv`);
+            const res = await fetch(`https://bible-api.com/${encodeURIComponent(book)}+${ch}?translation=web`);
             if (res.ok) {
               const data = await res.json();
               if (data && data.verses) {
@@ -661,6 +666,8 @@
               }
             }
           } catch (e) {}
+          // Gentle rate-limit pause to prevent browser/network drops
+          await delay(50);
         }
 
         completed++;
@@ -675,6 +682,7 @@
 
     // --- LEXICON LOOKUP ENGINE ---
     function lookupStrongs(id) {
+      dismissKeyboard();
       if (!id) return;
       const cleanId = id.trim().toUpperCase();
       const entry = LEXICON_DICT[cleanId] || {
@@ -756,6 +764,7 @@
     syncKeyStatusUI();
 
     saveKeyBtn.addEventListener('click', () => {
+      dismissKeyboard();
       const k = apiKeyInput.value.trim();
       if (k && k !== "••••••••••••••••••••••••••••••••") {
         localStorage.setItem('gemini_key', k);
@@ -766,6 +775,7 @@
     let currentInsightsText = '';
 
     generateAiBtn.addEventListener('click', async () => {
+      dismissKeyboard();
       const key = getActiveApiKey();
       if (!key) {
         aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Please paste and save your Gemini API Key above first.</p>`;
