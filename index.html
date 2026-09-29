@@ -242,6 +242,475 @@
         <div class="flex justify-between items-center pt-1">
           <p id="keyStatusText" class="text-[11px] text-slate-400 select-none">Stored locally on device.</p>
           <button id="clearCacheBtn" class="text-[11px] font-bold text-rose-500 hover:text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 rounded-lg active:scale-95 transition-all cursor-pointer flex items-center gap-1 select-none">
+            <span>🗑️️</span> Clear Cache
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <div class="flex justify-between items-center">
+          <label class="text-xs font-bold text-slate-600 dark:text-slate-300 select-none">Target Passage</label>
+          <button id="syncReaderBtn" class="text-[10px] font-bold text-sky-500 hover:text-sky-400 flex items-center gap-1 cursor-pointer">
+            <span>🔄</span> Sync with Reader
+          </button>
+        </div>
+        <input id="aiPassageInput" type="text" enterkeyhint="done" value="John 1:1-14" class="w-full bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[11px] font-semibold text-slate-400 select-none">Translation</label>
+            <select id="aiTranslationSelect" class="w-full bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2 text-xs font-semibold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+              <option value="ESV" selected>ESV</option>
+              <option value="KJV">KJV</option>
+              <option value="Phillips NT">Phillips NT</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[11px] font-semibold text-slate-400 select-none">Target Output Preset</label>
+            <select id="aiAudienceSelect" class="w-full bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2 text-xs font-semibold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+              <option value="Comprehensive" selected>Comprehensive Study Pack</option>
+              <option value="Devotional">Personal Devotional</option>
+              <option value="Visualize">Visualize / Illustrate</option>
+              <option value="SmallGroup">Small Group Leader</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-200/40 dark:border-slate-800/60 space-y-2">
+          <label class="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 dark:text-slate-300">
+            <input type="checkbox" id="compareTraditionsToggle" class="rounded border-slate-700 text-sky-500 focus:ring-sky-500" />
+            <span>Compare Traditions (Traditional Protestant, Reformed, Expository)</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-slate-600 dark:text-slate-300">
+            <input type="checkbox" id="compareCalvinismToggle" class="rounded border-slate-700 text-sky-500 focus:ring-sky-500" />
+            <span>Compare Calvinist & Arminian Perspectives</span>
+          </label>
+        </div>
+
+        <button id="generateAiBtn" class="w-full bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600 text-white font-bold text-xs py-3 rounded-xl shadow-lg shadow-sky-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 select-none cursor-pointer">
+          <span>✨</span> Generate Study & Teaching Pack
+        </button>
+      </div>
+
+      <div id="aiResultsDisplay" class="glass-card rounded-2xl p-5 space-y-4">
+        <p class="text-xs text-slate-400 text-center py-8">Select options and tap "Generate Study & Teaching Pack".</p>
+      </div>
+    </div>
+
+    <!-- CHECKBOOK TAB -->
+    <div id="checkbookView" class="space-y-4 hidden">
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <div class="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800 pb-2">
+          <div>
+            <span class="text-[10px] font-extrabold text-sky-400 uppercase tracking-wider">Charles H. Spurgeon</span>
+            <h2 class="text-sm font-extrabold text-slate-900 dark:text-slate-100">Faith's Checkbook</h2>
+          </div>
+          <button id="checkbookTodayBtn" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-1 rounded-lg text-xs font-bold active:scale-95 transition-all cursor-pointer">
+            Today
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-bold text-slate-500">Select Date (Month & Day):</label>
+          <input id="checkbookDatePicker" type="date" class="bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-1.5 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+        </div>
+      </div>
+
+      <div id="checkbookDisplay" class="glass-card rounded-2xl p-5 space-y-4">
+      </div>
+    </div>
+
+    <!-- LEXICON VIEW -->
+    <div id="lexiconView" class="space-y-4 hidden">
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
+          <span>🏛️</span> Greek & Hebrew Lexicon
+        </h2>
+        <div class="flex gap-2">
+          <input id="strongsInput" type="text" enterkeyhint="search" placeholder="e.g. G3056 or H7225..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <button id="lexiconSearchBtn" class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-xl active:scale-95 transition-all select-none cursor-pointer">
+            Lookup
+          </button>
+        </div>
+
+        <div class="flex flex-wrap gap-1.5 pt-1 select-none">
+          <button class="preset-tag text-[10px] font-bold bg-slate-200/80 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg text-sky-600 dark:text-sky-400 border border-slate-300/40 dark:border-slate-800/80 active:scale-95 cursor-pointer" data-strongs="G3056">Logos (G3056)</button>
+          <button class="preset-tag text-[10px] font-bold bg-slate-200/80 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg text-sky-600 dark:text-sky-400 border border-slate-300/40 dark:border-slate-800/80 active:scale-95 cursor-pointer" data-strongs="G26">Agape (G26)</button>
+          <button class="preset-tag text-[10px] font-bold bg-slate-200/80 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg text-sky-600 dark:text-sky-400 border border-slate-300/40 dark:border-slate-800/80 active:scale-95 cursor-pointer" data-strongs="G4151">Pneuma (G4151)</button>
+          <button class="preset-tag text-[10px] font-bold bg-slate-200/80 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg text-sky-600 dark:text-sky-400 border border-slate-300/40 dark:border-slate-800/80 active:scale-95 cursor-pointer" data-strongs="H7225">Reshith (H7225)</button>
+          <button class="preset-tag text-[10px] font-bold bg-slate-200/80 dark:bg-slate-900/90 px-2.5 py-1 rounded-lg text-sky-600 dark:text-sky-400 border border-slate-300/40 dark:border-slate-800/80 active:scale-95 cursor-pointer" data-strongs="H430">Elohim (H430)</button>
+        </div>
+      </div>
+
+      <div id="lexiconResultCard" class="glass-card rounded-2xl p-5 space-y-4">
+        <p class="text-xs text-slate-400 text-center py-8">Select a tag or search Strong's ID to load definition.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Cross-Reference Popover Modal -->
+  <div id="crossRefModal" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl p-5 max-w-lg w-full space-y-3 relative shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-200/40 dark:border-slate-800 pb-2">
+        <h3 id="popoverRefTitle" class="text-xs font-bold text-sky-400 uppercase tracking-wider">Cross-Reference Reader</h3>
+        <button id="closeCrossRefModal" class="text-slate-400 hover:text-slate-100 font-extrabold text-sm px-2">✕</button>
+      </div>
+      <div id="popoverRefContent" class="text-xs leading-relaxed max-h-80 overflow-y-auto space-y-2 py-2">
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="glass-nav fixed bottom-0 left-0 right-0 z-50 px-4 py-3 pb-6 flex justify-around items-center border-t border-slate-200/50 dark:border-slate-800/50 select-none max-w-4xl mx-auto">
+    <button id="navReadBtn" class="flex flex-col items-center gap-1 text-sky-400 font-bold transition-all cursor-pointer">
+      <span class="text-xl">📖</span>
+      <span class="text-[10px] tracking-wide">Read</span>
+    </button>
+    <button id="navAiBtn" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold transition-all cursor-pointer">
+      <span class="text-xl">🤖</span>
+      <span class="text-[10px] tracking-wide">AI Insights</span>
+    </button>
+    <button id="navCheckbookBtn" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold transition-all cursor-pointer">
+      <span class="text-xl">💳</span>
+      <span class="text-[10px] tracking-wide">Checkbook</span>
+    </button>
+    <button id="navLexiconBtn" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold transition-all cursor-pointer">
+      <span class="text-xl">🏛️</span>
+      <span class="text-[10px] tracking-wide">Lexicon</span>
+    </button>
+  </nav>
+
+  <script>
+    function dismissKeyboard() {
+      if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+      }
+    }
+
+    const fontScaleClasses = ['reader-text-sm', 'reader-text-base', 'reader-text-lg', 'reader-text-xl'];
+    let fontScaleIndex = 1;
+
+    const fontDecBtn = document.getElementById('fontDecBtn');
+    const fontIncBtn = document.getElementById('fontIncBtn');
+    const fontSizeDisplay = document.getElementById('fontSizeDisplay');
+
+    function updateFontDisplay() {
+      const percentages = ['87%', '100%', '112%', '125%'];
+      fontSizeDisplay.textContent = percentages[fontScaleIndex];
+      const verses = verseDisplay.querySelectorAll('p');
+      verses.forEach(p => {
+        fontScaleClasses.forEach(c => p.classList.remove(c));
+        p.classList.add(fontScaleClasses[fontScaleIndex]);
+      });
+    }
+
+    fontDecBtn.addEventListener('click', () => {
+      if (fontScaleIndex > 0) {
+        fontScaleIndex--;
+        updateFontDisplay();
+      }
+    });
+
+    fontIncBtn.addEventListener('click', () => {
+      if (fontScaleIndex < fontScaleClasses.length - 1) {
+        fontScaleIndex++;
+        updateFontDisplay();
+      }
+    });
+
+    function renderReaderSkeleton() {
+      return `
+        <div class="space-y-4 animate-fade-in">
+          ${Array(7).fill(0).map(() => `
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <div class="w-4 h-3 rounded skeleton-box"></div>
+                <div class="w-full h-4 rounded-md skeleton-box"></div>
+              </div>
+              <div class="w-11/12 h-4 rounded-md skeleton-box ml-6"></div>
+              <div class="w-3/4 h-4 rounded-md skeleton-box ml-6"></div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderAiInsightsSkeleton() {
+      return `
+        <div class="space-y-5 animate-fade-in">
+          <div class="space-y-2">
+            <div class="w-28 h-3 rounded skeleton-box"></div>
+            <div class="w-full h-16 rounded-xl skeleton-box"></div>
+          </div>
+          <div class="space-y-2">
+            <div class="w-36 h-3 rounded skeleton-box"></div>
+            <div class="w-full h-20 rounded-xl skeleton-box"></div>
+          </div>
+          <div class="space-y-2">
+            <div class="w-32 h-3 rounded skeleton-box"></div>
+            <div class="w-full h-16 rounded-xl skeleton-box"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    const HARDCODED_API_KEY = "";
+
+    const BIBLE_BOOKS = {
+      OT: ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "HabAh, look at the screenshot! The book dropdown appears blank/empty because `populateBooks()` wasn't triggered immediately when the script initialized or populated the DOM options properly before the dropdown rendered.
+
+To fix this so the books populate instantly on load, we just need to ensure `populateBooks()` is called explicitly right when the DOM content loads, rather than just at the very bottom.
+
+Here is the fully corrected file:
+
+### Updated File: `index.html`
+
+```html
+<!DOCTYPE html>
+<html lang="en" class="h-full dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#020617">
+  <title>Fred's Bible Reference v2.0</title>
+
+  <link rel="manifest" href="manifest.json">
+  <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              500: '#38bdf8',
+              600: '#0284c7',
+              700: '#0369a1',
+            }
+          },
+          keyframes: {
+            shimmer: {
+              '100%': { transform: 'translateX(100%)' }
+            }
+          },
+          animation: {
+            shimmer: 'shimmer 1.8s infinite'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Glassmorphism Surface Styles */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 12px 32px 0 rgba(31, 38, 135, 0.06);
+    }
+    
+    .dark .glass-card {
+      background: rgba(10, 15, 30, 0.85);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.65);
+    }
+
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+    }
+
+    .dark .glass-nav {
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(30, 41, 59, 0.6);
+    }
+
+    .ios-header-padding {
+      padding-top: max(0.75rem, env(safe-area-inset-top));
+    }
+
+    .glow-bg-1 {
+      position: fixed;
+      top: -10%;
+      left: -10%;
+      width: 380px;
+      height: 380px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.18) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(60px);
+      pointer-events: none !important;
+      z-index: 0;
+    }
+
+    .glow-bg-2 {
+      position: fixed;
+      bottom: 5%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.18) 0%, rgba(168, 85, 247, 0.08) 50%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(70px);
+      pointer-events: none !important;
+      z-index: 0;
+    }
+
+    body, p, span, li, blockquote, div {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+    }
+
+    button, input, select {
+      touch-action: manipulation;
+    }
+
+    body {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Reading typography scaling */
+    .reader-text-sm { font-size: 0.875rem; line-height: 1.6; }
+    .reader-text-base { font-size: 1rem; line-height: 1.7; }
+    .reader-text-lg { font-size: 1.125rem; line-height: 1.8; }
+    .reader-text-xl { font-size: 1.25rem; line-height: 1.85; }
+
+    /* Skeleton Shimmer Mask */
+    .skeleton-box {
+      position: relative;
+      overflow: hidden;
+      background-color: rgba(203, 213, 225, 0.4);
+    }
+    .dark .skeleton-box {
+      background-color: rgba(30, 41, 59, 0.6);
+    }
+
+    .skeleton-box::after {
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      transform: translateX(-100%);
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0)
+      );
+      animation: shimmer 1.8s infinite;
+      content: '';
+    }
+    .dark .skeleton-box::after {
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.03) 20%,
+        rgba(255, 255, 255, 0.08) 60%,
+        rgba(255, 255, 255, 0)
+      );
+    }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-dvh flex flex-col font-sans transition-colors duration-300 relative selection:bg-sky-500/30">
+
+  <div class="glow-bg-1"></div>
+  <div class="glow-bg-2"></div>
+
+  <!-- Header Bar -->
+  <header class="glass-nav sticky top-0 z-40 px-4 pb-3 ios-header-padding flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-black shadow-md shadow-sky-500/20 select-none">
+        FB
+      </div>
+      <div>
+        <h1 class="text-base font-extrabold tracking-tight bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          Fred's Bible Reference
+        </h1>
+        <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">v2.0 Enterprise</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="themeToggle" aria-label="Toggle Dark/Light Theme" class="px-3 py-1.5 rounded-full glass-card text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm active:scale-95 transition-all select-none cursor-pointer flex items-center gap-1.5">
+        <span id="themeIcon">🌙</span> <span id="themeText">Theme</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Viewport Container -->
+  <main id="appContainer" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-32 z-10 max-w-4xl mx-auto w-full">
+    
+    <!-- READ VIEW -->
+    <div id="readView" class="space-y-4">
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <div class="grid grid-cols-12 gap-2">
+          <select id="testamentSelect" class="col-span-3 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+            <option value="NT" selected>NT</option>
+            <option value="OT">OT</option>
+          </select>
+
+          <select id="bookSelect" class="col-span-5 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+          </select>
+
+          <select id="chapterSelect" class="col-span-2 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-1 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+          </select>
+          
+          <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-2 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs (opt)" />
+        </div>
+
+        <div class="grid grid-cols-12 gap-2">
+          <select id="readTranslationSelect" class="col-span-8 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+            <option value="KJV" selected>KJV - King James Version</option>
+            <option value="ESV">ESV - English Standard Version</option>
+            <option value="PHILLIPS">Phillips NT - J.B. Phillips New Testament</option>
+          </select>
+
+          <div class="col-span-4 flex items-center justify-between bg-slate-200/80 dark:bg-slate-900/90 rounded-xl px-2 border border-slate-300/40 dark:border-slate-800/80 select-none">
+            <button id="fontDecBtn" class="text-xs font-black text-slate-500 hover:text-sky-400 px-1.5 py-1">A-</button>
+            <span id="fontSizeDisplay" class="text-[10px] font-extrabold text-slate-400">100%</span>
+            <button id="fontIncBtn" class="text-xs font-black text-slate-500 hover:text-sky-400 px-1.5 py-1">A+</button>
+          </div>
+        </div>
+
+        <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 via-indigo-600 to-purple-600 hover:from-sky-600 hover:to-purple-700 text-white font-bold text-xs py-3 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all select-none cursor-pointer flex items-center justify-center gap-2">
+          <span>📖</span> Load Passage
+        </button>
+      </div>
+
+      <div id="passageHeader" class="px-1 flex justify-between items-center text-xs font-bold text-slate-600 dark:text-slate-300">
+        <span id="passageTitle" class="text-sm bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">Romans 1 (KJV)</span>
+        <span id="offlineStatus" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none">Ready</span>
+      </div>
+
+      <div id="verseDisplay" class="glass-card rounded-2xl p-5 space-y-3 min-h-[320px] transition-all">
+        <p class="text-xs text-slate-400 text-center py-10">Tap "Load Passage" or press Enter to view text...</p>
+      </div>
+    </div>
+
+    <!-- AI INSIGHTS VIEW -->
+    <div id="aiView" class="space-y-4 hidden">
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
+          <span>⚙️</span> Gemini API Settings
+        </h2>
+        <div class="flex gap-2">
+          <input id="apiKeyInput" type="password" enterkeyhint="done" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <button id="saveKeyBtn" class="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold px-3 py-2 rounded-xl active:scale-95 transition-all select-none cursor-pointer">
+            Save Key
+          </button>
+        </div>
+        
+        <div class="flex justify-between items-center pt-1">
+          <p id="keyStatusText" class="text-[11px] text-slate-400 select-none">Stored locally on device.</p>
+          <button id="clearCacheBtn" class="text-[11px] font-bold text-rose-500 hover:text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 rounded-lg active:scale-95 transition-all cursor-pointer flex items-center gap-1 select-none">
             <span>🗑️</span> Clear Cache
           </button>
         </div>
@@ -634,7 +1103,7 @@
 
       if (selectedTranslation === 'KJV') {
         try {
-          const res = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}?translation=kjv`);
+          const res = await fetch(`[https://bible-api.com/$](https://bible-api.com/$){encodeURIComponent(passageQuery)}?translation=kjv`);
           if (res.ok) {
             const data = await res.json();
             if (data && data.verses && data.verses.length > 0) {
@@ -695,7 +1164,7 @@
         }
       };
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`;
+      const endpoint = `[https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=$](https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=$){encodeURIComponent(key)}`;
 
       try {
         const res = await fetch(endpoint, {
@@ -753,7 +1222,7 @@
       verseDisplay.innerHTML = verses.map(v => `
         <p class="${fontScaleClasses[fontScaleIndex]} leading-relaxed text-slate-700 dark:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-900/50 p-1.5 rounded-lg transition-colors cursor-pointer" onclick="copyVerseText('${v.verse}', \`${v.text.replace(/'/g, "\\'")}\`)">
           <sup class="text-[10px] font-extrabold text-sky-400 mr-1.5 select-none">${v.verse}</sup>
-          <span class="select-text">${v.text.trim()}</sup>
+          <span class="select-text">${v.text.trim()}</span>
         </p>
       `).join('');
       updateFontDisplay();
@@ -815,7 +1284,7 @@
       const monthIndex = parseInt(month, 10) - 1;
       const monthName = fixedMonthNames[monthIndex];
       const dayNum = parseInt(day, 10);
-      const rawUrl = `https://raw.githubusercontent.com/lyteword/chspurgeon-fcb/main/${monthName}/${monthName}-${dayNum}.md`;
+      const rawUrl = `[https://raw.githubusercontent.com/lyteword/chspurgeon-fcb/main/$](https://raw.githubusercontent.com/lyteword/chspurgeon-fcb/main/$){monthName}/${monthName}-${dayNum}.md`;
 
       try {
         const res = await fetch(rawUrl);
@@ -866,7 +1335,6 @@
         } else if (line.startsWith('## ')) {
           scripture = line.replace('## ', '').trim();
         } else if (line.startsWith('>') || (line.includes('—') && (line.startsWith('*') || line.startsWith('"')))) {
-          // Clean blockquote or inline scripture line
           let bqText = line.replace(/^>\s*/, '').trim();
           
           const dashMatch = bqText.match(/(["'].*?["'])\s*[—–-]\s*(.*)$/) \vert{}\vert{} bqText.match(/(\*.*?\*)\s*[—–-]\s*(.*)$/);
@@ -968,7 +1436,7 @@
       crossRefModal.classList.remove('hidden');
 
       try {
-        const res = await fetch(`https://bible-api.com/${encodeURIComponent(refText)}?translation=kjv`);
+        const res = await fetch(`[https://bible-api.com/$](https://bible-api.com/$){encodeURIComponent(refText)}?translation=kjv`);
         if (res.ok) {
           const data = await res.json();
           if (data && data.verses) {
@@ -1180,7 +1648,7 @@
         }
       };
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`;
+      const endpoint = `[https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=$](https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=$){encodeURIComponent(key)}`;
 
       try {
         const res = await fetch(endpoint, {
@@ -1296,6 +1764,7 @@
       }
     });
 
+    // Ensure books and initial passage load immediately on startup
     populateBooks();
     fetchPassage();
     initCheckbookDatePicker();
