@@ -495,11 +495,10 @@ Return ONLY a valid JSON object with key "verses" containing an array of objects
         generationConfig: { temperature: 0.1 }
       };
 
-      // Updated model endpoint URLs explicitly targeting gemini-2.5-flash and gemini-2.5-pro
+      // Model endpoints updated explicitly to gemini-3.8-flash as requested by API error message
       const modelEndpoints = [
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${encodeURIComponent(key)}`,
-        `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`
       ];
 
       let lastErrorDetail = '';
@@ -714,8 +713,8 @@ Return ONLY a valid JSON object matching this exact schema:
       };
 
       const modelEndpoints = [
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${encodeURIComponent(key)}`
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`
       ];
 
       let lastError = null;
