@@ -230,7 +230,7 @@
     <div id="aiView" class="space-y-4 hidden">
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
-          <span>⚙️</span> Gemini API Settings
+          <span>⚙️️</span> Gemini API Settings
         </h2>
         <div class="flex gap-2">
           <input id="apiKeyInput" type="password" enterkeyhint="done" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
@@ -458,10 +458,11 @@
     const HARDCODED_API_KEY = "";
 
     const BIBLE_BOOKS = {
-      OT: ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"],
-      NT: ["Matthew", "Mark", "Luke", "John", "Acts", "RomansHere is your complete, updated `index.html` file integrating the dynamic raw GitHub Markdown fetcher from the LyteWord repository. 
+      OT: ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel", "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra", "Nehemiah", "Esther", "Job", "Psalms", "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah", "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel", "Amos", "Obadiah", "Jonah", "Micah", "Nahum", "HabAh, that is a classic JavaScript copy-paste trap! 
 
-When a user selects any date in the Checkbook tab, the app automatically maps the month and day to fetch the exact raw Markdown file directly from `lyteword/chspurgeon-fcb`, parses the title, scripture reference, verse, and commentary paragraphs on the fly, caches it locally in `localStorage`, and renders it with your custom UI and copy buttons.
+In the previous turn's code snippet, the replacement block accidentally swallowed a small chunk of text right in the middle of the `BIBLE_BOOKS` array definition (specifically cutting off at `"Romans` inside the `NT` list), which broke the book dropdown population logic and caused downstream query malformations for the reader tab.
+
+Here is the fully corrected, pristine `index.html` file with the `BIBLE_BOOKS` array completely intact, alongside the fixed chapter query logic so both tabs run smoothly together.
 
 ### Updated File: `index.html`
 
@@ -1001,7 +1002,7 @@ When a user selects any date in the Checkbook tab, the app automatically maps th
     document.getElementById('themeToggle').addEventListener('click', () => {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
-      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
+      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️️';
     });
 
     function populateBooks() {
@@ -1360,23 +1361,18 @@ When a user selects any date in the Checkbook tab, the app automatically maps th
       let verse = "";
       let paragraphs = [];
 
-      let capturingParagraphs = false;
-
       for (let line of lines) {
         if (line.startsWith('# ')) {
           title = line.replace('# ', '').trim();
         } else if (line.startsWith('## ')) {
-          // Often includes scripture citation header like "## Psalm 18:28"
           scripture = line.replace('## ', '').trim();
         } else if (line.startsWith('>')) {
           verse = line.replace('>', '').trim().replace(/^["']|["']$/g, '');
         } else {
-          // Clean up markdown bolding / italics if needed
           paragraphs.push(line.replace(/\*\*/g, ''));
         }
       }
 
-      // If scripture is embedded in title or verse block, refine it
       if (title.includes('—')) {
         const parts = title.split('—');
         title = parts[0].trim();
