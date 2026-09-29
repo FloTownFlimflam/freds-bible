@@ -609,7 +609,6 @@
       const versesInput = verseRangeInput.value.trim();
       const selectedTranslation = readTranslationSelect.value || 'KJV';
 
-      // Fix: Only append colon and verses if text is actually entered, preventing 404s on full chapters
       const passageQuery = versesInput ? `${book} ${chapter}:${versesInput}` : `${book} ${chapter}`;
       const passageRef = passageQuery;
       const cacheKey = `bcache_${selectedTranslation}_${book}_${chapter}_${versesInput || 'all'}`;
@@ -782,7 +781,7 @@
       checkbookDatePicker.value = today;
     }
 
-    // Dynamic LyteWord Raw Markdown Fetcher for Faith's Checkbook
+    // Dynamic LyteWord Raw Markdown Fetcher for Faith's Checkbook (Fixed with unpadded day naming: month-day.md)
     async function loadCheckbookDevotion() {
       if (!checkbookDatePicker.value) initCheckbookDatePicker();
       
@@ -811,10 +810,12 @@
         </div>
       `;
 
-      // 2. Fetch directly from lyteword/chspurgeon-fcb GitHub raw repository
+      // 2. Fetch directly from lyteword/chspurgeon-fcb GitHub raw repository using exact unpadded structure (e.g. september-26.md)
       const monthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
-      const monthName = monthNames[parseInt(month, 10) - 1];
-      const rawUrl = `https://raw.githubusercontent.com/lyteword/chspurgeon-fcb/main/${monthName}/${month}-${day}.md`;
+      const monthIndex = parseInt(month, 10) - 1;
+      const monthName = monthNames[monthIndex];
+      const dayNum = parseInt(day, 10);
+      const rawUrl = `https://raw.githubusercontent.com/lyteword/chspurgeon-fcb/main/${monthName}/${monthName}-${dayNum}.md`;
 
       try {
         const res = await fetch(rawUrl);
@@ -828,58 +829,16 @@
           }
         }
       } catch (err) {
-        console.warn("Failed to fetch from LyteWord repo, attempting AI/fallback...", err);
+        console.warn("Failed to fetch from LyteWord repo, attempting fallback...", err);
       }
 
-      // 3. Optional AI Fallback if LyteWord fetch fails & API key is active
-      const key = getActiveApiKey();
-      if (key) {
-        const promptText = `Provide Charles H. Spurgeon's Faith's Checkbook devotional for ${formattedDateStr}. Return JSON with fields: title (string), scripture (string, e.g. "John 14:27"), verse (string), paragraphs (array of strings for commentary body).`;
-        const requestPayload = {
-          contents: [{ parts: [{ text: promptText }] }],
-          generationConfig: { 
-            temperature: 0.3,
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: "OBJECT",
-              properties: {
-                title: { type: "STRING" },
-                scripture: { type: "STRING" },
-                verse: { type: "STRING" },
-                paragraphs: { type: "ARRAY", items: { type: "STRING" } }
-              },
-              required: ["title", "scripture", "verse", "paragraphs"]
-            }
-          }
-        };
-
-        try {
-          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`;
-          const aiRes = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestPayload)
-          });
-          if (aiRes.ok) {
-            const data = await aiRes.json();
-            const parsed = JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text || '{}');
-            if (parsed && parsed.title && parsed.verse) {
-              try { localStorage.setItem(cacheKey, JSON.stringify(parsed)); } catch(e){}
-              renderCheckbookUI(formattedDateStr, parsed.title, parsed.scripture, parsed.verse, parsed.paragraphs);
-              return;
-            }
-          }
-        } catch (e) {}
-      }
-
-      // 4. Final safety fallback
+      // 3. Final safety fallback
       const fallback = {
         title: `Faith's Daily Promise for ${formattedDateStr}`,
         scripture: "Proverbs 3:5-6",
         verse: "Trust in the Lord with all thine heart; and lean not unto thine own understanding.",
         paragraphs: [
-          `As you walk through ${formattedDateStr}, remember that the Lord holds your steps in His hands. His promises are sure and steadfast for every day of the year.`,
-          "Lean not on your own strength or wisdom, but acknowledge Him in all your ways, and He shall direct your paths with unfailing grace and love."
+          `As you walk through ${formattedDateStr}, remember that the Lord holds your steps in His hands. His promises are sure and steadfast for every day of the year.`
         ]
       };
       renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs);
