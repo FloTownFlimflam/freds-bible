@@ -556,7 +556,7 @@
     document.getElementById('themeToggle').addEventListener('click', () => {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
-      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️️';
+      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
     });
 
     function populateBooks() {
@@ -831,7 +831,57 @@
         return;
       }
 
-      // Fallback generator for unmapped dates
+      // If not hardcoded, attempt to generate/fetch via Gemini if API key is present, otherwise show clean generated devotional
+      const key = getActiveApiKey();
+      if (key) {
+        checkbookDisplay.innerHTML = `
+          <div class="text-center py-10 space-y-3">
+            <div class="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="text-xs text-sky-400 font-bold">Loading Spurgeon's Checkbook for ${formattedDateStr}...</p>
+          </div>
+        `;
+
+        const promptText = `Provide Charles H. Spurgeon's Faith's Checkbook devotional for ${formattedDateStr}. Return JSON with fields: title (string), scripture (string, e.g. "John 14:27"), verse (string), paragraphs (array of strings for commentary body).`;
+
+        const requestPayload = {
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: { 
+            temperature: 0.3,
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                title: { type: "STRING" },
+                scripture: { type: "STRING" },
+                verse: { type: "STRING" },
+                paragraphs: { type: "ARRAY", items: { type: "STRING" } }
+              },
+              required: ["title", "scripture", "verse", "paragraphs"]
+            }
+          }
+        };
+
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`;
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestPayload)
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const parsed = JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text || '{}');
+            if (parsed && parsed.title && parsed.verse) {
+              SPURGEON_CALENDAR_MAP[monthDayKey] = parsed;
+              try { localStorage.setItem(cacheKey, JSON.stringify(parsed)); } catch(e){}
+              renderCheckbookUI(formattedDateStr, parsed.title, parsed.scripture, parsed.verse, parsed.paragraphs);
+              return;
+            }
+          }
+        } catch (e) {}
+      }
+
+      // Fallback if AI key is missing or request fails
       const fallback = {
         title: `Faith's Daily Promise for ${formattedDateStr}`,
         scripture: "Proverbs 3:5-6",
