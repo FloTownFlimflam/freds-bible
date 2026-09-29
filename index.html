@@ -184,7 +184,8 @@
           <span>⚙️</span> Gemini API Settings
         </h2>
         <div class="flex gap-2">
-          <input id="apiKeyInput" type="password" enterkeyhint="done" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <!-- Unmasked type="text" field for easy inspection and debugging -->
+          <input id="apiKeyInput" type="text" enterkeyhint="done" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
           <button id="saveKeyBtn" class="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold px-3 py-2 rounded-xl active:scale-95 transition-all select-none cursor-pointer">
             Save Key
           </button>
@@ -468,7 +469,7 @@
         } catch (e) {}
       }
 
-      // Option B: ESV & Phillips via Gemini AI Engine (Cycles endpoints: 2.5-flash -> 1.5-flash)
+      // Option B: ESV & Phillips via Gemini AI Engine
       const key = getActiveApiKey();
       if (!key) {
         verseDisplay.innerHTML = `
@@ -481,7 +482,7 @@
       }
 
       const promptText = `Provide the exact biblical verse text for ${passageRef} in the ${selectedTranslation} translation.
-Return ONLY a valid JSON object with a single key "verses" containing an array of objects with "verse" (number) and "text" (string):
+Return ONLY a valid JSON object with key "verses" containing an array of objects with "verse" (number) and "text" (string):
 {
   "verses": [
     { "verse": 1, "text": "Verse text here..." }
@@ -497,6 +498,8 @@ Return ONLY a valid JSON object with a single key "verses" containing an array o
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(key)}`
       ];
+
+      let lastErrorDetail = '';
 
       for (const endpoint of modelEndpoints) {
         const controller = new AbortController();
@@ -523,13 +526,22 @@ Return ONLY a valid JSON object with a single key "verses" containing an array o
               offlineStatus.className = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
               return;
             }
+          } else {
+            const errData = await res.json().catch(() => ({}));
+            lastErrorDetail = errData.error?.message || `HTTP ${res.status}`;
           }
         } catch (e) {
           clearTimeout(timeoutId);
+          lastErrorDetail = e.name === 'AbortError' ? 'Request timed out (8s)' : e.message;
         }
       }
 
-      verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to render ${passageRef} in ${selectedTranslation}. Check internet connection or Gemini API key.</p>`;
+      verseDisplay.innerHTML = `
+        <div class="text-center py-6 space-y-2">
+          <p class="text-xs text-rose-500 font-bold">Unable to render ${passageRef} in ${selectedTranslation}</p>
+          <p class="text-[11px] text-slate-400 font-mono bg-slate-900/50 p-2 rounded-lg border border-slate-800">API Error: ${lastErrorDetail}</p>
+        </div>
+      `;
     }
 
     function renderVerses(verses) {
@@ -645,7 +657,7 @@ Return ONLY a valid JSON object with a single key "verses" containing an array o
     saveKeyBtn.addEventListener('click', () => {
       dismissKeyboard();
       const k = apiKeyInput.value.trim();
-      if (k && k !== "••••••••••••••••••••••••••••••••") {
+      if (k) {
         localStorage.setItem('gemini_key', k);
         syncKeyStatusUI();
       }
@@ -727,7 +739,7 @@ Return ONLY a valid JSON object matching this exact schema:
         aiResultsDisplay.innerHTML = `
           <div class="text-center py-6 space-y-2">
             <p class="text-xs text-rose-500 font-bold">API Connection Error</p>
-            <p class="text-[11px] text-slate-400 font-mono">${lastError}</p>
+            <p class="text-[11px] text-slate-400 font-mono bg-slate-900/50 p-2 rounded-lg border border-slate-800">${lastError}</p>
           </div>
         `;
         return;
