@@ -404,6 +404,7 @@
         const opt = document.createElement('option');
         opt.value = c;
         opt.textContent = `Ch ${c}`;
+        if (c === 1) opt.selected = true;
         chapterSelect.appendChild(opt);
       }
     }
@@ -467,7 +468,7 @@
         } catch (e) {}
       }
 
-      // Option B: ESV & Phillips via Gemini AI Engine with 8s Timeout
+      // Option B: ESV & Phillips via Gemini AI Engine (Cycles endpoints: 2.5-flash -> 1.5-flash)
       const key = getActiveApiKey();
       if (!key) {
         verseDisplay.innerHTML = `
@@ -480,43 +481,52 @@
       }
 
       const promptText = `Provide the exact biblical verse text for ${passageRef} in the ${selectedTranslation} translation.
-Return ONLY a valid JSON object matching this schema:
+Return ONLY a valid JSON object with a single key "verses" containing an array of objects with "verse" (number) and "text" (string):
 {
   "verses": [
-    { "verse": 1, "text": "Exact verse text..." }
+    { "verse": 1, "text": "Verse text here..." }
   ]
 }`;
 
       const requestPayload = {
         contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
+        generationConfig: { temperature: 0.1 }
       };
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8-second timeout
+      const modelEndpoints = [
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(key)}`
+      ];
 
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestPayload),
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
+      for (const endpoint of modelEndpoints) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-        if (res.ok) {
-          const successData = await res.json();
-          const jsonText = successData.candidates?.[0]?.content?.parts?.[0]?.text;
-          const parsed = JSON.parse(jsonText);
-          if (parsed && parsed.verses && parsed.verses.length > 0) {
-            renderVerses(parsed.verses);
-            offlineStatus.textContent = `${selectedTranslation} Gemini Active`;
-            offlineStatus.className = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
-            return;
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestPayload),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (res.ok) {
+            const successData = await res.json();
+            const rawText = successData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            const cleanedJson = rawText.replace(/```json|```/g, '').trim();
+            const parsed = JSON.parse(cleanedJson);
+            
+            if (parsed && parsed.verses && parsed.verses.length > 0) {
+              renderVerses(parsed.verses);
+              offlineStatus.textContent = `${selectedTranslation} Gemini Active`;
+              offlineStatus.className = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
+              return;
+            }
           }
+        } catch (e) {
+          clearTimeout(timeoutId);
         }
-      } catch (e) {
-        clearTimeout(timeoutId);
       }
 
       verseDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8 font-bold">Unable to render ${passageRef} in ${selectedTranslation}. Check internet connection or Gemini API key.</p>`;
@@ -682,12 +692,12 @@ Return ONLY a valid JSON object matching this exact schema:
 
       const requestPayload = {
         contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
+        generationConfig: { temperature: 0.7 }
       };
 
       const modelEndpoints = [
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${encodeURIComponent(key)}`
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(key)}`
       ];
 
       let lastError = null;
@@ -724,8 +734,9 @@ Return ONLY a valid JSON object matching this exact schema:
       }
 
       try {
-        const jsonText = successData.candidates?.[0]?.content?.parts?.[0]?.text;
-        const data = JSON.parse(jsonText);
+        const rawText = successData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const cleanedJson = rawText.replace(/```json|```/g, '').trim();
+        const data = JSON.parse(cleanedJson);
 
         currentInsightsText = `FRED'S BIBLE REFERENCE - STUDY PACK
 Passage: ${passage} (${translation})
