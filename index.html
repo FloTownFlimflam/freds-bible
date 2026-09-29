@@ -21,6 +21,14 @@
               600: '#0284c7',
               700: '#0369a1',
             }
+          },
+          keyframes: {
+            shimmer: {
+              '100%': { transform: 'translateX(100%)' }
+            }
+          },
+          animation: {
+            shimmer: 'shimmer 1.8s infinite'
           }
         }
       }
@@ -28,7 +36,7 @@
   </script>
 
   <style>
-    /* Modern Glassmorphism Styling */
+    /* Glassmorphism Surface Styles */
     .glass-card {
       background: rgba(255, 255, 255, 0.82);
       backdrop-filter: blur(24px) saturate(190%);
@@ -107,6 +115,40 @@
     .reader-text-base { font-size: 1rem; line-height: 1.7; }
     .reader-text-lg { font-size: 1.125rem; line-height: 1.8; }
     .reader-text-xl { font-size: 1.25rem; line-height: 1.85; }
+
+    /* Skeleton Shimmer Mask */
+    .skeleton-box {
+      position: relative;
+      overflow: hidden;
+      background-color: rgba(203, 213, 225, 0.4);
+    }
+    .dark .skeleton-box {
+      background-color: rgba(30, 41, 59, 0.6);
+    }
+
+    .skeleton-box::after {
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      transform: translateX(-100%);
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0)
+      );
+      animation: shimmer 1.8s infinite;
+      content: '';
+    }
+    .dark .skeleton-box::after {
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.03) 20%,
+        rgba(255, 255, 255, 0.08) 60%,
+        rgba(255, 255, 255, 0)
+      );
+    }
   </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-dvh flex flex-col font-sans transition-colors duration-300 relative selection:bg-sky-500/30">
@@ -308,7 +350,6 @@
     }
 
     // Dynamic Font Scaling Logic
-    let currentFontScale = 1; // 1 = 100%, 1.125 = 112%, etc.
     const fontScaleClasses = ['reader-text-sm', 'reader-text-base', 'reader-text-lg', 'reader-text-xl'];
     let fontScaleIndex = 1;
 
@@ -339,6 +380,54 @@
         updateFontDisplay();
       }
     });
+
+    // --- SKELETON LOADER TEMPLATES ---
+    function renderReaderSkeleton() {
+      return `
+        <div class="space-y-4 animate-fade-in">
+          ${Array(7).fill(0).map(() => `
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <div class="w-4 h-3 rounded skeleton-box"></div>
+                <div class="w-full h-4 rounded-md skeleton-box"></div>
+              </div>
+              <div class="w-11/12 h-4 rounded-md skeleton-box ml-6"></div>
+              <div class="w-3/4 h-4 rounded-md skeleton-box ml-6"></div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderAiInsightsSkeleton() {
+      return `
+        <div class="space-y-5 animate-fade-in">
+          <div class="space-y-2">
+            <div class="w-28 h-3 rounded skeleton-box"></div>
+            <div class="w-full h-16 rounded-xl skeleton-box"></div>
+          </div>
+          <div class="space-y-2">
+            <div class="w-36 h-3 rounded skeleton-box"></div>
+            <div class="w-full h-20 rounded-xl skeleton-box"></div>
+          </div>
+          <div class="space-y-2">
+            <div class="w-32 h-3 rounded skeleton-box"></div>
+            <div class="w-full h-16 rounded-xl skeleton-box"></div>
+          </div>
+          <div class="space-y-2">
+            <div class="w-24 h-3 rounded skeleton-box"></div>
+            <div class="w-full h-12 rounded-xl skeleton-box"></div>
+          </div>
+          <div class="space-y-2">
+            <div class="w-40 h-3 rounded skeleton-box"></div>
+            <div class="space-y-1.5">
+              <div class="w-full h-8 rounded-lg skeleton-box"></div>
+              <div class="w-full h-8 rounded-lg skeleton-box"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
 
     // --- APPLICATION CONSTANTS ---
     const HARDCODED_API_KEY = "";
@@ -469,7 +558,7 @@
     });
     navLexiconBtn.addEventListener('click', () => switchView(lexiconView, navLexiconBtn));
 
-    // --- PASSAGE FETCHING & LIGHTWEIGHT CACHING ENGINE ---
+    // --- PASSAGE FETCHING ENGINE ---
     async function fetchPassage() {
       dismissKeyboard();
       const book = bookSelect.value || 'Romans';
@@ -499,7 +588,8 @@
         localStorage.removeItem(cacheKey);
       }
 
-      verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${passageRef} (${selectedTranslation})...</p>`;
+      // Display Skeleton Loader during fetch
+      verseDisplay.innerHTML = renderReaderSkeleton();
 
       // Public API Option for KJV
       if (selectedTranslation === 'KJV') {
@@ -518,7 +608,7 @@
         } catch (e) {}
       }
 
-      // Gemini AI Engine for non-KJV or Fallbacks
+      // Gemini AI Engine
       const key = getActiveApiKey();
       if (!key) {
         offlineStatus.textContent = `Key Missing`;
@@ -740,12 +830,8 @@
       const translation = aiTranslationSelect.value;
       const tradition = aiTraditionSelect.value;
 
-      aiResultsDisplay.innerHTML = `
-        <div class="py-12 text-center space-y-2">
-          <div class="animate-spin text-2xl inline-block">✨</div>
-          <p class="text-xs text-slate-400 animate-pulse">Generating ${tradition} teaching pack for ${passage}... (${translation})</p>
-        </div>
-      `;
+      // Render Skeleton Loader for AI Insights
+      aiResultsDisplay.innerHTML = renderAiInsightsSkeleton();
 
       const promptText = `Provide a comprehensive study and teaching pack for ${passage} using the ${translation} translation from a ${tradition} perspective.`;
 
