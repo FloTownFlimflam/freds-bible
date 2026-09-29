@@ -476,6 +476,16 @@
     };
 
     const SPURGEON_CALENDAR_MAP = {
+      '09-28': {
+        title: "Peace Left As A Legacy",
+        scripture: "John 14:27",
+        verse: "Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you.",
+        paragraphs: [
+          "What a valuable legacy is this! It is the peace of God, which passeth all understanding. Jesus had peace Himself, unbroken amidst all the storms of life, and this He bequeaths to His disciples.",
+          "The world gives its peace by removing trouble or by offering worldly distractions; but the Lord Jesus gives peace in the very midst of tribulation. His peace stays the mind upon God and keeps the heart calm when trials rage.",
+          "Let us accept this divine legacy today. We need not fear nor be dismayed, for His peace guards our hearts and minds against every anxious care."
+        ]
+      },
       '09-29': {
         title: "To Glorify Christ Jesus",
         scripture: "John 16:14",
@@ -546,7 +556,7 @@
     document.getElementById('themeToggle').addEventListener('click', () => {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
-      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
+      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️️';
     });
 
     function populateBooks() {
@@ -815,14 +825,23 @@
       } catch (e) {}
 
       if (SPURGEON_CALENDAR_MAP[monthDayKey]) {
-        const fallback = SPURGEON_CALENDAR_MAP[monthDayKey];
-        renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs || fallback.devotion);
-        try { localStorage.setItem(cacheKey, JSON.stringify(fallback)); } catch (e) {}
+        const entry = SPURGEON_CALENDAR_MAP[monthDayKey];
+        renderCheckbookUI(formattedDateStr, entry.title, entry.scripture, entry.verse, entry.paragraphs || entry.devotion);
+        try { localStorage.setItem(cacheKey, JSON.stringify(entry)); } catch (e) {}
         return;
       }
 
-      const fallback = SPURGEON_CALENDAR_MAP['09-29'];
-      renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs || fallback.devotion);
+      // Fallback generator for unmapped dates
+      const fallback = {
+        title: `Faith's Daily Promise for ${formattedDateStr}`,
+        scripture: "Proverbs 3:5-6",
+        verse: "Trust in the Lord with all thine heart; and lean not unto thine own understanding.",
+        paragraphs: [
+          `As you walk through ${formattedDateStr}, remember that the Lord holds your steps in His hands. His promises are sure and steadfast for every day of the year.`,
+          "Lean not on your own strength or wisdom, but acknowledge Him in all your ways, and He shall direct your paths with unfailing grace and love."
+        ]
+      };
+      renderCheckbookUI(formattedDateStr, fallback.title, fallback.scripture, fallback.verse, fallback.paragraphs);
     }
 
     function renderCheckbookUI(dateHeader, title, scripture, verse, content) {
