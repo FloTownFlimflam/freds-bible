@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Fred's Bible">
-  <title>Fred's Bible Reference</title>
-  
+  <meta name="theme-color" content="#020617">
+  <title>Fred's Bible Reference v2.0</title>
+
   <link rel="manifest" href="manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -26,22 +26,22 @@
       }
     }
   </script>
-  
+
   <style>
-    /* Premium Modern Glassmorphism Styling */
+    /* Modern Glassmorphism Styling */
     .glass-card {
-      background: rgba(255, 255, 255, 0.78);
-      backdrop-filter: blur(20px) saturate(190%);
-      -webkit-backdrop-filter: blur(20px) saturate(190%);
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
       border: 1px solid rgba(255, 255, 255, 0.6);
-      box-shadow: 0 12px 32px 0 rgba(31, 38, 135, 0.08);
+      box-shadow: 0 12px 32px 0 rgba(31, 38, 135, 0.06);
     }
     
     .dark .glass-card {
-      background: rgba(10, 15, 30, 0.88);
-      backdrop-filter: blur(20px) saturate(190%);
-      -webkit-backdrop-filter: blur(20px) saturate(190%);
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      background: rgba(10, 15, 30, 0.85);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.65);
     }
 
@@ -59,45 +59,41 @@
       border-bottom: 1px solid rgba(30, 41, 59, 0.6);
     }
 
-    /* iOS Notch Safe Area Support */
     .ios-header-padding {
-      padding-top: calc(0.75rem + env(safe-area-inset-top, 20px));
+      padding-top: max(0.75rem, env(safe-area-inset-top));
     }
 
-    /* Deep Ambient Background Glow Spheres */
     .glow-bg-1 {
       position: fixed;
       top: -10%;
       left: -10%;
-      width: 320px;
-      height: 320px;
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, rgba(99, 102, 241, 0.1) 50%, transparent 70%);
-      border-radius: 50%;
-      filter: blur(50px);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .glow-bg-2 {
-      position: fixed;
-      bottom: 10%;
-      right: -10%;
-      width: 350px;
-      height: 350px;
-      background: radial-gradient(circle, rgba(129, 140, 248, 0.2) 0%, rgba(168, 85, 247, 0.1) 50%, transparent 70%);
+      width: 380px;
+      height: 380px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.18) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 70%);
       border-radius: 50%;
       filter: blur(60px);
       pointer-events: none;
       z-index: 0;
     }
 
-    /* Enable Native Copy/Paste and Highlighting */
+    .glow-bg-2 {
+      position: fixed;
+      bottom: 5%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.18) 0%, rgba(168, 85, 247, 0.08) 50%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(70px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
     body, p, span, li, blockquote, div {
       user-select: text !important;
       -webkit-user-select: text !important;
     }
 
-    /* Instant Touch Feedback in iOS Standalone Mode */
     button, input, select {
       touch-action: manipulation;
     }
@@ -105,64 +101,82 @@
     body {
       -webkit-tap-highlight-color: transparent;
     }
+
+    /* Reading typography scaling */
+    .reader-text-sm { font-size: 0.875rem; line-height: 1.6; }
+    .reader-text-base { font-size: 1rem; line-height: 1.7; }
+    .reader-text-lg { font-size: 1.125rem; line-height: 1.8; }
+    .reader-text-xl { font-size: 1.25rem; line-height: 1.85; }
   </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 h-full flex flex-col font-sans transition-colors duration-300 relative">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-dvh flex flex-col font-sans transition-colors duration-300 relative selection:bg-sky-500/30">
 
   <div class="glow-bg-1"></div>
   <div class="glow-bg-2"></div>
 
-  <!-- iOS Safe-Area Responsive Header Bar -->
+  <!-- Responsive Header Bar -->
   <header class="glass-nav sticky top-0 z-40 px-4 pb-3 ios-header-padding flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-md shadow-sky-500/20 select-none">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-black shadow-md shadow-sky-500/20 select-none">
         FB
       </div>
-      <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent">
-        Fred's Bible Reference
-      </h1>
+      <div>
+        <h1 class="text-base font-extrabold tracking-tight bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          Fred's Bible Reference
+        </h1>
+        <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">v2.0 Enterprise</span>
+      </div>
     </div>
-    <button id="themeToggle" class="px-3 py-1.5 rounded-full glass-card text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm active:scale-95 transition-all select-none cursor-pointer">
-      🌙 Theme
-    </button>
+    <div class="flex items-center gap-2">
+      <button id="themeToggle" aria-label="Toggle Dark/Light Theme" class="px-3 py-1.5 rounded-full glass-card text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm active:scale-95 transition-all select-none cursor-pointer flex items-center gap-1.5">
+        <span id="themeIcon">🌙</span> <span id="themeText">Theme</span>
+      </button>
+    </div>
   </header>
 
   <!-- Viewport Container -->
-  <main id="appContainer" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-32 z-10">
+  <main id="appContainer" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-32 z-10 max-w-4xl mx-auto w-full">
     
     <!-- READ VIEW -->
     <div id="readView" class="space-y-4">
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <div class="grid grid-cols-12 gap-2">
           <!-- Testament Selector -->
-          <select id="testamentSelect" class="col-span-3 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+          <select id="testamentSelect" aria-label="Select Testament" class="col-span-3 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
             <option value="NT" selected>NT</option>
             <option value="OT">OT</option>
           </select>
 
           <!-- Book Selector -->
-          <select id="bookSelect" class="col-span-4 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+          <select id="bookSelect" aria-label="Select Book" class="col-span-5 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
           </select>
 
           <!-- Chapter Dropdown -->
-          <select id="chapterSelect" class="col-span-2 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-1 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+          <select id="chapterSelect" aria-label="Select Chapter" class="col-span-2 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-1 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
           </select>
           
           <!-- Optional Verse(s) Text Input -->
-          <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-3 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs (opt)" />
+          <input id="verseRangeInput" type="text" enterkeyhint="go" aria-label="Verse Range" class="col-span-2 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-2 py-2.5 text-xs font-bold text-center border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs (opt)" />
         </div>
 
         <div class="grid grid-cols-12 gap-2">
-          <!-- Translation Selector for Reading -->
-          <select id="readTranslationSelect" class="col-span-12 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
+          <!-- Translation Selector -->
+          <select id="readTranslationSelect" aria-label="Translation Selector" class="col-span-8 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-bold border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none">
             <option value="KJV" selected>KJV - King James Version</option>
             <option value="ESV">ESV - English Standard Version</option>
             <option value="PHILLIPS">Phillips NT - J.B. Phillips New Testament</option>
           </select>
+
+          <!-- Reader Font Scale Control -->
+          <div class="col-span-4 flex items-center justify-between bg-slate-200/80 dark:bg-slate-900/90 rounded-xl px-2 border border-slate-300/40 dark:border-slate-800/80 select-none">
+            <button id="fontDecBtn" class="text-xs font-black text-slate-500 hover:text-sky-400 px-1.5 py-1">A-</button>
+            <span id="fontSizeDisplay" class="text-[10px] font-extrabold text-slate-400">100%</span>
+            <button id="fontIncBtn" class="text-xs font-black text-slate-500 hover:text-sky-400 px-1.5 py-1">A+</button>
+          </div>
         </div>
 
-        <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all select-none cursor-pointer">
-          Load Passage
+        <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 via-indigo-600 to-purple-600 hover:from-sky-600 hover:to-purple-700 text-white font-bold text-xs py-3 rounded-xl shadow-md shadow-sky-500/20 active:scale-95 transition-all select-none cursor-pointer flex items-center justify-center gap-2">
+          <span>📖</span> Load Passage
         </button>
       </div>
 
@@ -171,20 +185,19 @@
         <span id="offlineStatus" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none">Ready</span>
       </div>
 
-      <div id="verseDisplay" class="glass-card rounded-2xl p-5 space-y-3 min-h-[320px]">
+      <div id="verseDisplay" class="glass-card rounded-2xl p-5 space-y-3 min-h-[320px] transition-all">
         <p class="text-xs text-slate-400 text-center py-10">Tap "Load Passage" or press Enter to view text...</p>
       </div>
     </div>
 
     <!-- AI INSIGHTS VIEW -->
     <div id="aiView" class="space-y-4 hidden">
-      <!-- Gemini Key Section -->
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
           <span>⚙️</span> Gemini API Settings
         </h2>
         <div class="flex gap-2">
-          <input id="apiKeyInput" type="text" enterkeyhint="done" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
+          <input id="apiKeyInput" type="password" enterkeyhint="done" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-200/80 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 rounded-xl px-3 py-2 text-xs font-mono border border-slate-300/40 dark:border-slate-800/80 focus:ring-2 focus:ring-sky-500 outline-none" />
           <button id="saveKeyBtn" class="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold px-3 py-2 rounded-xl active:scale-95 transition-all select-none cursor-pointer">
             Save Key
           </button>
@@ -192,15 +205,14 @@
         <p id="keyStatusText" class="text-[11px] text-slate-400 select-none">Stored locally on device.</p>
       </div>
 
-      <!-- Cache Management Section -->
       <div class="glass-card rounded-2xl p-4 space-y-3">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
-          <span>🗑️</span> Cache & Storage Management
+          <span>🗑️</span> Cache & Storage
         </h2>
         <p class="text-[11px] text-slate-400 leading-relaxed">
           Clear local database storage and reset cached Bible chapters.
         </p>
-        <button id="clearCacheBtn" class="w-full bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2">
+        <button id="clearCacheBtn" class="w-full bg-rose-600/10 hover:bg-rose-600/20 text-rose-500 border border-rose-500/20 text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2">
           <span>🗑️</span> Clear Saved Bible Cache
         </button>
         <p id="clearCacheStatus" class="text-[10px] text-slate-400 text-center hidden"></p>
@@ -272,7 +284,7 @@
   </main>
 
   <!-- Navigation -->
-  <nav class="glass-nav fixed bottom-0 left-0 right-0 z-40 px-6 py-3 pb-6 flex justify-around items-center border-t border-slate-200/50 dark:border-slate-800/50 select-none">
+  <nav class="glass-nav fixed bottom-0 left-0 right-0 z-40 px-6 py-3 pb-6 flex justify-around items-center border-t border-slate-200/50 dark:border-slate-800/50 select-none max-w-4xl mx-auto">
     <button id="navReadBtn" class="flex flex-col items-center gap-1 text-sky-400 font-bold transition-all cursor-pointer">
       <span class="text-xl">📖</span>
       <span class="text-[10px] tracking-wide">Read</span>
@@ -295,13 +307,40 @@
       }
     }
 
-    document.addEventListener('touchstart', (e) => {
-      if (!['INPUT', 'SELECT', 'BUTTON', 'TEXTAREA'].includes(e.target.tagName)) {
-        dismissKeyboard();
-      }
-    }, { passive: true });
+    // Dynamic Font Scaling Logic
+    let currentFontScale = 1; // 1 = 100%, 1.125 = 112%, etc.
+    const fontScaleClasses = ['reader-text-sm', 'reader-text-base', 'reader-text-lg', 'reader-text-xl'];
+    let fontScaleIndex = 1;
 
-    // --- APPLICATION LOGIC ---
+    const fontDecBtn = document.getElementById('fontDecBtn');
+    const fontIncBtn = document.getElementById('fontIncBtn');
+    const fontSizeDisplay = document.getElementById('fontSizeDisplay');
+
+    function updateFontDisplay() {
+      const percentages = ['87%', '100%', '112%', '125%'];
+      fontSizeDisplay.textContent = percentages[fontScaleIndex];
+      const verses = verseDisplay.querySelectorAll('p');
+      verses.forEach(p => {
+        fontScaleClasses.forEach(c => p.classList.remove(c));
+        p.classList.add(fontScaleClasses[fontScaleIndex]);
+      });
+    }
+
+    fontDecBtn.addEventListener('click', () => {
+      if (fontScaleIndex > 0) {
+        fontScaleIndex--;
+        updateFontDisplay();
+      }
+    });
+
+    fontIncBtn.addEventListener('click', () => {
+      if (fontScaleIndex < fontScaleClasses.length - 1) {
+        fontScaleIndex++;
+        updateFontDisplay();
+      }
+    });
+
+    // --- APPLICATION CONSTANTS ---
     const HARDCODED_API_KEY = "";
 
     const BIBLE_BOOKS = {
@@ -359,13 +398,16 @@
     const storedTheme = localStorage.getItem('app_theme');
     if (storedTheme === 'light') {
       document.documentElement.classList.remove('dark');
+      document.getElementById('themeIcon').textContent = '☀️';
     } else {
       document.documentElement.classList.add('dark');
+      document.getElementById('themeIcon').textContent = '🌙';
     }
 
     document.getElementById('themeToggle').addEventListener('click', () => {
       const isDark = document.documentElement.classList.toggle('dark');
       localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
+      document.getElementById('themeIcon').textContent = isDark ? '🌙' : '☀️';
     });
 
     function populateBooks() {
@@ -441,7 +483,7 @@
 
       passageTitle.textContent = `${passageRef} (${selectedTranslation})`;
 
-      // 1. Check Local Cache First (Instant load in 0ms)
+      // 1. Local Cache Lookup
       try {
         const cachedData = localStorage.getItem(cacheKey);
         if (cachedData) {
@@ -454,12 +496,12 @@
           }
         }
       } catch (e) {
-        localStorage.removeItem(cacheKey); // Clean invalid entries safely
+        localStorage.removeItem(cacheKey);
       }
 
       verseDisplay.innerHTML = `<p class="text-xs text-slate-400 text-center py-10 animate-pulse">Loading ${passageRef} (${selectedTranslation})...</p>`;
 
-      // Option A: KJV via Public Endpoint
+      // Public API Option for KJV
       if (selectedTranslation === 'KJV') {
         try {
           const res = await fetch(`https://bible-api.com/${encodeURIComponent(passageQuery)}?translation=kjv`);
@@ -467,7 +509,7 @@
             const data = await res.json();
             if (data && data.verses && data.verses.length > 0) {
               renderVerses(data.verses);
-              localStorage.setItem(cacheKey, JSON.stringify(data.verses));
+              try { localStorage.setItem(cacheKey, JSON.stringify(data.verses)); } catch(e){}
               offlineStatus.textContent = `KJV Active`;
               offlineStatus.className = 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
               return;
@@ -476,7 +518,7 @@
         } catch (e) {}
       }
 
-      // Option B: ESV & Phillips via Gemini AI Engine
+      // Gemini AI Engine for non-KJV or Fallbacks
       const key = getActiveApiKey();
       if (!key) {
         offlineStatus.textContent = `Key Missing`;
@@ -490,59 +532,56 @@
         return;
       }
 
-      const promptText = `Provide the complete verse text for ${passageRef} in ${selectedTranslation}.
-Return ONLY a JSON object formatted as {"verses":[{"verse":1,"text":"..."}]}.`;
+      const promptText = `Provide the complete verse text for ${passageRef} in ${selectedTranslation}.`;
 
       const requestPayload = {
         contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: { temperature: 0.1 }
+        generationConfig: { 
+          temperature: 0.1,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              verses: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    verse: { type: "INTEGER" },
+                    text: { type: "STRING" }
+                  },
+                  required: ["verse", "text"]
+                }
+              }
+            },
+            required: ["verses"]
+          }
+        }
       };
 
-      const modelEndpoints = [
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`,
-        `https://generativelanguage.googleapis.com/v1/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`
-      ];
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`;
 
-      let lastErrorDetail = '';
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestPayload)
+        });
 
-      for (const endpoint of modelEndpoints) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 18000);
-
-        try {
-          const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestPayload),
-            signal: controller.signal
-          });
-          clearTimeout(timeoutId);
-
-          if (res.ok) {
-            const successData = await res.json();
-            const rawText = successData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-            const cleanedJson = rawText.replace(/```json|```/g, '').trim();
-            const parsed = JSON.parse(cleanedJson);
-            
-            if (parsed && parsed.verses && parsed.verses.length > 0) {
-              renderVerses(parsed.verses);
-              // Save to cache for instant subsequent reads
-              try {
-                localStorage.setItem(cacheKey, JSON.stringify(parsed.verses));
-              } catch (e) {}
-              offlineStatus.textContent = `${selectedTranslation} Gemini Active`;
-              offlineStatus.className = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
-              return;
-            }
-          } else {
-            const errData = await res.json().catch(() => ({}));
-            lastErrorDetail = errData.error?.message || `HTTP ${res.status}`;
+        if (res.ok) {
+          const successData = await res.json();
+          const rawText = successData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+          const parsed = JSON.parse(rawText);
+          
+          if (parsed && parsed.verses && parsed.verses.length > 0) {
+            renderVerses(parsed.verses);
+            try { localStorage.setItem(cacheKey, JSON.stringify(parsed.verses)); } catch (e) {}
+            offlineStatus.textContent = `${selectedTranslation} Gemini Active`;
+            offlineStatus.className = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
+            return;
           }
-        } catch (e) {
-          clearTimeout(timeoutId);
-          lastErrorDetail = e.name === 'AbortError' ? 'Request timed out (18s)' : e.message;
         }
-      }
+      } catch (e) {}
 
       offlineStatus.textContent = `${selectedTranslation} Error`;
       offlineStatus.className = 'bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2.5 py-0.5 rounded-full text-[10px] font-semibold select-none';
@@ -550,18 +589,27 @@ Return ONLY a JSON object formatted as {"verses":[{"verse":1,"text":"..."}]}.`;
       verseDisplay.innerHTML = `
         <div class="text-center py-6 space-y-2">
           <p class="text-xs text-rose-500 font-bold">Unable to render ${passageRef} in ${selectedTranslation}</p>
-          <p class="text-[11px] text-slate-400 font-mono bg-slate-900/50 p-2 rounded-lg border border-slate-800">API Error: ${lastErrorDetail}</p>
         </div>
       `;
     }
 
     function renderVerses(verses) {
       verseDisplay.innerHTML = verses.map(v => `
-        <p class="text-sm leading-relaxed text-slate-700 dark:text-slate-100">
-          <sup class="text-[10px] font-extrabold text-sky-400 mr-1 select-none">${v.verse}</sup>
+        <p class="${fontScaleClasses[fontScaleIndex]} leading-relaxed text-slate-700 dark:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-900/50 p-1.5 rounded-lg transition-colors cursor-pointer" onclick="copyVerseText('${v.verse}', \`${v.text.replace(/'/g, "\\'")}\`)">
+          <sup class="text-[10px] font-extrabold text-sky-400 mr-1.5 select-none">${v.verse}</sup>
           <span class="select-text">${v.text.trim()}</span>
         </p>
       `).join('');
+      updateFontDisplay();
+    }
+
+    function copyVerseText(num, text) {
+      const ref = `${bookSelect.value} ${chapterSelect.value}:${num}`;
+      navigator.clipboard.writeText(`"${text}" (${ref})`);
+      offlineStatus.textContent = `Copied ${ref}!`;
+      setTimeout(() => {
+        offlineStatus.textContent = `Ready`;
+      }, 2000);
     }
 
     loadBtn.addEventListener('click', fetchPassage);
@@ -572,12 +620,10 @@ Return ONLY a JSON object formatted as {"verses":[{"verse":1,"text":"..."}]}.`;
       }
     });
 
-    // --- CACHE CLEARING EVENT ---
     clearCacheBtn.addEventListener('click', async () => {
       clearCacheStatus.classList.remove('hidden');
       clearCacheStatus.textContent = "Clearing saved Bible cache...";
       
-      // Selectively clear only Bible cache entries
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith('bcache_')) {
           localStorage.removeItem(key);
@@ -701,73 +747,43 @@ Return ONLY a JSON object formatted as {"verses":[{"verse":1,"text":"..."}]}.`;
         </div>
       `;
 
-      const promptText = `Provide a comprehensive study and teaching pack for ${passage} using the ${translation} translation from a ${tradition} perspective.
-
-Return ONLY a valid JSON object matching this exact schema:
-{
-  "theologicalSummary": "A concise 2-3 sentence overview highlighting structural, grammatical, or theological context.",
-  "sermonIllustration": "A vivid classic sermon illustration or object lesson tailored to the theme of this passage.",
-  "conceptualAnalogy": "A clear, modern analogy explaining the central doctrine or practical point.",
-  "famousQuote": "A notable quote from a theologian, C.S. Lewis, Church Father, or historical Christian author relevant to this verse (include author name).",
-  "crossReferences": ["Book Ch:Vs - Brief note on connection", "Book Ch:Vs - Brief note on connection"],
-  "studyQuestions": [
-    "Observation: Focus on key details explicitly stated in text",
-    "Grammar & Structure: Focus on key word, contrast, or phrasing",
-    "Theological Core: What this reveals about God's character/truth",
-    "Practical Application: How this applies to daily modern life",
-    "Deep Heart Reflection: Introspective personal question probing heart motivations, surrender, or convictions"
-  ]
-}`;
+      const promptText = `Provide a comprehensive study and teaching pack for ${passage} using the ${translation} translation from a ${tradition} perspective.`;
 
       const requestPayload = {
         contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: { temperature: 0.7 }
+        generationConfig: { 
+          temperature: 0.7,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              theologicalSummary: { type: "STRING" },
+              sermonIllustration: { type: "STRING" },
+              conceptualAnalogy: { type: "STRING" },
+              famousQuote: { type: "STRING" },
+              crossReferences: { type: "ARRAY", items: { type: "STRING" } },
+              studyQuestions: { type: "ARRAY", items: { type: "STRING" } }
+            },
+            required: ["theologicalSummary", "sermonIllustration", "conceptualAnalogy", "famousQuote", "crossReferences", "studyQuestions"]
+          }
+        }
       };
 
-      const modelEndpoints = [
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`,
-        `https://generativelanguage.googleapis.com/v1/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`
-      ];
-
-      let lastError = null;
-      let successData = null;
-
-      for (const endpoint of modelEndpoints) {
-        try {
-          const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestPayload)
-          });
-
-          if (res.ok) {
-            successData = await res.json();
-            break;
-          } else {
-            const errJson = await res.json().catch(() => ({}));
-            lastError = errJson.error?.message || `HTTP ${res.status}`;
-          }
-        } catch (e) {
-          lastError = e.message;
-        }
-      }
-
-      if (!successData) {
-        aiResultsDisplay.innerHTML = `
-          <div class="text-center py-6 space-y-2">
-            <p class="text-xs text-rose-500 font-bold">API Connection Error</p>
-            <p class="text-[11px] text-slate-400 font-mono bg-slate-900/50 p-2 rounded-lg border border-slate-800">${lastError}</p>
-          </div>
-        `;
-        return;
-      }
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`;
 
       try {
-        const rawText = successData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        const cleanedJson = rawText.replace(/```json|```/g, '').trim();
-        const data = JSON.parse(cleanedJson);
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestPayload)
+        });
 
-        currentInsightsText = `FRED'S BIBLE REFERENCE - STUDY PACK
+        if (res.ok) {
+          const successData = await res.json();
+          const rawText = successData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+          const data = JSON.parse(rawText);
+
+          currentInsightsText = `FRED'S BIBLE REFERENCE - STUDY PACK
 Passage: ${passage} (${translation})
 Perspective: ${tradition}
 
@@ -789,74 +805,79 @@ ${data.crossReferences.map(r => `• ${r}`).join('\n')}
 --- REFLECTION & STUDY QUESTIONS ---
 ${data.studyQuestions.map((q, i) => `${i + 1}.${q}`).join('\n')}`;
 
-        aiResultsDisplay.innerHTML = `
-          <div class="space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800 pb-2">
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Target: ${passage} (${translation})</span>
-              <button id="copyAllInsightsBtn" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-3 py-1 rounded-lg text-xs font-bold active:scale-95 transition-all select-none cursor-pointer">
-                📋 Copy All Insights
-              </button>
-            </div>
+          aiResultsDisplay.innerHTML = `
+            <div class="space-y-4">
+              <div class="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800 pb-2">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Target: ${passage} (${translation})</span>
+                <button id="copyAllInsightsBtn" class="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-3 py-1 rounded-lg text-xs font-bold active:scale-95 transition-all select-none cursor-pointer">
+                  📋 Copy All Insights
+                </button>
+              </div>
 
-            <div>
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-1 select-none">Overview (${tradition})</h3>
-              <p class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-sky-500/10 border border-sky-500/20 p-3 rounded-xl font-medium select-text">${data.theologicalSummary}</p>
-            </div>
+              <div>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-1 select-none">Overview (${tradition})</h3>
+                <p class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-sky-500/10 border border-sky-500/20 p-3 rounded-xl font-medium select-text">${data.theologicalSummary}</p>
+              </div>
 
-            <div>
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🎪 Sermon Illustration / Object Lesson</h3>
-              <div class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-slate-100/80 dark:bg-slate-900/90 p-3.5 rounded-xl border border-slate-200/50 dark:border-slate-800/80 select-text">
-                ${data.sermonIllustration}
+              <div>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🎪 Sermon Illustration / Object Lesson</h3>
+                <div class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-slate-100/80 dark:bg-slate-900/90 p-3.5 rounded-xl border border-slate-200/50 dark:border-slate-800/80 select-text">
+                  ${data.sermonIllustration}
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">💡 Conceptual Analogy</h3>
+                <div class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-slate-100/80 dark:bg-slate-900/90 p-3.5 rounded-xl border border-slate-200/50 dark:border-slate-800/80 select-text">
+                  ${data.conceptualAnalogy}
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">💬 Notable Quote</h3>
+                <blockquote class="text-xs italic leading-relaxed text-slate-700 dark:text-slate-200 bg-indigo-500/10 border-l-4 border-indigo-500 p-3 rounded-r-xl select-text">
+                  "${data.famousQuote}"
+                </blockquote>
+              </div>
+
+              <div>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🔗 Key Cross-References</h3>
+                <ul class="space-y-1.5 select-text">
+                  ${data.crossReferences.map(ref => `<li class="text-xs text-slate-700 dark:text-slate-200 bg-slate-100/60 dark:bg-slate-900/60 px-3 py-2 rounded-lg border border-slate-200/40 dark:border-slate-800/60 font-mono">📍 ${ref}</li>`).join('')}
+                </ul>
+              </div>
+
+              <div>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">❓ Reflection & Study Questions (5 Tiers)</h3>
+                <ol class="space-y-2 select-text">
+                  ${data.studyQuestions.map((q, idx) => {
+                    const isDeep = idx === 4;
+                    return `
+                      <li class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 p-3 rounded-xl border ${isDeep ? 'bg-indigo-500/10 dark:bg-indigo-950/60 border-indigo-500/30' : 'bg-slate-100/80 dark:bg-slate-900/90 border-slate-200/50 dark:border-slate-800/80'}">
+                        <strong class="text-sky-400">${idx + 1}.</strong> ${q}${isDeep ? '<span class="block mt-1 text-[10px] font-bold text-indigo-400 uppercase tracking-wider select-none">🔍 Deep Personal Reflection</span>' : ''}
+                      </li>
+                    `;
+                  }).join('')}
+                </ol>
               </div>
             </div>
+          `;
 
-            <div>
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">💡 Conceptual Analogy</h3>
-              <div class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 bg-slate-100/80 dark:bg-slate-900/90 p-3.5 rounded-xl border border-slate-200/50 dark:border-slate-800/80 select-text">
-                ${data.conceptualAnalogy}
-              </div>
-            </div>
+          document.getElementById('copyAllInsightsBtn').addEventListener('click', () => {
+            navigator.clipboard.writeText(currentInsightsText);
+            const btn = document.getElementById('copyAllInsightsBtn');
+            btn.textContent = '✅ Copied!';
+            setTimeout(() => { btn.textContent = '📋 Copy All Insights'; }, 2000);
+          });
+          return;
+        }
+      } catch (e) {}
 
-            <div>
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">💬 Notable Quote</h3>
-              <blockquote class="text-xs italic leading-relaxed text-slate-700 dark:text-slate-200 bg-indigo-500/10 border-l-4 border-indigo-500 p-3 rounded-r-xl select-text">
-                "${data.famousQuote}"
-              </blockquote>
-            </div>
-
-            <div>
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🔗 Key Cross-References</h3>
-              <ul class="space-y-1.5 select-text">
-                ${data.crossReferences.map(ref => `<li class="text-xs text-slate-700 dark:text-slate-200 bg-slate-100/60 dark:bg-slate-900/60 px-3 py-2 rounded-lg border border-slate-200/40 dark:border-slate-800/60 font-mono">📍 ${ref}</li>`).join('')}
-              </ul>
-            </div>
-
-            <div>
-              <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">❓ Reflection & Study Questions (5 Tiers)</h3>
-              <ol class="space-y-2 select-text">
-                ${data.studyQuestions.map((q, idx) => {
-                  const isDeep = idx === 4;
-                  return `
-                    <li class="text-xs leading-relaxed text-slate-700 dark:text-slate-200 p-3 rounded-xl border ${isDeep ? 'bg-indigo-500/10 dark:bg-indigo-950/60 border-indigo-500/30' : 'bg-slate-100/80 dark:bg-slate-900/90 border-slate-200/50 dark:border-slate-800/80'}">
-                      <strong class="text-sky-400">${idx + 1}.</strong> ${q}${isDeep ? '<span class="block mt-1 text-[10px] font-bold text-indigo-400 uppercase tracking-wider select-none">🔍 Deep Personal Reflection</span>' : ''}
-                    </li>
-                  `;
-                }).join('')}
-              </ol>
-            </div>
-          </div>
-        `;
-
-        document.getElementById('copyAllInsightsBtn').addEventListener('click', () => {
-          navigator.clipboard.writeText(currentInsightsText);
-          const btn = document.getElementById('copyAllInsightsBtn');
-          btn.textContent = '✅ Copied!';
-          setTimeout(() => { btn.textContent = '📋 Copy All Insights'; }, 2000);
-        });
-
-      } catch (err) {
-        aiResultsDisplay.innerHTML = `<p class="text-xs text-rose-500 text-center py-8">Parsing Error: ${err.message}</p>`;
-      }
+      aiResultsDisplay.innerHTML = `
+        <div class="text-center py-6 space-y-2">
+          <p class="text-xs text-rose-500 font-bold">API Connection Error</p>
+        </div>
+      `;
     });
 
     populateBooks();
