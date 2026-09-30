@@ -214,7 +214,7 @@
     <div id="aiView" class="space-y-6 hidden">
       <div class="glass-card rounded-3xl p-6 sm:p-7 space-y-5 shadow-2xl">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
-          <span>⚙️️</span> Gemini API Settings
+          <span>⚙️</span> Gemini API Settings
         </h2>
         <div class="flex gap-3">
           <input id="apiKeyInput" type="password" enterkeyhint="done" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-900 text-slate-100 rounded-2xl px-4 py-4 text-xs font-mono border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none" />
@@ -615,6 +615,7 @@
         if (val === 'CHANGE_PASSAGE') {
           cascadeState = 'testament';
           updateDropdownDisplay();
+          try { if (passageDropdown.showPicker) passageDropdown.showPicker(); } catch(err) {}
           return;
         }
 
@@ -623,25 +624,30 @@
             currentTestament = val;
             cascadeState = 'book';
             updateDropdownDisplay();
+            try { if (passageDropdown.showPicker) passageDropdown.showPicker(); } catch(err) {}
           }
         } else if (cascadeState === 'book') {
           if (val === 'BACK_TO_TESTAMENTS') {
             cascadeState = 'testament';
             updateDropdownDisplay();
+            try { if (passageDropdown.showPicker) passageDropdown.showPicker(); } catch(err) {}
           } else if (val) {
             currentBook = val;
             cascadeState = 'chapter';
             updateDropdownDisplay();
+            try { if (passageDropdown.showPicker) passageDropdown.showPicker(); } catch(err) {}
           }
         } else if (cascadeState === 'chapter') {
           if (val === 'BACK_TO_BOOKS') {
             cascadeState = 'book';
             updateDropdownDisplay();
+            try { if (passageDropdown.showPicker) passageDropdown.showPicker(); } catch(err) {}
           } else if (val) {
             currentChapter = parseInt(val, 10);
             cascadeState = 'verse';
             currentVerse = null;
             updateDropdownDisplay();
+            try { if (passageDropdown.showPicker) passageDropdown.showPicker(); } catch(err) {}
             fetchPassage();
             setPromptDisplay();
           }
@@ -650,6 +656,7 @@
             cascadeState = 'chapter';
             currentVerse = null;
             updateDropdownDisplay();
+            try { if (passageDropdown.showPicker) passageDropdown.showPicker(); } catch(err) {}
           } else if (val === 'WHOLE_CHAPTER') {
             currentVerse = null;
             fetchPassage();
