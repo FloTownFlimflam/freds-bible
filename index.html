@@ -215,15 +215,15 @@
     <!-- READ VIEW -->
     <div id="readView" class="space-y-6">
       <div class="glass-card rounded-3xl p-6 sm:p-7 space-y-5 shadow-2xl">
-        <!-- Streamlined Control Grid: Book (6 cols) | Chapter (3 cols) | Verse (3 cols) -->
+        <!-- Unified Control Grid: Book (6 cols) | Chapter (3 cols) | Verse (3 cols) -->
         <div class="grid grid-cols-12 gap-3.5">
           <select id="bookSelect" class="col-span-6 bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
           </select>
 
-          <select id="chapterSelect" class="col-span-3 bg-slate-900 text-slate-100 rounded-2xl px-2 py-4 text-xs font-bold text-center border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
+          <select id="chapterSelect" class="col-span-3 bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
           </select>
           
-          <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-3 bg-slate-900 text-slate-100 rounded-2xl px-2 py-4 text-xs font-bold text-center border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs..." />
+          <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-3 bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none placeholder-slate-500" placeholder="Vs..." />
         </div>
 
         <div>
@@ -240,11 +240,11 @@
       </div>
 
       <div id="passageHeader" class="px-3 flex justify-between items-center text-xs font-bold text-slate-300">
-        <span id="passageTitle" class="text-sm font-extrabold bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">John 1 (ESV)</span>
+        <span id="passageTitle" class="text-sm font-extrabold bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">Genesis 1 (ESV)</span>
         <span id="offlineStatus" class="bg-sky-500/10 text-sky-400 border border-sky-500/20 px-3 py-1 rounded-full text-[11px] font-semibold select-none">Ready</span>
       </div>
 
-      <div id="verseDisplay" class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 min-h-[400px] transition-all shadow-2xl">
+      <div id="verseDisplay" class="glass-card rounded-3xl p-6 sm:p-8 space-y-2 min-h-[400px] transition-all shadow-2xl">
         <p class="text-xs text-slate-400 text-center py-12">Tap "Load Passage" or press Enter to view text...</p>
       </div>
     </div>
@@ -539,7 +539,7 @@
         if (fontScaleIndex < fontScales.length - 1) { fontScaleIndex++; updateFontDisplay(); }
       });
 
-      // Single Book Selector listing all 66 books grouped under OT and NT
+      // Populate Books list starting with Genesis selected at top
       function populateBooks() {
         bookSelect.length = 0;
 
@@ -549,6 +549,7 @@
           var opt = document.createElement('option');
           opt.value = book;
           opt.textContent = book;
+          if (book === 'Genesis') opt.selected = true;
           otGroup.appendChild(opt);
         });
         bookSelect.appendChild(otGroup);
@@ -559,7 +560,6 @@
           var opt = document.createElement('option');
           opt.value = book;
           opt.textContent = book;
-          if (book === 'John') opt.selected = true;
           ntGroup.appendChild(opt);
         });
         bookSelect.appendChild(ntGroup);
@@ -568,7 +568,7 @@
       }
 
       function populateChapters() {
-        var selectedBook = bookSelect.value || 'John';
+        var selectedBook = bookSelect.value || 'Genesis';
         var totalChapters = CHAPTER_COUNTS[selectedBook] || 1;
 
         chapterSelect.length = 0;
@@ -606,7 +606,7 @@
       });
 
       syncReaderBtn.addEventListener('click', function() {
-        var currentBook = bookSelect.value || 'John';
+        var currentBook = bookSelect.value || 'Genesis';
         var currentChapter = chapterSelect.value || '1';
         var verses = verseRangeInput.value.trim();
         aiPassageInput.value = verses ? (currentBook + ' ' + currentChapter + ':' + verses) : (currentBook + ' ' + currentChapter);
@@ -638,10 +638,10 @@
         verseDisplay.innerHTML = '';
         verses.forEach(function(v) {
           var p = document.createElement('p');
-          p.className = 'text-xs leading-relaxed text-slate-700 dark:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-900/50 p-3 rounded-2xl transition-colors cursor-pointer';
+          p.className = 'text-xs leading-relaxed text-slate-700 dark:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-900/50 py-1.5 px-3 rounded-xl transition-colors cursor-pointer';
           
           var sup = document.createElement('sup');
-          sup.className = 'text-xs font-extrabold text-sky-400 mr-3 select-none';
+          sup.className = 'text-xs font-extrabold text-sky-400 mr-2.5 select-none';
           sup.textContent = v.verse;
           
           var span = document.createElement('span');
@@ -669,7 +669,7 @@
 
       function fetchPassage() {
         dismissKeyboard();
-        var book = bookSelect.value || 'John';
+        var book = bookSelect.value || 'Genesis';
         var chapter = parseInt(chapterSelect.value || '1', 10);
         var versesInput = verseRangeInput.value.trim();
         var selectedTranslation = readTranslationSelect.value || 'ESV';
