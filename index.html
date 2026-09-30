@@ -121,11 +121,19 @@
       --app-line-height-scale: 1.8;
     }
 
-    /* Dynamically apply scale to all typography across every active view */
-    main p, main span, main label, main h2, main h3, main h4, main div, main button, main input, main select,
-    #popoverRefContent p, #popoverRefContent span {
-      font-size: var(--app-font-scale);
-      line-height: var(--app-line-height-scale);
+    /* Universal Content Text Targeting (Excludes Headers & Control UI) */
+    #verseDisplay p, #verseDisplay span,
+    #checkbookDisplay p, #checkbookDisplay span,
+    #popoverRefContent p, #popoverRefContent span,
+    #aiResultsDisplay p, #aiResultsDisplay span, #aiResultsDisplay div,
+    #aiResultsDisplay li, #aiResultsDisplay button.crossref-pill {
+      font-size: var(--app-font-scale) !important;
+      line-height: var(--app-line-height-scale) !important;
+    }
+
+    /* Preserve Header Structural Proportions */
+    #aiResultsDisplay h3, #aiResultsDisplay h4, header h1, nav span {
+      font-size: initial;
     }
 
     /* Original gradient button format matching reference images */
@@ -516,7 +524,7 @@
       themeToggle.addEventListener('click', function() {
         var isDark = document.documentElement.classList.toggle('dark');
         safeSetStorage('app_theme', isDark ? 'dark' : 'light');
-        themeIcon.textContent = isDark ? '🌙' : '☀️️';
+        themeIcon.textContent = isDark ? '🌙' : '☀️';
       });
 
       // Check / Uncheck All Modules Logic
@@ -1166,14 +1174,14 @@
               if (data.theologicalSummary) {
                 htmlString += '<div>' +
                   '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">Overview</h3>' +
-                  '<p class="text-xs leading-relaxed text-slate-200 bg-sky-500/10 border border-sky-500/20 p-5 rounded-2xl font-medium select-text">' + data.theologicalSummary + '</p>' +
+                  '<p class="leading-relaxed text-slate-200 bg-sky-500/10 border border-sky-500/20 p-5 rounded-2xl font-medium select-text">' + data.theologicalSummary + '</p>' +
                 '</div>';
               }
 
               if (data.historicalContext) {
                 htmlString += '<div>' +
                   '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🏛️ Historical & Cultural Context</h3>' +
-                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + data.historicalContext + '</div>' +
+                  '<div class="leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + data.historicalContext + '</div>' +
                 '</div>';
               }
 
@@ -1181,7 +1189,7 @@
                 var keywordsHtml = '';
                 for(var i=0; i<data.keyWords.length; i++) {
                   var kw = data.keyWords[i];
-                  keywordsHtml += '<span class="text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3.5 py-2 rounded-xl inline-block">' + kw.word + ' (' + kw.strongs + ') - <span class="font-normal italic">' + kw.meaning + '</span></span>';
+                  keywordsHtml += '<span class="font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3.5 py-2 rounded-xl inline-block">' + kw.word + ' (' + kw.strongs + ') - <span class="font-normal italic">' + kw.meaning + '</span></span>';
                 }
                 htmlString += '<div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2.5 select-none">🔑 Key Word Breakdown</h3><div class="flex flex-wrap gap-2.5">' + keywordsHtml + '</div></div>';
               }
@@ -1189,35 +1197,35 @@
               if (data.personalDevotional) {
                 htmlString += '<div>' +
                   '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🙏 Personal Devotional</h3>' +
-                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + data.personalDevotional + '</div>' +
+                  '<div class="leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + data.personalDevotional + '</div>' +
                 '</div>';
               }
 
               if (data.teachingIllustrations) {
                 htmlString += '<div>' +
                   '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">💡 Teaching Illustrations & Metaphors</h3>' +
-                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text whitespace-pre-wrap">' + data.teachingIllustrations + '</div>' +
+                  '<div class="leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text whitespace-pre-wrap">' + data.teachingIllustrations + '</div>' +
                 '</div>';
               }
 
               if (data.practicalActionSteps) {
                 htmlString += '<div>' +
                   '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🚀 Practical Action Steps</h3>' +
-                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text whitespace-pre-wrap">' + data.practicalActionSteps + '</div>' +
+                  '<div class="leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text whitespace-pre-wrap">' + data.practicalActionSteps + '</div>' +
                 '</div>';
               }
 
               if (data.apologetics) {
                 htmlString += '<div>' +
                   '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🛡️ Apologetics & Hard Questions</h3>' +
-                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + data.apologetics + '</div>' +
+                  '<div class="leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + data.apologetics + '</div>' +
                 '</div>';
               }
 
               if (data.smallGroupLeader) {
                 htmlString += '<div>' +
                   '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">👥 Small Group Leader Prep</h3>' +
-                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + data.smallGroupLeader + '</div>' +
+                  '<div class="leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + data.smallGroupLeader + '</div>' +
                 '</div>';
               }
 
@@ -1227,7 +1235,7 @@
                   iceHtml += '<li>' + data.smallGroupIcebreakers[k] + '</li>';
                 }
                 iceHtml += '</ul>';
-                htmlString += '<div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🧊 Small Group Icebreakers</h3><div class="text-xs text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + iceHtml + '</div></div>';
+                htmlString += '<div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🧊 Small Group Icebreakers</h3><div class="text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + iceHtml + '</div></div>';
               }
 
               if (data.smallGroupQuestions && data.smallGroupQuestions.length > 0) {
@@ -1236,7 +1244,7 @@
                   qHtml += '<li>' + data.smallGroupQuestions[q] + '</li>';
                 }
                 qHtml += '</ol>';
-                htmlString += '<div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">❓ Small Group Discussion Questions</h3><div class="text-xs text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + qHtml + '</div></div>';
+                htmlString += '<div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">❓ Small Group Discussion Questions</h3><div class="text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + qHtml + '</div></div>';
               }
 
               if (data.calvinismVsArminianism) {
@@ -1246,7 +1254,7 @@
                 
                 htmlString += '<div class="p-5 bg-indigo-950/20 border border-indigo-500/30 rounded-2xl space-y-3">' +
                   '<h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-400 select-none">⚖️ Calvinist vs. Arminian Analysis</h3>' +
-                  '<div class="text-xs space-y-2.5 text-slate-200">' +
+                  '<div class="space-y-2.5 text-slate-200">' +
                     '<p><strong>Calvinist View:</strong> ' + calvView + '</p>' +
                     '<p><strong>Arminian View:</strong> ' + armView + '</p>' +
                     '<p class="italic text-slate-400"><strong>Summary:</strong> ' + summaryView + '</p>' +
@@ -1257,7 +1265,7 @@
               if (data.crossReferences && data.crossReferences.length > 0) {
                 var crHtml = '';
                 for(var j=0; j<data.crossReferences.length; j++) {
-                  crHtml += '<button class="crossref-pill text-xs font-mono bg-slate-900 text-sky-400 border border-slate-800 px-3.5 py-2 rounded-xl cursor-pointer hover:bg-slate-800">📍 ' + data.crossReferences[j] + '</button>';
+                  crHtml += '<button class="crossref-pill font-mono bg-slate-900 text-sky-400 border border-slate-800 px-3.5 py-2 rounded-xl cursor-pointer hover:bg-slate-800">📍 ' + data.crossReferences[j] + '</button>';
                 }
                 htmlString += '<div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2.5 select-none">🔗 Cross-References</h3><div class="flex flex-wrap gap-2.5">' + crHtml + '</div></div>';
               }
