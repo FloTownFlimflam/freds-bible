@@ -69,6 +69,7 @@
       border-bottom: 1px solid rgba(30, 41, 59, 0.6);
     }
 
+    /* Absolute bulletproof spacing below Dynamic Island / PWA status bar */
     .pwa-header-spacer {
       padding-top: max(3rem, calc(env(safe-area-inset-top) + 1.25rem));
     }
@@ -174,35 +175,23 @@
     
     <!-- READ VIEW -->
     <div id="readView" class="space-y-6">
-      <div class="glass-card rounded-3xl p-6 sm:p-7 space-y-4 shadow-2xl">
-        <!-- Breadcrumb Active State Indicator Bar -->
-        <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800/80 px-4 py-3 rounded-2xl">
-          <div class="flex items-center gap-2 overflow-x-auto">
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-sky-400">Active:</span>
-            <span id="breadcrumbText" class="text-xs font-bold text-slate-100 whitespace-nowrap">NT > Romans > Ch 1</span>
-          </div>
-          <button id="resetSelectionBtn" class="text-[10px] font-bold text-sky-400 hover:text-sky-300 bg-sky-500/10 px-2.5 py-1 rounded-lg border border-sky-500/20 cursor-pointer shrink-0">Change</button>
+      <div class="glass-card rounded-3xl p-6 sm:p-7 space-y-5 shadow-2xl">
+        <div class="grid grid-cols-12 gap-3">
+          <select id="testamentSelect" class="col-span-3 bg-slate-900 text-slate-100 rounded-2xl px-3 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
+            <option value="NT" selected>NT</option>
+            <option value="OT">OT</option>
+          </select>
+
+          <select id="bookSelect" class="col-span-5 bg-slate-900 text-slate-100 rounded-2xl px-3 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
+          </select>
+
+          <select id="chapterSelect" class="col-span-2 bg-slate-900 text-slate-100 rounded-xl px-2 py-4 text-xs font-bold text-center border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
+          </select>
+          
+          <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-2 bg-slate-900 text-slate-100 rounded-2xl px-1 py-4 text-xs font-bold text-center border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs..." />
         </div>
 
-        <!-- Touch-Optimized Cascading Selectors Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <select id="testamentSelect" class="bg-slate-900 text-slate-100 rounded-2xl px-3 py-3.5 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
-            <option value="OT">Old Testament</option>
-            <option value="NT" selected>New Testament</option>
-          </select>
-
-          <select id="bookSelect" class="bg-slate-900 text-slate-100 rounded-2xl px-3 py-3.5 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
-          </select>
-
-          <select id="chapterSelect" class="bg-slate-900 text-slate-100 rounded-2xl px-3 py-3.5 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
-          </select>
-
-          <select id="verseSelect" class="bg-slate-900 text-slate-100 rounded-2xl px-3 py-3.5 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
-            <option value="" selected>Whole Chapter</option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-12 gap-3 pt-1">
+        <div class="grid grid-cols-12 gap-3">
           <select id="readTranslationSelect" class="col-span-7 bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
             <option value="KJV" selected>KJV - King James</option>
             <option value="ESV">ESV - English Standard</option>
@@ -227,7 +216,7 @@
       </div>
 
       <div id="verseDisplay" class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 min-h-[400px] transition-all shadow-2xl">
-        <p class="text-xs text-slate-400 text-center py-12">Select passage above to view text...</p>
+        <p class="text-xs text-slate-400 text-center py-12">Tap "Load Passage" or press Enter to view text...</p>
       </div>
     </div>
 
@@ -449,15 +438,10 @@
       var navAiBtn = document.getElementById('navAiBtn');
       var navCheckbookBtn = document.getElementById('navCheckbookBtn');
       var navLexiconBtn = document.getElementById('navLexiconBtn');
-      
-      // Cascading Selectors Grid Elements
       var testamentSelect = document.getElementById('testamentSelect');
       var bookSelect = document.getElementById('bookSelect');
       var chapterSelect = document.getElementById('chapterSelect');
-      var verseSelect = document.getElementById('verseSelect');
-      var breadcrumbText = document.getElementById('breadcrumbText');
-      var resetSelectionBtn = document.getElementById('resetSelectionBtn');
-
+      var verseRangeInput = document.getElementById('verseRangeInput');
       var readTranslationSelect = document.getElementById('readTranslationSelect');
       var loadBtn = document.getElementById('loadBtn');
       var passageTitle = document.getElementById('passageTitle');
@@ -523,114 +507,37 @@
         if (fontScaleIndex < fontScaleClasses.length - 1) { fontScaleIndex++; updateFontDisplay(); }
       });
 
-      // --- CASCADING SELECTORS GRID LOGIC ---
-      function populateBooks(preserveBook) {
-        var t = testamentSelect.value;
-        var books = BIBLE_BOOKS[t] || BIBLE_BOOKS['NT'];
-        bookSelect.innerHTML = '';
+      function populateBooks() {
+        var selectedTestament = testamentSelect.value || 'NT';
+        var books = BIBLE_BOOKS[selectedTestament] || BIBLE_BOOKS['NT'];
         
-        books.forEach(function(b) {
+        bookSelect.length = 0;
+        books.forEach(function(book) {
           var opt = document.createElement('option');
-          opt.value = b;
-          opt.textContent = b;
-          if (preserveBook && b === preserveBook) opt.selected = true;
+          opt.value = book;
+          opt.textContent = book;
+          if (selectedTestament === 'NT' && book === 'Romans') opt.selected = true;
           bookSelect.add(opt);
         });
-
-        if (!preserveBook || !books.includes(preserveBook)) {
-          bookSelect.selectedIndex = 0;
-        }
-        populateChapters(null);
+        populateChapters();
       }
 
-      function populateChapters(preserveChapter) {
-        var b = bookSelect.value || 'Romans';
-        var totalChapters = CHAPTER_COUNTS[b] || 1;
-        chapterSelect.innerHTML = '';
+      function populateChapters() {
+        var selectedBook = bookSelect.value || 'Romans';
+        var totalChapters = CHAPTER_COUNTS[selectedBook] || 1;
 
+        chapterSelect.length = 0;
         for (var c = 1; c <= totalChapters; c++) {
           var opt = document.createElement('option');
           opt.value = c;
           opt.textContent = 'Ch ' + c;
-          if (preserveChapter && c === parseInt(preserveChapter, 10)) opt.selected = true;
+          if (c === 1) opt.selected = true;
           chapterSelect.add(opt);
         }
-
-        if (!preserveChapter || parseInt(preserveChapter, 10) > totalChapters) {
-          chapterSelect.selectedIndex = 0;
-        }
-        populateVerses(null);
       }
 
-      function getEstimatedVerseCount(book, chapter) {
-        if (book === 'Psalms') return chapter === 119 ? 176 : 100;
-        if (book === 'Genesis' && chapter === 50) return 26;
-        return 55;
-      }
-
-      function populateVerses(preserveVerse) {
-        var b = bookSelect.value || 'Romans';
-        var c = parseInt(chapterSelect.value || '1', 10);
-        var vCount = getEstimatedVerseCount(b, c);
-
-        verseSelect.innerHTML = '';
-        var optWhole = document.createElement('option');
-        optWhole.value = '';
-        optWhole.textContent = 'Whole Chapter';
-        verseSelect.add(optWhole);
-
-        for (var v = 1; v <= vCount; v++) {
-          var opt = document.createElement('option');
-          opt.value = v;
-          opt.textContent = 'Verse ' + v;
-          if (preserveVerse && v === parseInt(preserveVerse, 10)) opt.selected = true;
-          verseSelect.add(opt);
-        }
-
-        if (preserveVerse) {
-          verseSelect.value = preserveVerse;
-        } else {
-          verseSelect.selectedIndex = 0;
-        }
-
-        updateBreadcrumb();
-      }
-
-      function updateBreadcrumb() {
-        var tLabel = testamentSelect.value === 'OT' ? 'OT' : 'NT';
-        var b = bookSelect.value || 'Romans';
-        var c = chapterSelect.value || '1';
-        var v = verseSelect.value;
-        breadcrumbText.textContent = tLabel + ' > ' + b + ' > Ch ' + c + (v ? ' > Vs ' + v : '');
-      }
-
-      testamentSelect.addEventListener('change', function() {
-        populateBooks(null);
-        fetchPassage();
-      });
-
-      bookSelect.addEventListener('change', function() {
-        populateChapters(null);
-        fetchPassage();
-      });
-
-      chapterSelect.addEventListener('change', function() {
-        populateVerses(null);
-        fetchPassage();
-      });
-
-      verseSelect.addEventListener('change', function() {
-        updateBreadcrumb();
-        fetchPassage();
-      });
-
-      resetSelectionBtn.addEventListener('click', function() {
-        testamentSelect.value = 'NT';
-        populateBooks('Romans');
-        chapterSelect.value = '1';
-        populateVerses('');
-        fetchPassage();
-      });
+      testamentSelect.addEventListener('change', populateBooks);
+      bookSelect.addEventListener('change', populateChapters);
 
       function switchView(targetView, targetBtn) {
         dismissKeyboard();
@@ -658,10 +565,10 @@
       navLexiconBtn.addEventListener('click', function() { switchView(lexiconView, navLexiconBtn); });
 
       syncReaderBtn.addEventListener('click', function() {
-        var b = bookSelect.value || 'Romans';
-        var c = chapterSelect.value || '1';
-        var v = verseSelect.value;
-        aiPassageInput.value = v ? (b + ' ' + c + ':' + v) : (b + ' ' + c);
+        var currentBook = bookSelect.value || 'Romans';
+        var currentChapter = chapterSelect.value || '1';
+        var verses = verseRangeInput.value.trim();
+        aiPassageInput.value = verses ? (currentBook + ' ' + currentChapter + ':' + verses) : (currentBook + ' ' + currentChapter);
       });
 
       function copyVerseText(num, text) {
@@ -724,7 +631,7 @@
         dismissKeyboard();
         var book = bookSelect.value || 'Romans';
         var chapter = parseInt(chapterSelect.value || '1', 10);
-        var versesInput = verseSelect.value;
+        var versesInput = verseRangeInput.value.trim();
         var selectedTranslation = readTranslationSelect.value || 'KJV';
 
         var passageQuery = versesInput ? (book + ' ' + chapter + ':' + versesInput) : (book + ' ' + chapter);
@@ -874,6 +781,9 @@
       }
 
       loadBtn.addEventListener('click', fetchPassage);
+      verseRangeInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { dismissKeyboard(); fetchPassage(); }
+      });
 
       // Checkbook Functions (UNTOUCHED & LOCKED)
       function initCheckbookDatePicker() {
@@ -1230,7 +1140,7 @@
 
               if (data.traditionComparison) {
                 htmlString += '<div class="p-5 bg-purple-950/20 border border-purple-500/30 rounded-2xl space-y-3">' +
-                  '<h3 class="text-xs font-extrabold uppercase tracking-wider text-purple-400 select-none">🏛️️ Tradition Comparison</h3>' +
+                  '<h3 class="text-xs font-extrabold uppercase tracking-wider text-purple-400 select-none">🏛️ Tradition Comparison</h3>' +
                   '<div class="text-xs space-y-2.5 text-slate-200">' +
                     '<p><strong>Traditional Protestant:</strong> ' + data.traditionComparison.traditionalProtestant + '</p>' +
                     '<p><strong>Reformed:</strong> ' + data.traditionComparison.reformed + '</p>' +
@@ -1299,10 +1209,7 @@
       });
 
       // Execute Initialization
-      testamentSelect.value = 'NT';
-      populateBooks('Romans');
-      chapterSelect.value = '1';
-      populateVerses('');
+      populateBooks();
       fetchPassage();
       initCheckbookDatePicker();
     });
