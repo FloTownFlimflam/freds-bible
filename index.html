@@ -115,23 +115,38 @@
       padding: 12px;
     }
 
-    /* True Root-Level Universal Dynamic Font Scaling */
+    /* True Universal Root Font Controller Variables */
     :root {
       --app-font-scale: 1rem;
       --app-line-height-scale: 1.8;
     }
 
-    /* Target all content nodes globally inside the app container */
-    main p, main span, main label, main h2, main h3, main h4, main div, main button, main input, main select {
-      font-size: calc(var(--app-font-scale) * 0.85) !important;
+    /* Dynamically apply scale to all typography across every active view */
+    main p, main span, main label, main h2, main h3, main h4, main div, main button, main input, main select,
+    #popoverRefContent p, #popoverRefContent span {
+      font-size: var(--app-font-scale);
       line-height: var(--app-line-height-scale);
     }
 
-    /* Explicit scaling for primary body text containers */
-    #verseDisplay p, #aiResultsDisplay p, #checkbookDisplay p, #popoverRefContent p,
-    #verseDisplay span, #aiResultsDisplay span, #checkbookDisplay span, #popoverRefContent span {
-      font-size: var(--app-font-scale) !important;
-      line-height: var(--app-line-height-scale);
+    /* Original gradient button format matching reference images */
+    .btn-gradient-primary {
+      background: linear-gradient(90deg, #38bdf8 0%, #6366f1 50%, #a855f7 100%);
+      padding-top: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-radius: 1rem;
+      font-weight: 800;
+      color: #ffffff;
+      box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.3);
+      transition: all 0.2s ease-in-out;
+    }
+
+    .btn-gradient-primary:hover {
+      opacity: 0.95;
+      box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-gradient-primary:active {
+      transform: scale(0.98);
     }
 
     .skeleton-box {
@@ -164,7 +179,7 @@
   <div class="glow-bg-1"></div>
   <div class="glow-bg-2"></div>
 
-  <!-- Header Bar with PWA Spacer -->
+  <!-- Header Bar with Universal Font Controls & Theme Toggle -->
   <header class="glass-nav sticky top-0 z-40 px-6 py-4 pwa-header-spacer flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-3.5">
       <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-black shadow-md shadow-sky-500/20 select-none">
@@ -177,9 +192,18 @@
         <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">v2.0 Enterprise</span>
       </div>
     </div>
-    <div class="flex items-center gap-2">
-      <button id="themeToggle" aria-label="Toggle Dark/Light Theme" class="px-4 py-2 rounded-full glass-card text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm active:scale-95 transition-all select-none cursor-pointer flex items-center gap-1.5">
-        <span id="themeIcon">🌙</span> <span id="themeText">Theme</span>
+
+    <!-- Persistent Global Controls -->
+    <div class="flex items-center gap-2.5">
+      <!-- Universal Global Font Control -->
+      <div class="flex items-center justify-between bg-slate-900/90 rounded-full px-3 py-1 border border-slate-800 select-none shadow-inner">
+        <button id="fontDecBtn" aria-label="Decrease Font Size" class="text-xs font-black text-slate-400 hover:text-sky-400 px-1.5 py-0.5 cursor-pointer">A-</button>
+        <span id="fontSizeDisplay" class="text-[11px] font-extrabold text-slate-300 px-1">100%</span>
+        <button id="fontIncBtn" aria-label="Increase Font Size" class="text-xs font-black text-slate-400 hover:text-sky-400 px-1.5 py-0.5 cursor-pointer">A+</button>
+      </div>
+
+      <button id="themeToggle" aria-label="Toggle Dark/Light Theme" class="px-3.5 py-1.5 rounded-full glass-card text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm active:scale-95 transition-all select-none cursor-pointer flex items-center gap-1.5">
+        <span id="themeIcon">🌙</span>
       </button>
     </div>
   </header>
@@ -205,21 +229,15 @@
           <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-2 bg-slate-900 text-slate-100 rounded-2xl px-1 py-4 text-xs font-bold text-center border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs..." />
         </div>
 
-        <div class="grid grid-cols-12 gap-3">
-          <select id="readTranslationSelect" class="col-span-7 bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
+        <div>
+          <select id="readTranslationSelect" class="w-full bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
             <option value="KJV" selected>KJV - King James</option>
             <option value="ESV">ESV - English Standard</option>
             <option value="PHILLIPS">Phillips NT</option>
           </select>
-
-          <div class="col-span-5 flex items-center justify-between bg-slate-900 rounded-2xl px-3.5 border border-slate-800 select-none">
-            <button id="fontDecBtn" class="text-xs font-black text-slate-400 hover:text-sky-400 py-3 px-1.5 cursor-pointer">A-</button>
-            <span id="fontSizeDisplay" class="text-[11px] font-extrabold text-slate-400">100%</span>
-            <button id="fontIncBtn" class="text-xs font-black text-slate-400 hover:text-sky-400 py-3 px-1.5 cursor-pointer">A+</button>
-          </div>
         </div>
 
-        <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600 text-white font-extrabold text-xs py-4.5 rounded-2xl shadow-lg shadow-sky-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 select-none cursor-pointer">
+        <button id="loadBtn" class="w-full btn-gradient-primary text-xs flex items-center justify-center gap-2 select-none cursor-pointer">
           <span>📖</span> Load Passage
         </button>
       </div>
@@ -295,7 +313,7 @@
           </label>
         </div>
 
-        <button id="generateAiBtn" class="w-full bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600 text-white font-extrabold text-xs py-4.5 rounded-2xl shadow-lg shadow-sky-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 select-none cursor-pointer">
+        <button id="generateAiBtn" class="w-full btn-gradient-primary text-xs flex items-center justify-center gap-2 select-none cursor-pointer">
           <span>✨</span> Generate Study & Teaching Pack
         </button>
       </div>
@@ -373,10 +391,10 @@
       }
 
       var fontScales = [
-        { size: '0.95rem', lineHeight: '1.7', pct: '87%' },
-        { size: '1.1rem', lineHeight: '1.9', pct: '100%' },
-        { size: '1.25rem', lineHeight: '2.0', pct: '112%' },
-        { size: '1.4rem', lineHeight: '2.1', pct: '125%' }
+        { size: '0.85rem', lineHeight: '1.6', pct: '85%' },
+        { size: '1rem', lineHeight: '1.8', pct: '100%' },
+        { size: '1.15rem', lineHeight: '1.9', pct: '115%' },
+        { size: '1.3rem', lineHeight: '2.0', pct: '130%' }
       ];
       var fontScaleIndex = 1;
       var HARDCODED_API_KEY = "";
@@ -1124,6 +1142,7 @@
       populateBooks();
       fetchPassage();
       initCheckbookDatePicker();
+      updateFontDisplay();
     });
   </script>
 </body>
