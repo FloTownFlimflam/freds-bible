@@ -264,7 +264,7 @@
             <select id="aiAudienceSelect" class="w-full bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-3.5 text-xs font-semibold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer mt-1">
               <option value="Comprehensive" selected>Comprehensive Study Pack</option>
               <option value="Devotional">Personal Devotional</option>
-              <option value="Visualize">Visualize / Illustrate</option>
+              <option value="Visualize">Teaching Illustration / Object Lesson</option>
               <option value="SmallGroup">Small Group Leader</option>
             </select>
           </div>
@@ -1044,7 +1044,16 @@
 
         aiResultsDisplay.innerHTML = renderAiSkeletonBlock();
 
-        var promptText = 'Provide a tailored study output for ' + aiPassageInput.value.trim() + ' (' + aiTranslationSelect.value + ') targeting preset: ' + aiAudienceSelect.value + '.';
+        var presetValue = aiAudienceSelect.value;
+        var presetInstruction = '';
+        
+        if (presetValue === 'Visualize') {
+          presetInstruction = 'Generate a powerful teaching illustration or object lesson (a memorable physical analogy, metaphor, or illustrative story—such as "the eternity rope" or "the muddy water pitcher") that vividly brings the core theological truth of this passage to life for preaching and teaching.';
+        } else {
+          presetInstruction = 'targeting preset: ' + presetValue + '.';
+        }
+
+        var promptText = 'Provide a tailored study output for ' + aiPassageInput.value.trim() + ' (' + aiTranslationSelect.value + '). ' + presetInstruction;
         if (compareTraditionsToggle.checked) promptText += ' Include comparisons across Traditional Protestant, Reformed, and Expository traditions.';
         if (compareCalvinismToggle.checked) promptText += ' Include explicit analysis comparing Calvinist vs. Arminian views.';
 
