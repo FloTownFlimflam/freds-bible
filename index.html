@@ -69,7 +69,6 @@
       border-bottom: 1px solid rgba(30, 41, 59, 0.6);
     }
 
-    /* Absolute bulletproof spacing below Dynamic Island / PWA status bar */
     .pwa-header-spacer {
       padding-top: max(3rem, calc(env(safe-area-inset-top) + 1.25rem));
     }
@@ -176,19 +175,10 @@
     <!-- READ VIEW -->
     <div id="readView" class="space-y-6">
       <div class="glass-card rounded-3xl p-6 sm:p-7 space-y-5 shadow-2xl">
-        <div class="grid grid-cols-12 gap-3">
-          <select id="testamentSelect" class="col-span-3 bg-slate-900 text-slate-100 rounded-2xl px-3 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
-            <option value="NT" selected>NT</option>
-            <option value="OT">OT</option>
+        <!-- Unified Cascading Passage Dropdown -->
+        <div>
+          <select id="passageDropdown" class="w-full bg-slate-900 text-slate-100 rounded-2xl px-4 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
           </select>
-
-          <select id="bookSelect" class="col-span-5 bg-slate-900 text-slate-100 rounded-2xl px-3 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
-          </select>
-
-          <select id="chapterSelect" class="col-span-2 bg-slate-900 text-slate-100 rounded-xl px-2 py-4 text-xs font-bold text-center border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
-          </select>
-          
-          <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-2 bg-slate-900 text-slate-100 rounded-2xl px-1 py-4 text-xs font-bold text-center border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none" placeholder="Vs..." />
         </div>
 
         <div class="grid grid-cols-12 gap-3">
@@ -206,7 +196,7 @@
         </div>
 
         <button id="loadBtn" class="w-full bg-gradient-to-r from-sky-500 via-indigo-600 to-purple-600 hover:from-sky-600 hover:to-purple-700 text-white font-extrabold text-xs py-4.5 rounded-2xl shadow-lg shadow-sky-500/25 active:scale-95 transition-all select-none cursor-pointer flex items-center justify-center gap-2">
-          <span>📖</span> Load Passage
+          <span>📖</span> Refresh Passage
         </button>
       </div>
 
@@ -216,7 +206,7 @@
       </div>
 
       <div id="verseDisplay" class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 min-h-[400px] transition-all shadow-2xl">
-        <p class="text-xs text-slate-400 text-center py-12">Tap "Load Passage" or press Enter to view text...</p>
+        <p class="text-xs text-slate-400 text-center py-12">Select passage above to view text...</p>
       </div>
     </div>
 
@@ -224,7 +214,7 @@
     <div id="aiView" class="space-y-6 hidden">
       <div class="glass-card rounded-3xl p-6 sm:p-7 space-y-5 shadow-2xl">
         <h2 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 flex items-center gap-2 select-none">
-          <span>⚙️</span> Gemini API Settings
+          <span>⚙️️</span> Gemini API Settings
         </h2>
         <div class="flex gap-3">
           <input id="apiKeyInput" type="password" enterkeyhint="done" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-900 text-slate-100 rounded-2xl px-4 py-4 text-xs font-mono border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none" />
@@ -438,10 +428,15 @@
       var navAiBtn = document.getElementById('navAiBtn');
       var navCheckbookBtn = document.getElementById('navCheckbookBtn');
       var navLexiconBtn = document.getElementById('navLexiconBtn');
-      var testamentSelect = document.getElementById('testamentSelect');
-      var bookSelect = document.getElementById('bookSelect');
-      var chapterSelect = document.getElementById('chapterSelect');
-      var verseRangeInput = document.getElementById('verseRangeInput');
+      
+      // Cascading Passage Dropdown & State Machine
+      var passageDropdown = document.getElementById('passageDropdown');
+      var cascadeState = 'testament'; // 'testament', 'book', 'chapter', 'verse'
+      var currentTestament = 'NT';
+      var currentBook = 'Romans';
+      var currentChapter = 1;
+      var currentVerse = null;
+
       var readTranslationSelect = document.getElementById('readTranslationSelect');
       var loadBtn = document.getElementById('loadBtn');
       var passageTitle = document.getElementById('passageTitle');
@@ -507,37 +502,165 @@
         if (fontScaleIndex < fontScaleClasses.length - 1) { fontScaleIndex++; updateFontDisplay(); }
       });
 
-      function populateBooks() {
-        var selectedTestament = testamentSelect.value || 'NT';
-        var books = BIBLE_BOOKS[selectedTestament] || BIBLE_BOOKS['NT'];
-        
-        bookSelect.length = 0;
-        books.forEach(function(book) {
-          var opt = document.createElement('option');
-          opt.value = book;
-          opt.textContent = book;
-          if (selectedTestament === 'NT' && book === 'Romans') opt.selected = true;
-          bookSelect.add(opt);
-        });
-        populateChapters();
+      // --- CASCADING DROPDOWN LOGIC ---
+      function getEstimatedVerseCount(book, chapter) {
+        if (book === 'Psalms') return chapter === 119 ? 176 : 100;
+        if (book === 'Genesis' && chapter === 50) return 26;
+        return 55;
       }
 
-      function populateChapters() {
-        var selectedBook = bookSelect.value || 'Romans';
-        var totalChapters = CHAPTER_COUNTS[selectedBook] || 1;
+      function updateDropdownDisplay() {
+        passageDropdown.innerHTML = '';
 
-        chapterSelect.length = 0;
-        for (var c = 1; c <= totalChapters; c++) {
-          var opt = document.createElement('option');
-          opt.value = c;
-          opt.textContent = 'Ch ' + c;
-          if (c === 1) opt.selected = true;
-          chapterSelect.add(opt);
+        if (cascadeState === 'testament') {
+          var optDefault = document.createElement('option');
+          optDefault.disabled = true;
+          optDefault.selected = true;
+          optDefault.textContent = '📖 Select Testament...';
+          passageDropdown.add(optDefault);
+
+          var optOT = document.createElement('option');
+          optOT.value = 'OT';
+          optOT.textContent = 'Old Testament';
+          passageDropdown.add(optOT);
+
+          var optNT = document.createElement('option');
+          optNT.value = 'NT';
+          optNT.textContent = 'New Testament';
+          passageDropdown.add(optNT);
+
+        } else if (cascadeState === 'book') {
+          var optBack = document.createElement('option');
+          optBack.value = 'BACK_TO_TESTAMENTS';
+          optBack.textContent = '← Back to Testaments';
+          passageDropdown.add(optBack);
+
+          var optHeader = document.createElement('option');
+          optHeader.disabled = true;
+          optHeader.selected = true;
+          optHeader.textContent = `--- ${currentTestament === 'OT' ? 'Old Testament' : 'New Testament'} Books ---`;
+          passageDropdown.add(optHeader);
+
+          var books = BIBLE_BOOKS[currentTestament] || BIBLE_BOOKS['NT'];
+          books.forEach(function(book) {
+            var opt = document.createElement('option');
+            opt.value = book;
+            opt.textContent = `${currentTestament === 'OT' ? 'Old Testament' : 'New Testament'} > ${book}`;
+            passageDropdown.add(opt);
+          });
+
+        } else if (cascadeState === 'chapter') {
+          var optBack = document.createElement('option');
+          optBack.value = 'BACK_TO_BOOKS';
+          optBack.textContent = '← Back to Books';
+          passageDropdown.add(optBack);
+
+          var optHeader = document.createElement('option');
+          optHeader.disabled = true;
+          optHeader.selected = true;
+          optHeader.textContent = `--- ${currentBook} Chapters ---`;
+          passageDropdown.add(optHeader);
+
+          var totalChapters = CHAPTER_COUNTS[currentBook] || 1;
+          for (var c = 1; c <= totalChapters; c++) {
+            var opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = `${currentBook} > Chapter ${c}`;
+            passageDropdown.add(opt);
+          }
+
+        } else if (cascadeState === 'verse') {
+          var optBack = document.createElement('option');
+          optBack.value = 'BACK_TO_CHAPTERS';
+          optBack.textContent = '← Back to Chapters';
+          passageDropdown.add(optBack);
+
+          var optWhole = document.createElement('option');
+          optWhole.value = 'WHOLE_CHAPTER';
+          optWhole.textContent = `📖 Load Whole Chapter (${currentBook} ${currentChapter})`;
+          passageDropdown.add(optWhole);
+
+          var optHeader = document.createElement('option');
+          optHeader.disabled = true;
+          optHeader.selected = true;
+          optHeader.textContent = `--- Select Verse in ${currentBook} ${currentChapter} ---`;
+          passageDropdown.add(optHeader);
+
+          var vCount = getEstimatedVerseCount(currentBook, currentChapter);
+          for (var v = 1; v <= vCount; v++) {
+            var opt = document.createElement('option');
+            opt.value = v;
+            opt.textContent = `${currentBook} ${currentChapter} > Verse ${v}`;
+            passageDropdown.add(opt);
+          }
         }
       }
 
-      testamentSelect.addEventListener('change', populateBooks);
-      bookSelect.addEventListener('change', populateChapters);
+      function setPromptDisplay() {
+        passageDropdown.innerHTML = '';
+        var optCurrent = document.createElement('option');
+        optCurrent.selected = true;
+        optCurrent.textContent = `📖 Current: ${currentBook} ${currentChapter}${currentVerse ? ':' + currentVerse : ''} (Tap to change)`;
+        passageDropdown.add(optCurrent);
+
+        var optChange = document.createElement('option');
+        optChange.value = 'CHANGE_PASSAGE';
+        optChange.textContent = '🔄 Change Passage Selection...';
+        passageDropdown.add(optChange);
+      }
+
+      passageDropdown.addEventListener('change', function(e) {
+        var val = passageDropdown.value;
+
+        if (val === 'CHANGE_PASSAGE') {
+          cascadeState = 'testament';
+          updateDropdownDisplay();
+          return;
+        }
+
+        if (cascadeState === 'testament') {
+          if (val === 'OT' || val === 'NT') {
+            currentTestament = val;
+            cascadeState = 'book';
+            updateDropdownDisplay();
+          }
+        } else if (cascadeState === 'book') {
+          if (val === 'BACK_TO_TESTAMENTS') {
+            cascadeState = 'testament';
+            updateDropdownDisplay();
+          } else if (val) {
+            currentBook = val;
+            cascadeState = 'chapter';
+            updateDropdownDisplay();
+          }
+        } else if (cascadeState === 'chapter') {
+          if (val === 'BACK_TO_BOOKS') {
+            cascadeState = 'book';
+            updateDropdownDisplay();
+          } else if (val) {
+            currentChapter = parseInt(val, 10);
+            cascadeState = 'verse';
+            currentVerse = null;
+            updateDropdownDisplay();
+            fetchPassage();
+            setPromptDisplay();
+          }
+        } else if (cascadeState === 'verse') {
+          if (val === 'BACK_TO_CHAPTERS') {
+            cascadeState = 'chapter';
+            currentVerse = null;
+            updateDropdownDisplay();
+          } else if (val === 'WHOLE_CHAPTER') {
+            currentVerse = null;
+            fetchPassage();
+            setPromptDisplay();
+          } else if (val) {
+            currentVerse = parseInt(val, 10);
+            fetchPassage();
+            setPromptDisplay();
+          }
+        }
+      });
 
       function switchView(targetView, targetBtn) {
         dismissKeyboard();
@@ -565,14 +688,14 @@
       navLexiconBtn.addEventListener('click', function() { switchView(lexiconView, navLexiconBtn); });
 
       syncReaderBtn.addEventListener('click', function() {
-        var currentBook = bookSelect.value || 'Romans';
-        var currentChapter = chapterSelect.value || '1';
-        var verses = verseRangeInput.value.trim();
-        aiPassageInput.value = verses ? (currentBook + ' ' + currentChapter + ':' + verses) : (currentBook + ' ' + currentChapter);
+        var b = currentBook || 'Romans';
+        var c = currentChapter || 1;
+        var v = currentVerse ? String(currentVerse) : '';
+        aiPassageInput.value = v ? (b + ' ' + c + ':' + v) : (b + ' ' + c);
       });
 
       function copyVerseText(num, text) {
-        var ref = bookSelect.value + ' ' + chapterSelect.value + ':' + num;
+        var ref = currentBook + ' ' + currentChapter + ':' + num;
         navigator.clipboard.writeText('"' + text + '" (' + ref + ')');
         offlineStatus.textContent = 'Copied ' + ref + '!';
         setTimeout(function() { offlineStatus.textContent = 'Ready'; }, 2000);
@@ -629,9 +752,9 @@
 
       function fetchPassage() {
         dismissKeyboard();
-        var book = bookSelect.value || 'Romans';
-        var chapter = parseInt(chapterSelect.value || '1', 10);
-        var versesInput = verseRangeInput.value.trim();
+        var book = currentBook || 'Romans';
+        var chapter = parseInt(currentChapter || 1, 10);
+        var versesInput = currentVerse ? String(currentVerse) : '';
         var selectedTranslation = readTranslationSelect.value || 'KJV';
 
         var passageQuery = versesInput ? (book + ' ' + chapter + ':' + versesInput) : (book + ' ' + chapter);
@@ -781,9 +904,6 @@
       }
 
       loadBtn.addEventListener('click', fetchPassage);
-      verseRangeInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { dismissKeyboard(); fetchPassage(); }
-      });
 
       // Checkbook Functions (UNTOUCHED & LOCKED)
       function initCheckbookDatePicker() {
@@ -1209,7 +1329,12 @@
       });
 
       // Execute Initialization
-      populateBooks();
+      currentTestament = 'NT';
+      currentBook = 'Romans';
+      currentChapter = 1;
+      currentVerse = null;
+      cascadeState = 'verse';
+      setPromptDisplay();
       fetchPassage();
       initCheckbookDatePicker();
     });
