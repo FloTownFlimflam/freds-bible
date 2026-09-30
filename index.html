@@ -282,35 +282,84 @@
         </div>
         <input id="aiPassageInput" type="text" enterkeyhint="done" value="John 1:1-14" class="w-full bg-slate-900 text-slate-100 rounded-2xl px-4 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none" />
 
-        <div class="grid grid-cols-2 gap-3.5">
-          <div>
-            <label class="text-[11px] font-semibold text-slate-400 select-none">Translation</label>
-            <select id="aiTranslationSelect" class="w-full bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-3.5 text-xs font-semibold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer mt-1">
-              <option value="ESV" selected>ESV</option>
-              <option value="KJV">KJV</option>
-              <option value="Phillips NT">Phillips NT</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-[11px] font-semibold text-slate-400 select-none">Target Output Preset</label>
-            <select id="aiAudienceSelect" class="w-full bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-3.5 text-xs font-semibold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer mt-1">
-              <option value="Comprehensive" selected>Comprehensive Study Pack</option>
-              <option value="Devotional">Personal Devotional</option>
-              <option value="Visualize">Visualize / Illustrate</option>
-              <option value="SmallGroup">Small Group Leader</option>
-            </select>
-          </div>
+        <div>
+          <label class="text-[11px] font-semibold text-slate-400 select-none">Translation</label>
+          <select id="aiTranslationSelect" class="w-full bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-3.5 text-xs font-semibold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer mt-1">
+            <option value="ESV" selected>ESV</option>
+            <option value="KJV">KJV</option>
+            <option value="Phillips NT">Phillips NT</option>
+          </select>
         </div>
 
-        <div class="pt-4 border-t border-slate-800/80 space-y-3.5">
-          <label class="flex items-center gap-3 cursor-pointer select-none text-xs font-semibold text-slate-300">
-            <input type="checkbox" id="compareTraditionsToggle" class="rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
-            <span>Compare Traditions (Traditional Protestant, Reformed, Expository)</span>
-          </label>
-          <label class="flex items-center gap-3 cursor-pointer select-none text-xs font-semibold text-slate-300">
-            <input type="checkbox" id="compareCalvinismToggle" class="rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
-            <span>Compare Calvinist & Arminian Perspectives</span>
-          </label>
+        <div class="pt-2 space-y-4">
+          <div class="flex justify-between items-center border-b border-slate-800/80 pb-2">
+            <label class="text-xs font-bold text-slate-300 select-none">Select Study Modules to Include:</label>
+            <button id="toggleAllModulesBtn" type="button" class="text-[11px] font-bold text-sky-400 hover:text-sky-300 bg-sky-500/10 border border-sky-500/20 px-3 py-1.5 rounded-xl cursor-pointer active:scale-95 transition-all select-none">
+              Check/Uncheck All
+            </button>
+          </div>
+
+          <div id="modulesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <label class="flex items-center gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 cursor-pointer select-none text-xs font-semibold text-slate-300 hover:border-slate-700 transition-colors">
+              <input type="checkbox" data-module="overview" checked class="module-checkbox rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
+              <span>Overview</span>
+            </label>
+
+            <label class="flex items-center gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 cursor-pointer select-none text-xs font-semibold text-slate-300 hover:border-slate-700 transition-colors">
+              <input type="checkbox" data-module="historicalContext" checked class="module-checkbox rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
+              <span>Historical & Cultural Context</span>
+            </label>
+
+            <label class="flex items-center gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 cursor-pointer select-none text-xs font-semibold text-slate-300 hover:border-slate-700 transition-colors">
+              <input type="checkbox" data-module="keyWords" class="module-checkbox rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
+              <span>Key Word Breakdown</span>
+            </label>
+
+            <label class="flex items-center gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 cursor-pointer select-none text-xs font-semibold text-slate-300 hover:border-slate-700 transition-colors">
+              <input type="checkbox" data-module="crossReferences" class="module-checkbox rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
+              <span>Cross-References</span>
+            </label>
+
+            <label class="flex items-center gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 cursor-pointer select-none text-xs font-semibold text-slate-300 hover:border-slate-700 transition-colors">
+              <input type="checkbox" data-module="personalDevotional" checked class="module-checkbox rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
+              <span>Personal Devotional</span>
+            </label>
+
+            <label class="flex items-center gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 cursor-pointer select-none text-xs font-semibold text-slate-300 hover:border-slate-700 transition-colors">
+              <input type="checkbox" data-module="teachingIllustrations" checked class="module-checkbox rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
+              <span>Teaching Illustrations</span>
+            </label>
+
+            <label class="flex items-center gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 cursor-pointer select-none text-xs font-semibold text-slate-300 hover:border-slate-700 transition-colors">
+              <input type="checkbox" data-module="practicalActionSteps" class="module-checkbox rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
+              <span>Practical Action Steps</span>
+            </label>
+
+            <label class="flex items-center gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 cursor-pointer select-none text-xs font-semibold text-slate-300 hover:border-slate-700 transition-colors">
+              <input type="checkbox" data-module="apologetics" class="module-checkbox rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
+              <span>Apologetics & Hard Questions</span>
+            </label>
+
+            <label class="flex items-center gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 cursor-pointer select-none text-xs font-semibold text-slate-300 hover:border-slate-700 transition-colors">
+              <input type="checkbox" data-module="smallGroupLeader" checked class="module-checkbox rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
+              <span>Small Group Leader Prep</span>
+            </label>
+
+            <label class="flex items-center gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 cursor-pointer select-none text-xs font-semibold text-slate-300 hover:border-slate-700 transition-colors">
+              <input type="checkbox" data-module="smallGroupIcebreakers" checked class="module-checkbox rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
+              <span>Small Group Icebreakers</span>
+            </label>
+
+            <label class="flex items-center gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 cursor-pointer select-none text-xs font-semibold text-slate-300 hover:border-slate-700 transition-colors">
+              <input type="checkbox" data-module="smallGroupQuestions" class="module-checkbox rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
+              <span>Small Group Questions</span>
+            </label>
+
+            <label class="flex items-center gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800/80 cursor-pointer select-none text-xs font-semibold text-slate-300 hover:border-slate-700 transition-colors">
+              <input type="checkbox" data-module="calvinistArminian" checked class="module-checkbox rounded border-slate-700 text-sky-500 focus:ring-sky-500 cursor-pointer w-4 h-4" />
+              <span>Compare Calvinist & Arminian</span>
+            </label>
+          </div>
         </div>
 
         <button id="generateAiBtn" class="w-full btn-gradient-primary text-xs flex items-center justify-center gap-2 select-none cursor-pointer">
@@ -415,15 +464,6 @@
         }
       }
 
-      function speakText(text) {
-        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          var currentSpeechUtterance = new SpeechSynthesisUtterance(text);
-          currentSpeechUtterance.rate = 0.95;
-          window.speechSynthesis.speak(currentSpeechUtterance);
-        }
-      }
-
       // Elements
       var fontDecBtn = document.getElementById('fontDecBtn');
       var fontIncBtn = document.getElementById('fontIncBtn');
@@ -449,9 +489,7 @@
       var clearCacheBtn = document.getElementById('clearCacheBtn');
       var aiPassageInput = document.getElementById('aiPassageInput');
       var aiTranslationSelect = document.getElementById('aiTranslationSelect');
-      var aiAudienceSelect = document.getElementById('aiAudienceSelect');
-      var compareTraditionsToggle = document.getElementById('compareTraditionsToggle');
-      var compareCalvinismToggle = document.getElementById('compareCalvinismToggle');
+      var toggleAllModulesBtn = document.getElementById('toggleAllModulesBtn');
       var syncReaderBtn = document.getElementById('syncReaderBtn');
       var generateAiBtn = document.getElementById('generateAiBtn');
       var aiResultsDisplay = document.getElementById('aiResultsDisplay');
@@ -478,7 +516,16 @@
       themeToggle.addEventListener('click', function() {
         var isDark = document.documentElement.classList.toggle('dark');
         safeSetStorage('app_theme', isDark ? 'dark' : 'light');
-        themeIcon.textContent = isDark ? '🌙' : '☀️';
+        themeIcon.textContent = isDark ? '🌙' : '☀️️';
+      });
+
+      // Check / Uncheck All Modules Logic
+      toggleAllModulesBtn.addEventListener('click', function() {
+        var moduleCheckboxes = document.querySelectorAll('.module-checkbox');
+        var allChecked = Array.from(moduleCheckboxes).every(function(cb) { return cb.checked; });
+        moduleCheckboxes.forEach(function(cb) {
+          cb.checked = !allChecked;
+        });
       });
 
       // True Universal Root Font Controller
@@ -974,6 +1021,11 @@
         '</div>';
       }
 
+      function isModuleSelected(moduleKey) {
+        var el = document.querySelector('.module-checkbox[data-module="' + moduleKey + '"]');
+        return el ? el.checked : false;
+      }
+
       generateAiBtn.addEventListener('click', function() {
         dismissKeyboard();
         var key = getActiveApiKey();
@@ -984,15 +1036,77 @@
 
         aiResultsDisplay.innerHTML = renderAiSkeletonBlock();
 
-        var promptText = 'Provide a tailored study output for ' + aiPassageInput.value.trim() + ' (' + aiTranslationSelect.value + ') targeting preset: ' + aiAudienceSelect.value + '.';
-        if (compareTraditionsToggle.checked) promptText += ' Include comparisons across Traditional Protestant, Reformed, and Expository traditions.';
-        if (compareCalvinismToggle.checked) promptText += ' Include explicit analysis comparing Calvinist vs. Arminian views.';
+        var selectedModules = [];
+        document.querySelectorAll('.module-checkbox:checked').forEach(function(cb) {
+          selectedModules.push(cb.getAttribute('data-module'));
+        });
 
-        var propertiesSchema = {
-          theologicalSummary: { type: "STRING" }, 
-          mainOutput: { type: "STRING" }, 
-          crossReferences: { type: "ARRAY", items: { type: "STRING" } },
-          keyWords: { 
+        if (selectedModules.length === 0) {
+          aiResultsDisplay.innerHTML = '<p class="text-xs text-rose-500 text-center py-10 font-bold">Please select at least one study module checkbox above.</p>';
+          return;
+        }
+
+        var promptText = 'Provide a tailored biblical study & teaching output for ' + aiPassageInput.value.trim() + ' (' + aiTranslationSelect.value + ').\n';
+        promptText += 'Include ONLY the following requested sections based on the requested modules:\n';
+
+        if (isModuleSelected('overview')) promptText += '- Overview: High-level theological summary of the passage.\n';
+        if (isModuleSelected('historicalContext')) promptText += '- Historical & Cultural Context: Background details on author, audience, and setting.\n';
+        if (isModuleSelected('keyWords')) promptText += '- Key Word Breakdown: Significant original language words with Strong\'s IDs and meanings.\n';
+        if (isModuleSelected('crossReferences')) promptText += '- Cross-References: Related biblical passage references.\n';
+        if (isModuleSelected('personalDevotional')) promptText += '- Personal Devotional: Reflective application insights for personal spiritual growth.\n';
+        if (isModuleSelected('teachingIllustrations')) promptText += '- Teaching Illustrations: Memorable metaphors, analogies, and illustrative real-world stories (avoid props or physical stage directions; focus purely on rich illustrative ideas).\n';
+        if (isModuleSelected('practicalActionSteps')) promptText += '- Practical Action Steps: Actionable takeaways for daily life.\n';
+        if (isModuleSelected('apologetics')) promptText += '- Apologetics & Hard Questions: Direct answers to difficult theological or historical objections.\n';
+        if (isModuleSelected('smallGroupLeader')) promptText += '- Small Group Leader Prep: Main theme summaries and discussion goal directions.\n';
+        if (isModuleSelected('smallGroupIcebreakers')) promptText += '- Small Group Icebreakers: Engaging opening icebreaker questions related to the passage theme.\n';
+        if (isModuleSelected('smallGroupQuestions')) promptText += '- Small Group Questions: Thought-provoking open-ended discussion questions.\n';
+        if (isModuleSelected('calvinistArminian')) promptText += '- Compare Calvinist & Arminian Perspectives: Explicit analysis comparing Calvinist vs. Arminian theological views on this passage.\n';
+
+        var propertiesSchema = {};
+        var requiredFields = [];
+
+        if (isModuleSelected('overview')) {
+          propertiesSchema.theologicalSummary = { type: "STRING" };
+          requiredFields.push("theologicalSummary");
+        }
+        if (isModuleSelected('historicalContext')) {
+          propertiesSchema.historicalContext = { type: "STRING" };
+          requiredFields.push("historicalContext");
+        }
+        if (isModuleSelected('personalDevotional')) {
+          propertiesSchema.personalDevotional = { type: "STRING" };
+          requiredFields.push("personalDevotional");
+        }
+        if (isModuleSelected('teachingIllustrations')) {
+          propertiesSchema.teachingIllustrations = { type: "STRING" };
+          requiredFields.push("teachingIllustrations");
+        }
+        if (isModuleSelected('practicalActionSteps')) {
+          propertiesSchema.practicalActionSteps = { type: "STRING" };
+          requiredFields.push("practicalActionSteps");
+        }
+        if (isModuleSelected('apologetics')) {
+          propertiesSchema.apologetics = { type: "STRING" };
+          requiredFields.push("apologetics");
+        }
+        if (isModuleSelected('smallGroupLeader')) {
+          propertiesSchema.smallGroupLeader = { type: "STRING" };
+          requiredFields.push("smallGroupLeader");
+        }
+        if (isModuleSelected('smallGroupIcebreakers')) {
+          propertiesSchema.smallGroupIcebreakers = { type: "ARRAY", items: { type: "STRING" } };
+          requiredFields.push("smallGroupIcebreakers");
+        }
+        if (isModuleSelected('smallGroupQuestions')) {
+          propertiesSchema.smallGroupQuestions = { type: "ARRAY", items: { type: "STRING" } };
+          requiredFields.push("smallGroupQuestions");
+        }
+        if (isModuleSelected('crossReferences')) {
+          propertiesSchema.crossReferences = { type: "ARRAY", items: { type: "STRING" } };
+          requiredFields.push("crossReferences");
+        }
+        if (isModuleSelected('keyWords')) {
+          propertiesSchema.keyWords = { 
             type: "ARRAY", 
             items: { 
               type: "OBJECT", 
@@ -1003,20 +1117,10 @@
                 meaning: { type: "STRING" } 
               } 
             } 
-          }
-        };
-        var requiredFields = ["theologicalSummary", "mainOutput", "keyWords", "crossReferences"];
-
-        if (compareTraditionsToggle.checked) {
-          propertiesSchema.traditionComparison = { 
-            type: "OBJECT", 
-            required: ["traditionalProtestant", "reformed", "expository"], 
-            properties: { traditionalProtestant: { type: "STRING" }, reformed: { type: "STRING" }, expository: { type: "STRING" } } 
           };
-          requiredFields.push("traditionComparison");
+          requiredFields.push("keyWords");
         }
-
-        if (compareCalvinismToggle.checked) {
+        if (isModuleSelected('calvinistArminian')) {
           propertiesSchema.calvinismVsArminianism = { 
             type: "OBJECT", 
             required: ["calvinistView", "arminianView", "consensusOrDivergence"], 
@@ -1053,23 +1157,27 @@
               }
 
               var data = JSON.parse(rawText);
-              var hasKeyWords = (data && data.keyWords && data.keyWords.length > 0);
 
               var htmlString = '<div class="space-y-5">' +
-                '<div class="flex justify-between items-center border-b border-slate-800/80 pb-3.5">' +
+                '<div class="border-b border-slate-800/80 pb-3.5">' +
                   '<span class="text-xs font-bold text-slate-400">Target: ' + aiPassageInput.value + ' (' + aiTranslationSelect.value + ')</span>' +
-                  '<button id="ttsListenBtn" class="bg-sky-500/10 text-sky-400 border border-sky-500/20 px-4 py-2 rounded-xl text-xs font-bold active:scale-95 transition-all cursor-pointer flex items-center gap-1.5">🔊 Listen</button>' +
-                '</div>' +
-                '<div>' +
-                  '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">Overview</h3>' +
-                  '<p class="text-xs leading-relaxed text-slate-200 bg-sky-500/10 border border-sky-500/20 p-5 rounded-2xl font-medium select-text">' + data.theologicalSummary + '</p>' +
-                '</div>' +
-                '<div>' +
-                  '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2.5 select-none">' + aiAudienceSelect.value + ' Content</h3>' +
-                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 whitespace-pre-wrap select-text">' + data.mainOutput + '</div>' +
                 '</div>';
 
-              if (hasKeyWords) {
+              if (data.theologicalSummary) {
+                htmlString += '<div>' +
+                  '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">Overview</h3>' +
+                  '<p class="text-xs leading-relaxed text-slate-200 bg-sky-500/10 border border-sky-500/20 p-5 rounded-2xl font-medium select-text">' + data.theologicalSummary + '</p>' +
+                '</div>';
+              }
+
+              if (data.historicalContext) {
+                htmlString += '<div>' +
+                  '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🏛️ Historical & Cultural Context</h3>' +
+                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + data.historicalContext + '</div>' +
+                '</div>';
+              }
+
+              if (data.keyWords && data.keyWords.length > 0) {
                 var keywordsHtml = '';
                 for(var i=0; i<data.keyWords.length; i++) {
                   var kw = data.keyWords[i];
@@ -1078,21 +1186,63 @@
                 htmlString += '<div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2.5 select-none">🔑 Key Word Breakdown</h3><div class="flex flex-wrap gap-2.5">' + keywordsHtml + '</div></div>';
               }
 
-              if (data.traditionComparison) {
-                htmlString += '<div class="p-5 bg-purple-950/20 border border-purple-500/30 rounded-2xl space-y-3">' +
-                  '<h3 class="text-xs font-extrabold uppercase tracking-wider text-purple-400 select-none">🏛️ Tradition Comparison</h3>' +
-                  '<div class="text-xs space-y-2.5 text-slate-200">' +
-                    '<p><strong>Traditional Protestant:</strong> ' + data.traditionComparison.traditionalProtestant + '</p>' +
-                    '<p><strong>Reformed:</strong> ' + data.traditionComparison.reformed + '</p>' +
-                    '<p><strong>Expository:</strong> ' + data.traditionComparison.expository + '</p>' +
-                  '</div>' +
+              if (data.personalDevotional) {
+                htmlString += '<div>' +
+                  '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🙏 Personal Devotional</h3>' +
+                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + data.personalDevotional + '</div>' +
                 '</div>';
               }
 
+              if (data.teachingIllustrations) {
+                htmlString += '<div>' +
+                  '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">💡 Teaching Illustrations & Metaphors</h3>' +
+                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text whitespace-pre-wrap">' + data.teachingIllustrations + '</div>' +
+                '</div>';
+              }
+
+              if (data.practicalActionSteps) {
+                htmlString += '<div>' +
+                  '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🚀 Practical Action Steps</h3>' +
+                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text whitespace-pre-wrap">' + data.practicalActionSteps + '</div>' +
+                '</div>';
+              }
+
+              if (data.apologetics) {
+                htmlString += '<div>' +
+                  '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🛡️ Apologetics & Hard Questions</h3>' +
+                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + data.apologetics + '</div>' +
+                '</div>';
+              }
+
+              if (data.smallGroupLeader) {
+                htmlString += '<div>' +
+                  '<h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">👥 Small Group Leader Prep</h3>' +
+                  '<div class="text-xs leading-relaxed text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + data.smallGroupLeader + '</div>' +
+                '</div>';
+              }
+
+              if (data.smallGroupIcebreakers && data.smallGroupIcebreakers.length > 0) {
+                var iceHtml = '<ul class="list-disc pl-5 space-y-1.5">';
+                for(var k=0; k<data.smallGroupIcebreakers.length; k++) {
+                  iceHtml += '<li>' + data.smallGroupIcebreakers[k] + '</li>';
+                }
+                iceHtml += '</ul>';
+                htmlString += '<div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">🧊 Small Group Icebreakers</h3><div class="text-xs text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + iceHtml + '</div></div>';
+              }
+
+              if (data.smallGroupQuestions && data.smallGroupQuestions.length > 0) {
+                var qHtml = '<ol class="list-decimal pl-5 space-y-1.5">';
+                for(var q=0; q<data.smallGroupQuestions.length; q++) {
+                  qHtml += '<li>' + data.smallGroupQuestions[q] + '</li>';
+                }
+                qHtml += '</ol>';
+                htmlString += '<div><h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-2 select-none">❓ Small Group Discussion Questions</h3><div class="text-xs text-slate-200 bg-slate-900 p-5 rounded-2xl border border-slate-800 select-text">' + qHtml + '</div></div>';
+              }
+
               if (data.calvinismVsArminianism) {
-                var calvView = data.calvinistView || data.calvinismVsArminianism.calvinistView;
-                var armView = data.arminianView || data.calvinismVsArminianism.arminianView;
-                var summaryView = data.consensusOrDivergence || data.calvinismVsArminianism.consensusOrDivergence;
+                var calvView = data.calvinismVsArminianism.calvinistView || '';
+                var armView = data.calvinismVsArminianism.arminianView || '';
+                var summaryView = data.calvinismVsArminianism.consensusOrDivergence || '';
                 
                 htmlString += '<div class="p-5 bg-indigo-950/20 border border-indigo-500/30 rounded-2xl space-y-3">' +
                   '<h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-400 select-none">⚖️ Calvinist vs. Arminian Analysis</h3>' +
@@ -1114,10 +1264,6 @@
 
               htmlString += '</div>';
               aiResultsDisplay.innerHTML = htmlString;
-
-              document.getElementById('ttsListenBtn').addEventListener('click', function() {
-                speakText(data.theologicalSummary + '. ' + data.mainOutput);
-              });
               
               var crossrefPills = document.querySelectorAll('.crossref-pill');
               crossrefPills.forEach(function(pill) {
