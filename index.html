@@ -223,7 +223,8 @@
           <select id="chapterSelect" class="col-span-3 bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
           </select>
           
-          <input id="verseRangeInput" type="text" enterkeyhint="go" class="col-span-3 bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none placeholder-slate-500" placeholder="Vs..." />
+          <select id="verseSelect" class="col-span-3 bg-slate-900 text-slate-100 rounded-2xl px-3.5 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none cursor-pointer">
+          </select>
         </div>
 
         <div>
@@ -277,7 +278,7 @@
             <span>🔄</span> Sync with Reader
           </button>
         </div>
-        <input id="aiPassageInput" type="text" enterkeyhint="done" value="John 1:1-14" class="w-full bg-slate-900 text-slate-100 rounded-2xl px-4 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none" />
+        <input id="aiPassageInput" type="text" enterkeyhint="done" value="John 1" class="w-full bg-slate-900 text-slate-100 rounded-2xl px-4 py-4 text-xs font-bold border border-slate-800 focus:ring-2 focus:ring-sky-500 outline-none" />
 
         <div>
           <label class="text-[11px] font-semibold text-slate-400 select-none">Translation</label>
@@ -473,7 +474,7 @@
       var navCheckbookBtn = document.getElementById('navCheckbookBtn');
       var bookSelect = document.getElementById('bookSelect');
       var chapterSelect = document.getElementById('chapterSelect');
-      var verseRangeInput = document.getElementById('verseRangeInput');
+      var verseSelect = document.getElementById('verseSelect');
       var readTranslationSelect = document.getElementById('readTranslationSelect');
       var loadBtn = document.getElementById('loadBtn');
       var passageTitle = document.getElementById('passageTitle');
@@ -503,7 +504,7 @@
       var storedTheme = safeGetStorage('app_theme');
       if (storedTheme === 'light') {
         document.documentElement.classList.remove('dark');
-        themeIcon.textContent = '☀️';
+        themeIcon.textContent = '☀️️';
       } else {
         document.documentElement.classList.add('dark');
         themeIcon.textContent = '🌙';
@@ -538,6 +539,17 @@
       fontIncBtn.addEventListener('click', function() {
         if (fontScaleIndex < fontScales.length - 1) { fontScaleIndex++; updateFontDisplay(); }
       });
+
+      function populateVerses() {
+        verseSelect.length = 0;
+        for (var v = 1; v <= 176; v++) { // 176 accommodates longest chapter (Psalm 119)
+          var opt = document.createElement('option');
+          opt.value = v;
+          opt.textContent = 'v' + v;
+          if (v === 1) opt.selected = true;
+          verseSelect.add(opt);
+        }
+      }
 
       // Populate Books list starting with Genesis selected at top
       function populateBooks() {
@@ -579,9 +591,11 @@
           if (c === 1) opt.selected = true;
           chapterSelect.add(opt);
         }
+        populateVerses();
       }
 
       bookSelect.addEventListener('change', populateChapters);
+      chapterSelect.addEventListener('change', populateVerses);
 
       function switchView(targetView, targetBtn) {
         dismissKeyboard();
@@ -608,8 +622,11 @@
       syncReaderBtn.addEventListener('click', function() {
         var currentBook = bookSelect.value || 'Genesis';
         var currentChapter = chapterSelect.value || '1';
-        var verses = verseRangeInput.value.trim();
-        aiPassageInput.value = verses ? (currentBook + ' ' + currentChapter + ':' + verses) : (currentBook + ' ' + currentChapter);
+        var currentVerse = verseSelect.value || '1';
+        // If v1 is selected, default to requesting the full chapter for the AI
+        aiPassageInput.value = currentVerse === '1' 
+          ? (currentBook + ' ' + currentChapter) 
+          : (currentBook + ' ' + currentChapter + ':' + currentVerse);
       });
 
       function copyVerseText(num, text) {
@@ -634,11 +651,37 @@
         return '<div class="space-y-6 animate-fade-in">' + lines + '</div>';
       }
 
+      function scrollToVerse(targetVerseNum, totalVersesArray) {
+        setTimeout(function() {
+          var el = document.getElementById('verse-idx-' + targetVerseNum);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('bg-sky-500/20', 'dark:bg-sky-900/50');
+            setTimeout(function() {
+              el.classList.remove('bg-sky-500/20', 'dark:bg-sky-900/50');
+            }, 1500);
+          }
+          
+          // Dynamically truncate the verse dropdown options to the actual chapter length
+          if (totalVersesArray && Array.isArray(totalVersesArray)) {
+            verseSelect.length = 0;
+            totalVersesArray.forEach(function(ver) {
+              var opt = document.createElement('option');
+              opt.value = ver.verse;
+              opt.textContent = 'v' + ver.verse;
+              if (ver.verse == targetVerseNum) opt.selected = true;
+              verseSelect.add(opt);
+            });
+          }
+        }, 150); // slight delay ensures DOM paints before scrolling
+      }
+
       function renderVerses(verses) {
         verseDisplay.innerHTML = '';
         verses.forEach(function(v) {
           var p = document.createElement('p');
-          p.className = 'text-xs leading-relaxed text-slate-700 dark:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-900/50 py-1.5 px-3 rounded-xl transition-colors cursor-pointer';
+          p.id = 'verse-idx-' + v.verse;
+          p.className = 'text-xs leading-relaxed text-slate-700 dark:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-900/50 py-1.5 px-3 rounded-xl transition-all duration-700 cursor-pointer';
           
           var sup = document.createElement('sup');
           sup.className = 'text-xs font-extrabold text-sky-400 mr-2.5 select-none';
@@ -671,11 +714,12 @@
         dismissKeyboard();
         var book = bookSelect.value || 'Genesis';
         var chapter = parseInt(chapterSelect.value || '1', 10);
-        var versesInput = verseRangeInput.value.trim();
+        var targetVerse = verseSelect.value || '1';
         var selectedTranslation = readTranslationSelect.value || 'ESV';
 
-        var passageQuery = versesInput ? (book + ' ' + chapter + ':' + versesInput) : (book + ' ' + chapter);
-        var cacheKey = 'bcache_v3_' + selectedTranslation + '_' + book + '_' + chapter + '_' + (versesInput || 'all');
+        // We ALWAYS fetch the full chapter context to allow smooth scrolling.
+        var passageQuery = book + ' ' + chapter;
+        var cacheKey = 'bcache_v4_' + selectedTranslation + '_' + book + '_' + chapter;
 
         passageTitle.textContent = passageQuery + ' (' + selectedTranslation + ')';
         var cachedData = safeGetStorage(cacheKey);
@@ -685,6 +729,7 @@
             var parsed = JSON.parse(cachedData);
             if (parsed && Array.isArray(parsed) && parsed.length > 0) {
               renderVerses(parsed);
+              scrollToVerse(targetVerse, parsed);
               offlineStatus.textContent = selectedTranslation + ' Cached ⚡';
               offlineStatus.className = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-[11px] font-semibold select-none';
               return;
@@ -705,13 +750,9 @@
                       cleanText = cleanText.replace(/([a-zA-Zä-öüÄ-ÖÜß])\d+/g, '$1');
                       return { verse: item.verse, text: cleanText };
                     });
-                    
-                    if (versesInput) {
-                      var vNum = parseInt(versesInput, 10);
-                      formattedVerses = formattedVerses.filter(function(v) { return v.verse === vNum; });
-                    }
 
                     renderVerses(formattedVerses);
+                    scrollToVerse(targetVerse, formattedVerses);
                     safeSetStorage(cacheKey, JSON.stringify(formattedVerses));
                     offlineStatus.textContent = 'KJV Active';
                     offlineStatus.className = 'bg-sky-500/10 text-sky-400 border border-sky-500/20 px-3 py-1 rounded-full text-[11px] font-semibold select-none';
@@ -728,6 +769,7 @@
                     return res2.json().then(function(data2) {
                       if (data2 && data2.verses && data2.verses.length > 0) {
                         renderVerses(data2.verses);
+                        scrollToVerse(targetVerse, data2.verses);
                         safeSetStorage(cacheKey, JSON.stringify(data2.verses));
                         offlineStatus.textContent = 'KJV Active';
                         offlineStatus.className = 'bg-sky-500/10 text-sky-400 border border-sky-500/20 px-3 py-1 rounded-full text-[11px] font-semibold select-none';
@@ -801,6 +843,7 @@
               var parsed = JSON.parse(rawText);
               if (parsed && parsed.verses && parsed.verses.length > 0) {
                 renderVerses(parsed.verses);
+                scrollToVerse(targetVerse, parsed.verses);
                 safeSetStorage(cacheKey, JSON.stringify(parsed.verses));
                 offlineStatus.textContent = selectedTranslation + ' Gemini Active';
                 offlineStatus.className = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-[11px] font-semibold select-none';
@@ -821,9 +864,6 @@
       }
 
       loadBtn.addEventListener('click', fetchPassage);
-      verseRangeInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { dismissKeyboard(); fetchPassage(); }
-      });
 
       // Checkbook Functions (UNTOUCHED & LOCKED)
       function initCheckbookDatePicker() {
